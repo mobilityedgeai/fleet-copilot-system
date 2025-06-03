@@ -192,6 +192,131 @@ def create_minimal_bi_routes():
                 }
             }
         })
+    
+    @app.route('/api/copilot/checklist')
+    def minimal_checklist():
+        enterprise_id = request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7')
+        days = int(request.args.get('days', 30))
+        
+        return jsonify({
+            'success': True,
+            'data': [
+                {
+                    'id': 1,
+                    'vehiclePlate': 'ABC-1234',
+                    'itemName': 'Farol Dianteiro',
+                    'noCompliant': False,
+                    'driverName': 'João Silva',
+                    'timestamp': '2025-06-03T10:00:00Z'
+                },
+                {
+                    'id': 2,
+                    'vehiclePlate': 'ABC-1234',
+                    'itemName': 'Pneu Traseiro',
+                    'noCompliant': True,
+                    'driverName': 'João Silva',
+                    'timestamp': '2025-06-03T10:05:00Z'
+                },
+                {
+                    'id': 3,
+                    'vehiclePlate': 'ABC-1234',
+                    'itemName': 'Freios',
+                    'noCompliant': False,
+                    'driverName': 'João Silva',
+                    'timestamp': '2025-06-03T10:10:00Z'
+                }
+            ],
+            'summary': {
+                'total': 3,
+                'compliant': 2,
+                'non_compliant': 1,
+                'compliance_rate': 66.7,
+                'enterprise_id': enterprise_id,
+                'period_days': days
+            }
+        })
+    
+    @app.route('/api/copilot/trips')
+    def minimal_trips():
+        enterprise_id = request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7')
+        days = int(request.args.get('days', 30))
+        
+        return jsonify({
+            'success': True,
+            'data': [
+                {
+                    'id': 1,
+                    'vehiclePlate': 'ABC-1234',
+                    'driverName': 'João Silva',
+                    'origin': 'São Paulo',
+                    'destination': 'Rio de Janeiro',
+                    'distance': 430.5,
+                    'duration': 360,
+                    'timestamp': '2025-06-03T08:00:00Z'
+                }
+            ],
+            'summary': {
+                'total_trips': 1,
+                'total_distance': 430.5,
+                'total_duration': 360,
+                'enterprise_id': enterprise_id,
+                'period_days': days
+            }
+        })
+    
+    @app.route('/api/copilot/alerts')
+    def minimal_alerts():
+        enterprise_id = request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7')
+        days = int(request.args.get('days', 30))
+        
+        return jsonify({
+            'success': True,
+            'data': [
+                {
+                    'id': 1,
+                    'type': 'maintenance',
+                    'priority': 'high',
+                    'message': 'Manutenção preventiva necessária',
+                    'vehiclePlate': 'ABC-1234',
+                    'timestamp': '2025-06-03T12:00:00Z'
+                }
+            ],
+            'summary': {
+                'total_alerts': 1,
+                'high_priority': 1,
+                'medium_priority': 0,
+                'low_priority': 0,
+                'enterprise_id': enterprise_id,
+                'period_days': days
+            }
+        })
+    
+    @app.route('/api/copilot/maintenance')
+    def minimal_maintenance():
+        enterprise_id = request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7')
+        days = int(request.args.get('days', 30))
+        
+        return jsonify({
+            'success': True,
+            'data': [
+                {
+                    'id': 1,
+                    'vehiclePlate': 'ABC-1234',
+                    'serviceType': 'Troca de óleo',
+                    'cost': 150.00,
+                    'status': 'completed',
+                    'timestamp': '2025-06-02T14:00:00Z'
+                }
+            ],
+            'summary': {
+                'total_services': 1,
+                'total_cost': 150.00,
+                'completed': 1,
+                'pending': 0,
+                'enterprise_id': enterprise_id,
+                'period_days': days
+            }
+        })
 
 def create_fallback_routes():
     """Cria rotas de fallback em caso de erro"""
