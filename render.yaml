@@ -1,8 +1,8 @@
 # Configuração para Deploy no Render.com
-# Copiloto Inteligente de Gestão de Frotas
+# Copiloto Inteligente de Gestão de Frotas - BI Melhorado
 
 services:
-  # Backend API Flask
+  # Backend API Flask com BI Melhorado
   - type: web
     name: fleet-copilot-api
     env: python
@@ -20,9 +20,11 @@ services:
         value: 5000
       - key: FLASK_ENV
         value: production
-    healthCheckPath: /api/copilot/health
+      - key: FIREBASE_API_URL
+        value: https://firebase-bi-api.onrender.com
+    healthCheckPath: /api/health
     
-  # Frontend React (Static Site)
+  # Frontend React (Static Site )
   - type: static
     name: fleet-copilot-web
     buildCommand: |
@@ -43,4 +45,3 @@ databases: []
 networking:
   allowedOrigins:
     - "*"
-
