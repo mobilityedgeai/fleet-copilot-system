@@ -4,365 +4,134 @@ Todas as rotas funcionando com dados mock
 """
 
 import os
-import logging
-from flask import Flask, request, jsonify, send_from_directory
+import sys
+# DON'T CHANGE THIS !!!
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+
+from flask import Flask, send_from_directory
 from flask_cors import CORS
+from src.models.user import db
+from src.routes.user import user_bp
+from src.routes.copilot import copilot_bp
 
-# Configurar logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'static'))
+app.config['SECRET_KEY'] = 'asdf#FGSgvasgf$5$WGT'
 
-# Inicializar Flask
-app = Flask(__name__, static_folder='.')
+# Configurar CORS para integração com FlutterFlow
+CORS(app, resources={
+    r"/api/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
-# Configurar CORS - MUITO PERMISSIVO
-CORS(app, 
-     origins="*", 
-     allow_headers=["Content-Type", "Authorization"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+from src.routes.flutterflow import flutterflow_bp
 
-# Configurações
-app.config['ENV'] = 'production'
-app.config['DEBUG'] = False
+app.register_blueprint(user_bp, url_prefix='/api')
+app.register_blueprint(copilot_bp, url_prefix='/api/copilot')
+app.register_blueprint(flutterflow_bp, url_prefix='/api/flutterflow')
 
-@app.after_request
-def after_request(response):
-    """Adicionar headers CORS manualmente"""
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    return response
+# uncomment if you need to use database
+# app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{os.getenv('DB_USERNAME', 'root')}:{os.getenv('DB_PASSWORD', 'password')}@{os.getenv('DB_HOST', 'localhost')}:{os.getenv('DB_PORT', '3306')}/{os.getenv('DB_NAME', 'mydb')}"
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# db.init_app(app)
+# with app.app_context():
+#     db.create_all()
 
-# ROTAS PRINCIPAIS
-@app.route('/')
-def home():
-    return jsonify({
-        'message': 'Fleet Copilot API - Versão Emergencial',
-        'status': 'active',
-        'version': '1.0.0-emergency'
-    })
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    static_folder_path = app.static_folder
+    if static_folder_path is None:
+            return "Static folder not configured", 404
 
-@app.route('/api/health')
-def health():
-    return jsonify({
-        'status': 'healthy',
-        'message': 'API funcionando',
-        'timestamp': '2025-06-03T16:00:00Z'
-    })
-
-# ROTAS DO COPILOT
-@app.route('/api/copilot/summary')
-def copilot_summary():
-    enterprise_id = request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7')
-    days = int(request.args.get('days', 30))
-    
-    return jsonify({
-        'success': True,
-        'data': {
-            'total': 15,
-            'compliant': 12,
-            'non_compliant': 3,
-            'compliance_rate': 80.0,
-            'vehicles': 5,
-            'drivers': 8,
-            'period_days': days,
-            'enterprise_id': enterprise_id,
-            'last_updated': '2025-06-03T16:00:00Z'
-        }
-    })
-
-@app.route('/api/copilot/checklist')
-def copilot_checklist():
-    enterprise_id = request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7')
-    days = int(request.args.get('days', 30))
-    
-    return jsonify({
-        'success': True,
-        'data': [
-            {
-                'id': 1,
-                'vehiclePlate': 'ABC-1234',
-                'itemName': 'Farol Dianteiro',
-                'noCompliant': False,
-                'driverName': 'João Silva',
-                'timestamp': '2025-06-03T10:00:00Z',
-                'status': 'OK'
-            },
-            {
-                'id': 2,
-                'vehiclePlate': 'ABC-1234',
-                'itemName': 'Pneu Traseiro',
-                'noCompliant': True,
-                'driverName': 'João Silva',
-                'timestamp': '2025-06-03T10:05:00Z',
-                'status': 'NOK'
-            },
-            {
-                'id': 3,
-                'vehiclePlate': 'DEF-5678',
-                'itemName': 'Freios',
-                'noCompliant': False,
-                'driverName': 'Maria Santos',
-                'timestamp': '2025-06-03T10:10:00Z',
-                'status': 'OK'
-            },
-            {
-                'id': 4,
-                'vehiclePlate': 'GHI-9012',
-                'itemName': 'Cintos de Segurança',
-                'noCompliant': False,
-                'driverName': 'Pedro Costa',
-                'timestamp': '2025-06-03T11:00:00Z',
-                'status': 'OK'
-            },
-            {
-                'id': 5,
-                'vehiclePlate': 'GHI-9012',
-                'itemName': 'Extintor',
-                'noCompliant': True,
-                'driverName': 'Pedro Costa',
-                'timestamp': '2025-06-03T11:05:00Z',
-                'status': 'NOK'
-            }
-        ],
-        'summary': {
-            'total': 5,
-            'compliant': 3,
-            'non_compliant': 2,
-            'compliance_rate': 60.0,
-            'enterprise_id': enterprise_id,
-            'period_days': days
-        }
-    })
-
-@app.route('/api/copilot/trips')
-def copilot_trips():
-    enterprise_id = request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7')
-    days = int(request.args.get('days', 30))
-    
-    return jsonify({
-        'success': True,
-        'data': [
-            {
-                'id': 1,
-                'vehiclePlate': 'ABC-1234',
-                'driverName': 'João Silva',
-                'origin': 'São Paulo',
-                'destination': 'Rio de Janeiro',
-                'distance': 430.5,
-                'duration': 360,
-                'timestamp': '2025-06-03T08:00:00Z'
-            },
-            {
-                'id': 2,
-                'vehiclePlate': 'DEF-5678',
-                'driverName': 'Maria Santos',
-                'origin': 'Belo Horizonte',
-                'destination': 'Brasília',
-                'distance': 741.2,
-                'duration': 480,
-                'timestamp': '2025-06-03T09:00:00Z'
-            }
-        ],
-        'summary': {
-            'total_trips': 2,
-            'total_distance': 1171.7,
-            'total_duration': 840,
-            'enterprise_id': enterprise_id,
-            'period_days': days
-        }
-    })
-
-@app.route('/api/copilot/alerts')
-def copilot_alerts():
-    enterprise_id = request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7')
-    days = int(request.args.get('days', 30))
-    
-    return jsonify({
-        'success': True,
-        'data': [
-            {
-                'id': 1,
-                'type': 'maintenance',
-                'priority': 'high',
-                'message': 'Manutenção preventiva necessária',
-                'vehiclePlate': 'ABC-1234',
-                'timestamp': '2025-06-03T12:00:00Z'
-            },
-            {
-                'id': 2,
-                'type': 'safety',
-                'priority': 'medium',
-                'message': 'Verificar pneus',
-                'vehiclePlate': 'DEF-5678',
-                'timestamp': '2025-06-03T13:00:00Z'
-            }
-        ],
-        'summary': {
-            'total_alerts': 2,
-            'high_priority': 1,
-            'medium_priority': 1,
-            'low_priority': 0,
-            'enterprise_id': enterprise_id,
-            'period_days': days
-        }
-    })
-
-@app.route('/api/copilot/maintenance')
-def copilot_maintenance():
-    enterprise_id = request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7')
-    days = int(request.args.get('days', 30))
-    
-    return jsonify({
-        'success': True,
-        'data': [
-            {
-                'id': 1,
-                'vehiclePlate': 'ABC-1234',
-                'serviceType': 'Troca de óleo',
-                'cost': 150.00,
-                'status': 'completed',
-                'timestamp': '2025-06-02T14:00:00Z'
-            },
-            {
-                'id': 2,
-                'vehiclePlate': 'DEF-5678',
-                'serviceType': 'Revisão geral',
-                'cost': 350.00,
-                'status': 'pending',
-                'timestamp': '2025-06-03T15:00:00Z'
-            }
-        ],
-        'summary': {
-            'total_services': 2,
-            'total_cost': 500.00,
-            'completed': 1,
-            'pending': 1,
-            'enterprise_id': enterprise_id,
-            'period_days': days
-        }
-    })
-
-@app.route('/api/copilot/collections')
-def copilot_collections():
-    return jsonify({
-        'success': True,
-        'data': {
-            'checklist': {
-                'name': 'Checklist de Veículos',
-                'description': 'Inspeções e verificações de conformidade',
-                'icon': 'fas fa-clipboard-check',
-                'color': '#1abc9c'
-            },
-            'trips': {
-                'name': 'Viagens',
-                'description': 'Histórico de viagens e rotas',
-                'icon': 'fas fa-route',
-                'color': '#3498db'
-            },
-            'alerts': {
-                'name': 'Alertas',
-                'description': 'Alertas e notificações do sistema',
-                'icon': 'fas fa-exclamation-triangle',
-                'color': '#e74c3c'
-            },
-            'maintenance': {
-                'name': 'Manutenção',
-                'description': 'Serviços e manutenção de veículos',
-                'icon': 'fas fa-tools',
-                'color': '#f39c12'
-            }
-        }
-    })
-
-# DASHBOARD ROUTES
-@app.route('/api/copilot/enhanced-dashboard')
-def enhanced_dashboard():
-    """Serve o dashboard melhorado"""
-    try:
-        # Procurar por dashboard corrigido primeiro
-        dashboard_files = [
-            'dashboard_corrigido_final.html',
-            'dashboard_melhorado_corrigido.html', 
-            'dashboard_melhorado.html'
-        ]
-        
-        for filename in dashboard_files:
-            if os.path.exists(filename):
-                logger.info(f"✅ Dashboard encontrado: {filename}")
-                return send_from_directory('.', filename)
-        
-        # Se não encontrar nenhum, retornar dashboard básico
-        logger.warning("⚠️ Nenhum dashboard encontrado, retornando básico")
-        return """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Fleet Copilot BI</title>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <style>
-                body { font-family: Arial, sans-serif; margin: 20px; background: #2c3e50; color: white; }
-                .container { max-width: 1200px; margin: 0 auto; }
-                .card { background: #34495e; padding: 20px; margin: 10px; border-radius: 8px; }
-                .btn { background: #1abc9c; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
-                .btn:hover { background: #16a085; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h1>Fleet Copilot BI - Dashboard Básico</h1>
-                <div class="card">
-                    <h3>Sistema Funcionando</h3>
-                    <p>API ativa e respondendo corretamente.</p>
-                    <button class="btn" onclick="window.location.reload()">Recarregar</button>
-                </div>
-                <div class="card">
-                    <h3>APIs Disponíveis:</h3>
+    if path != "" and os.path.exists(os.path.join(static_folder_path, path)):
+        return send_from_directory(static_folder_path, path)
+    else:
+        index_path = os.path.join(static_folder_path, 'index.html')
+        if os.path.exists(index_path):
+            return send_from_directory(static_folder_path, 'index.html')
+        else:
+            # Página de boas-vindas se index.html não existir
+            return '''
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Fleet Copilot API</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+                           margin: 0; padding: 20px; background: #f5f5f5; }
+                    .container { max-width: 800px; margin: 0 auto; background: white; 
+                                padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                    h1 { color: #2563eb; margin-bottom: 20px; }
+                    .endpoint { background: #f8fafc; padding: 15px; margin: 10px 0; 
+                               border-left: 4px solid #2563eb; border-radius: 5px; }
+                    .method { background: #10b981; color: white; padding: 3px 8px; 
+                             border-radius: 3px; font-size: 12px; font-weight: bold; }
+                    .method.post { background: #f59e0b; }
+                    code { background: #e5e7eb; padding: 2px 6px; border-radius: 3px; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>🚛 Fleet Copilot API</h1>
+                    <p>API do Copiloto Inteligente de Gestão de Frotas - Pronta para integração com FlutterFlow!</p>
+                    
+                    <h2>📋 Endpoints Disponíveis:</h2>
+                    
+                    <div class="endpoint">
+                        <span class="method">GET</span> <code>/api/copilot/health</code><br>
+                        <small>Health check da API</small>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <span class="method">GET</span> <code>/api/copilot/summary</code><br>
+                        <small>Resumo da frota (ideal para cards no FlutterFlow)</small>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <span class="method">GET</span> <code>/api/copilot/vehicles</code><br>
+                        <small>Performance de veículos (para listas no FlutterFlow)</small>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <span class="method">GET</span> <code>/api/copilot/drivers</code><br>
+                        <small>Performance de motoristas</small>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <span class="method">GET</span> <code>/api/copilot/insights</code><br>
+                        <small>Insights e alertas (para notificações)</small>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <span class="method post">POST</span> <code>/api/copilot/question</code><br>
+                        <small>Responder perguntas em linguagem natural (para chat)</small>
+                    </div>
+                    
+                    <div class="endpoint">
+                        <span class="method">GET</span> <code>/api/copilot/dashboard</code><br>
+                        <small>Dashboard HTML (para WebView no FlutterFlow)</small>
+                    </div>
+                    
+                    <h2>🔗 Integração FlutterFlow:</h2>
+                    <p><strong>WebView URL:</strong> <code>https://fleet-copilot-api.onrender.com/api/copilot/dashboard</code></p>
+                    <p><strong>API Base URL:</strong> <code>https://fleet-copilot-api.onrender.com/api/copilot</code></p>
+                    
+                    <h2>📖 Parâmetros:</h2>
                     <ul>
-                        <li>/api/copilot/summary</li>
-                        <li>/api/copilot/checklist</li>
-                        <li>/api/copilot/trips</li>
-                        <li>/api/copilot/alerts</li>
-                        <li>/api/copilot/maintenance</li>
+                        <li><code>enterpriseId</code> - ID da empresa (padrão: sA9EmrE3ymtnBqJKcYn7)</li>
+                        <li><code>days</code> - Período em dias (padrão: 30)</li>
+                        <li><code>priority</code> - Prioridade dos insights (all, high, medium, low)</li>
                     </ul>
                 </div>
-            </div>
-        </body>
-        </html>
-        """
-        
-    except Exception as e:
-        logger.error(f"❌ Erro ao servir dashboard: {e}")
-        return jsonify({'error': 'Dashboard não disponível'}), 500
+            </body>
+            </html>
+            ''', 200
 
-# USERS API (para compatibilidade)
-@app.route('/users', methods=['GET'])
-def get_users():
-    return jsonify([
-        {'id': 1, 'username': 'admin', 'email': 'admin@fleet.com'},
-        {'id': 2, 'username': 'user', 'email': 'user@fleet.com'}
-    ])
-
-@app.route('/users', methods=['POST'])
-def create_user():
-    data = request.get_json()
-    return jsonify({
-        'id': 3,
-        'username': data.get('username', 'new_user'),
-        'email': data.get('email', 'new@fleet.com'),
-        'created': True
-    })
-
-@app.route('/users/<int:user_id>', methods=['GET'])
-def get_user(user_id):
-    return jsonify({
-        'id': user_id,
-        'username': f'user_{user_id}',
-        'email': f'user_{user_id}@fleet.com'
-    })
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    logger.info(f"🚀 Iniciando Fleet Copilot API Emergencial na porta {port}")
     app.run(host='0.0.0.0', port=port, debug=False)
