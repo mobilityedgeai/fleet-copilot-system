@@ -704,21 +704,35 @@
             // Configurar filtros
             setupFilters(collection, config.filters);
             
-            // Mostrar seções
-            document.getElementById('filtersSection').style.display = 'block';
-            document.getElementById('metricsSection').style.display = 'block';
-            document.getElementById('insightsSection').style.display = 'block';
-            document.getElementById('chartsSection').style.display = 'block';
-            document.getElementById('tableSection').style.display = 'block';
+            // Mostrar seções com verificação de existência
+            const sections = ['filtersSection', 'metricsSection', 'insightsSection', 'chartsSection', 'tableSection'];
+            sections.forEach(sectionId => {
+                const element = document.getElementById(sectionId);
+                if (element) {
+                    element.style.display = 'block';
+                }
+            });
             
-            // Atualizar títulos
-            document.getElementById('filtersTitle').textContent = `Filtros - ${config.title}`;
-            document.getElementById('tableTitle').textContent = `Dados - ${config.title}`;
+            // Atualizar títulos com verificação de existência
+            const filtersTitle = document.getElementById('filtersTitle');
+            if (filtersTitle) {
+                filtersTitle.textContent = `Filtros - ${config.title}`;
+            }
+            
+            const tableTitle = document.getElementById('tableTitle');
+            if (tableTitle) {
+                tableTitle.textContent = `Dados - ${config.title}`;
+            }
         }
 
         // Configurar filtros
         function setupFilters(collection, filters) {
             const container = document.getElementById('filtersContainer');
+            if (!container) {
+                console.error('❌ Container de filtros não encontrado');
+                return;
+            }
+            
             container.innerHTML = '';
             
             filters.forEach(filter => {
