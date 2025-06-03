@@ -43,17 +43,17 @@ def enhanced_dashboard():
     """Dashboard BI Avançado com todas as funcionalidades"""
     try:
         # Tentar carregar o dashboard avançado
-        dashboard_path = os.path.join(os.path.dirname(__file__), "dashboard_avancado.html")
+        dashboard_path = os.path.join(os.path.dirname(__file__), "..", "dashboard_avancado.html")
         
         if os.path.exists(dashboard_path):
             with open(dashboard_path, "r", encoding="utf-8") as f:
                 dashboard_content = f.read()
             return dashboard_content
         else:
-            # Fallback para dashboard reconstruído
-            fallback_path = os.path.join(os.path.dirname(__file__), "dashboard_reconstruido.html")
-            if os.path.exists(fallback_path):
-                with open(fallback_path, "r", encoding="utf-8") as f:
+            # Fallback para dashboard na raiz
+            root_path = os.path.join(os.path.dirname(__file__), "..", "..", "dashboard_avancado.html")
+            if os.path.exists(root_path):
+                with open(root_path, "r", encoding="utf-8") as f:
                     dashboard_content = f.read()
                 return dashboard_content
             else:
@@ -151,9 +151,9 @@ DASHBOARD_FALLBACK = """
             </ul>
         </div>
         <div class="error">
-            <h2>⚠️ Arquivo de Dashboard Não Encontrado</h2>
-            <p>O arquivo dashboard_avancado.html não foi encontrado no servidor.</p>
-            <p>Por favor, verifique se o arquivo foi enviado corretamente.</p>
+            <h2>⚠️ Dashboard Avançado Carregando...</h2>
+            <p>Se esta mensagem persistir, verifique se o arquivo dashboard_avancado.html está na raiz do projeto.</p>
+            <p><strong>Versão:</strong> 4.0.0 - Dashboard Avançado</p>
         </div>
     </div>
 </body>
