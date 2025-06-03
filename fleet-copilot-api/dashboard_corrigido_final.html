@@ -835,6 +835,13 @@
         function renderMetrics(collection, data) {
             const config = COLLECTION_CONFIGS[collection];
             const container = document.getElementById('metricsContainer');
+            
+            // Verificar se o elemento existe
+            if (!container) {
+                console.warn('⚠️ Elemento metricsContainer não encontrado');
+                return;
+            }
+            
             container.innerHTML = '';
             
             config.metrics.forEach(metric => {
@@ -860,6 +867,12 @@
         // Renderizar insights de IA
         async function renderInsights(collection, data) {
             const container = document.getElementById('insightsContainer');
+            
+            // Verificar se o elemento existe
+            if (!container) {
+                console.warn('⚠️ Elemento insightsContainer não encontrado');
+                return;
+            }
             
             try {
                 // Gerar insights baseados nos dados
