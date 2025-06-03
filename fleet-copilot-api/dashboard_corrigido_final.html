@@ -819,11 +819,16 @@
             
             const result = await response.json();
             
-            if (!result.success) {
-                throw new Error(result.message || 'Erro na API');
+            // API Firebase BI retorna dados diretamente (array ou objeto)
+            // Não tem wrapper com success/data
+            if (Array.isArray(result)) {
+                return result; // Dados diretos em array
+            } else if (result && typeof result === 'object') {
+                // Se tem propriedade data, usar ela, senão usar o objeto todo
+                return result.data || result;
+            } else {
+                throw new Error('Formato de dados inválido da API');
             }
-            
-            return result.data;
         }
 
         // Renderizar métricas
