@@ -697,17 +697,22 @@
 
         // Configurar interface da collection
         function setupCollectionInterface(collection) {
+            console.log('🔧 Configurando interface para collection:', collection);
             const config = COLLECTION_CONFIGS[collection];
             
             // Configurar filtros
             setupFilters(collection, config.filters);
             
             // Mostrar seções com verificação de existência
+            console.log('👁️ Mostrando seções do dashboard');
             const sections = ['filtersSection', 'metricsSection', 'insightsSection', 'chartsSection', 'tableSection'];
             sections.forEach(sectionId => {
                 const element = document.getElementById(sectionId);
                 if (element) {
                     element.style.display = 'block';
+                    console.log(`✅ Seção ${sectionId} mostrada`);
+                } else {
+                    console.warn(`⚠️ Seção ${sectionId} não encontrada`);
                 }
             });
             
@@ -1006,6 +1011,13 @@
         function renderCharts(collection, data) {
             const config = COLLECTION_CONFIGS[collection];
             const container = document.getElementById('chartsContainer');
+            
+            // Verificar se o elemento existe
+            if (!container) {
+                console.warn('⚠️ Elemento chartsContainer não encontrado');
+                return;
+            }
+            
             container.innerHTML = '';
             
             config.charts.forEach((chartConfig, index) => {
