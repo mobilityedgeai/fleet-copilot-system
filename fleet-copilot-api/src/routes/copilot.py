@@ -1,6 +1,6 @@
 """
 Rotas da API do Copiloto Inteligente de Gestão de Frotas
-Otimizado para integração com FlutterFlow - Versão Corrigida
+Otimizado para integração com FlutterFlow - Versão Corrigida (Sem undefined)
 """
 
 import os
@@ -46,6 +46,42 @@ def get_copilot_components():
     
     return _copilot_components
 
+def safe_get(data, key, default=0):
+    """Obtém valor de forma segura, retornando default se None ou inválido"""
+    if not isinstance(data, dict):
+        return default
+    
+    value = data.get(key, default)
+    if value is None or (isinstance(value, float) and (value != value)):  # Check for NaN
+        return default
+    return value
+
+def safe_format_number(value, decimals=1):
+    """Formata número de forma segura"""
+    try:
+        if value is None or (isinstance(value, float) and (value != value)):
+            return "0.0"
+        return f"{float(value):.{decimals}f}"
+    except (ValueError, TypeError):
+        return "0.0"
+
+def safe_format_message(template, **kwargs):
+    """Formata mensagem de forma segura, substituindo valores None por padrões"""
+    safe_kwargs = {}
+    for key, value in kwargs.items():
+        if value is None:
+            safe_kwargs[key] = "N/A"
+        elif isinstance(value, (int, float)):
+            safe_kwargs[key] = safe_format_number(value)
+        else:
+            safe_kwargs[key] = str(value)
+    
+    try:
+        return template.format(**safe_kwargs)
+    except (KeyError, ValueError) as e:
+        logger.warning(f"Erro ao formatar mensagem: {e}")
+        return "Informação não disponível"
+
 # ============================================================================
 # ROTAS PARA FLUTTERFLOW - API CALLS
 # ============================================================================
@@ -79,22 +115,22 @@ def get_fleet_summary():
         # Obter dados
         summary = processor.get_checklist_summary(enterprise_id, days)
         
-        # Formatar para FlutterFlow
+        # Validar e formatar dados com segurança
         response = {
             'success': True,
             'data': {
-                'totalChecks': summary['total'],
-                'complianceRate': round(summary['compliance_rate'], 1),
-                'compliantChecks': summary['compliant'],
-                'nonCompliantChecks': summary['non_compliant'],
-                'totalVehicles': summary['vehicles'],
-                'totalDrivers': summary['drivers'],
-                'periodDays': summary['period_days'],
+                'totalChecks': safe_get(summary, 'total', 0),
+                'complianceRate': float(safe_format_number(safe_get(summary, 'compliance_rate', 0))),
+                'compliantChecks': safe_get(summary, 'compliant', 0),
+                'nonCompliantChecks': safe_get(summary, 'non_compliant', 0),
+                'totalVehicles': safe_get(summary, 'vehicles', 0),
+                'totalDrivers': safe_get(summary, 'drivers', 0),
+                'periodDays': safe_get(summary, 'period_days', days),
                 'lastUpdate': datetime.now().isoformat()
             }
         }
         
-        logger.info(f"Resumo gerado com sucesso: {summary}")
+        logger.info(f"Resumo gerado com sucesso: {response['data']}")
         return jsonify(response)
         
     except Exception as e:
@@ -121,15 +157,15 @@ def get_vehicles_performance():
         # Obter performance de veículos (retorna lista)
         vehicle_perf = processor.get_vehicle_performance(enterprise_id, days)
         
-        # Formatar para FlutterFlow
+        # Formatar para FlutterFlow com validação
         vehicles_list = []
         for vehicle in vehicle_perf:
             vehicles_list.append({
-                'vehiclePlate': vehicle['vehicle_plate'],
-                'totalChecks': int(vehicle['total_checks']),
-                'complianceRate': round(vehicle['compliance_rate'], 1),
-                'lastActivity': vehicle['last_check'],
-                'status': vehicle['status'],
+                'vehiclePlate': vehicle.get('vehicle_plate', 'N/A'),
+                'totalChecks': int(safe_get(vehicle, 'total_checks', 0)),
+                'complianceRate': float(safe_format_number(safe_get(vehicle, 'compliance_rate', 0))),
+                'lastActivity': vehicle.get('last_check') or 'N/A',
+                'status': vehicle.get('status', 'unknown'),
                 'topItems': vehicle.get('top_items', [])
             })
         
@@ -165,15 +201,15 @@ def get_drivers_performance():
         # Obter performance de motoristas (retorna lista)
         driver_perf = processor.get_driver_performance(enterprise_id, days)
         
-        # Formatar para FlutterFlow
+        # Formatar para FlutterFlow com validação
         drivers_list = []
         for driver in driver_perf:
             drivers_list.append({
-                'driverName': driver['driver_name'],
-                'totalChecks': int(driver['total_checks']),
-                'complianceRate': round(driver['compliance_rate'], 1),
-                'vehiclesOperated': int(driver['vehicles_operated']),
-                'lastActivity': driver['last_activity']
+                'driverName': driver.get('driver_name', 'N/A'),
+                'totalChecks': int(safe_get(driver, 'total_checks', 0)),
+                'complianceRate': float(safe_format_number(safe_get(driver, 'compliance_rate', 0))),
+                'vehiclesOperated': int(safe_get(driver, 'vehicles_operated', 0)),
+                'lastActivity': driver.get('last_activity') or 'N/A'
             })
         
         logger.info(f"Performance de {len(drivers_list)} motoristas obtida")
@@ -205,59 +241,88 @@ def get_insights():
         components = get_copilot_components()
         processor = components['processor']
         
-        # Obter alertas de manutenção
-        alerts = processor.get_maintenance_alerts(enterprise_id)
-        
-        # Gerar insights básicos
+        # Obter dados básicos
         summary = processor.get_checklist_summary(enterprise_id, 30)
+        alerts = processor.get_maintenance_alerts(enterprise_id)
         
         insights = []
         
-        # Insight de conformidade
-        if summary['compliance_rate'] < 80:
-            insights.append({
-                'type': 'compliance_warning',
-                'priority': 'high',
-                'title': 'Taxa de Conformidade Baixa',
-                'message': f'Taxa de conformidade de {summary["compliance_rate"]}% está abaixo do ideal (80%)',
-                'category': 'safety'
-            })
-        elif summary['compliance_rate'] >= 95:
-            insights.append({
-                'type': 'compliance_excellent',
-                'priority': 'low',
-                'title': 'Excelente Conformidade',
-                'message': f'Taxa de conformidade de {summary["compliance_rate"]}% está excelente!',
-                'category': 'safety'
-            })
+        # Validar se há dados suficientes
+        total_checks = safe_get(summary, 'total', 0)
+        compliance_rate = safe_get(summary, 'compliance_rate', 0)
         
-        # Insight de atividade
-        if summary['total'] == 0:
+        if total_checks == 0:
             insights.append({
-                'type': 'no_activity',
-                'priority': 'high',
-                'title': 'Sem Atividade Recente',
-                'message': 'Nenhuma verificação registrada no período',
+                'type': 'no_data',
+                'priority': 'medium',
+                'title': 'Sem Dados Recentes',
+                'message': 'Nenhuma verificação registrada no período analisado',
                 'category': 'operational'
             })
+        else:
+            # Insight de conformidade (apenas se há dados)
+            if compliance_rate < 80:
+                insights.append({
+                    'type': 'compliance_warning',
+                    'priority': 'high',
+                    'title': 'Taxa de Conformidade Baixa',
+                    'message': safe_format_message(
+                        'Taxa de conformidade de {rate}% está abaixo do ideal (80%)',
+                        rate=compliance_rate
+                    ),
+                    'category': 'safety'
+                })
+            elif compliance_rate >= 95:
+                insights.append({
+                    'type': 'compliance_excellent',
+                    'priority': 'low',
+                    'title': 'Excelente Conformidade',
+                    'message': safe_format_message(
+                        'Taxa de conformidade de {rate}% está excelente!',
+                        rate=compliance_rate
+                    ),
+                    'category': 'safety'
+                })
+            else:
+                insights.append({
+                    'type': 'compliance_good',
+                    'priority': 'low',
+                    'title': 'Conformidade Adequada',
+                    'message': safe_format_message(
+                        'Taxa de conformidade de {rate}% está dentro do esperado',
+                        rate=compliance_rate
+                    ),
+                    'category': 'safety'
+                })
         
-        # Converter alertas para insights
+        # Converter alertas para insights com validação
         for alert in alerts:
+            if isinstance(alert, dict) and alert.get('message'):
+                insights.append({
+                    'type': alert.get('type', 'maintenance'),
+                    'priority': alert.get('priority', 'medium'),
+                    'title': 'Alerta de Manutenção',
+                    'message': str(alert.get('message', 'Alerta sem descrição')),
+                    'category': 'maintenance'
+                })
+        
+        # Se não há insights, adicionar mensagem padrão
+        if not insights:
             insights.append({
-                'type': alert['type'],
-                'priority': alert['priority'],
-                'title': 'Alerta de Manutenção',
-                'message': alert['message'],
-                'category': 'maintenance'
+                'type': 'all_good',
+                'priority': 'low',
+                'title': 'Tudo em Ordem',
+                'message': 'Nenhum alerta ou problema identificado no momento',
+                'category': 'operational'
             })
         
         # Filtrar por prioridade se especificado
         if priority != 'all':
-            insights = [i for i in insights if i['priority'] == priority]
+            insights = [i for i in insights if i.get('priority') == priority]
         
         # Ordenar por prioridade
         priority_order = {'high': 0, 'medium': 1, 'low': 2}
-        insights.sort(key=lambda x: priority_order.get(x['priority'], 3))
+        insights.sort(key=lambda x: priority_order.get(x.get('priority', 'low'), 3))
         
         logger.info(f"Gerados {len(insights)} insights")
         
@@ -268,9 +333,9 @@ def get_insights():
                 'alerts': alerts,
                 'summary': summary,
                 'totalInsights': len(insights),
-                'highPriorityCount': len([i for i in insights if i['priority'] == 'high']),
-                'mediumPriorityCount': len([i for i in insights if i['priority'] == 'medium']),
-                'lowPriorityCount': len([i for i in insights if i['priority'] == 'low'])
+                'highPriorityCount': len([i for i in insights if i.get('priority') == 'high']),
+                'mediumPriorityCount': len([i for i in insights if i.get('priority') == 'medium']),
+                'lowPriorityCount': len([i for i in insights if i.get('priority') == 'low'])
             }
         })
         
@@ -279,7 +344,22 @@ def get_insights():
         return jsonify({
             'success': False,
             'error': str(e),
-            'message': 'Erro ao obter insights'
+            'message': 'Erro ao obter insights',
+            'data': {
+                'insights': [{
+                    'type': 'error',
+                    'priority': 'high',
+                    'title': 'Erro no Sistema',
+                    'message': 'Não foi possível carregar os insights no momento',
+                    'category': 'system'
+                }],
+                'alerts': [],
+                'summary': {},
+                'totalInsights': 1,
+                'highPriorityCount': 1,
+                'mediumPriorityCount': 0,
+                'lowPriorityCount': 0
+            }
         }), 500
 
 @copilot_bp.route('/question', methods=['POST'])
@@ -371,62 +451,109 @@ def process_natural_language_question(question: str, summary: dict) -> str:
     
     question_lower = question.lower()
     
+    # Validar dados do summary
+    total = safe_get(summary, 'total', 0)
+    compliance_rate = safe_get(summary, 'compliance_rate', 0)
+    compliant = safe_get(summary, 'compliant', 0)
+    non_compliant = safe_get(summary, 'non_compliant', 0)
+    vehicles = safe_get(summary, 'vehicles', 0)
+    drivers = safe_get(summary, 'drivers', 0)
+    period_days = safe_get(summary, 'period_days', 30)
+    
     # Perguntas sobre conformidade
     if any(word in question_lower for word in ['conformidade', 'compliance', 'taxa']):
-        return f"A taxa de conformidade atual da frota é de {summary['compliance_rate']}%. " \
-               f"Foram realizadas {summary['total']} verificações, sendo {summary['compliant']} conformes " \
-               f"e {summary['non_compliant']} não conformes."
+        return safe_format_message(
+            "A taxa de conformidade atual da frota é de {rate}%. "
+            "Foram realizadas {total} verificações, sendo {compliant} conformes "
+            "e {non_compliant} não conformes.",
+            rate=compliance_rate, total=total, compliant=compliant, non_compliant=non_compliant
+        )
     
     # Perguntas sobre veículos
     elif any(word in question_lower for word in ['veículos', 'veiculos', 'carros', 'frota']):
-        return f"A frota possui {summary['vehicles']} veículos monitorados ativamente. " \
-               f"Foram realizadas {summary['total']} verificações no período analisado."
+        return safe_format_message(
+            "A frota possui {vehicles} veículos monitorados ativamente. "
+            "Foram realizadas {total} verificações no período analisado.",
+            vehicles=vehicles, total=total
+        )
     
     # Perguntas sobre motoristas
     elif any(word in question_lower for word in ['motoristas', 'drivers', 'condutores']):
-        return f"Há {summary['drivers']} motoristas ativos na frota. " \
-               f"Cada motorista realizou verificações durante o período."
+        if drivers > 0:
+            return safe_format_message(
+                "Há {drivers} motoristas ativos na frota. "
+                "Cada motorista realizou verificações durante o período.",
+                drivers=drivers
+            )
+        else:
+            return "Não foram encontrados motoristas ativos no período analisado."
     
     # Perguntas sobre problemas/alertas
     elif any(word in question_lower for word in ['problemas', 'alertas', 'issues', 'falhas']):
-        return f"Há {summary['non_compliant']} não conformidades registradas no período. " \
-               f"Recomenda-se atenção especial aos itens com falhas."
+        return safe_format_message(
+            "Há {non_compliant} não conformidades registradas no período. "
+            "Recomenda-se atenção especial aos itens com falhas.",
+            non_compliant=non_compliant
+        )
     
     # Resposta genérica
     else:
-        return f"Com base na análise dos últimos {summary['period_days']} dias: " \
-               f"A frota tem {summary['vehicles']} veículos, {summary['drivers']} motoristas, " \
-               f"realizou {summary['total']} verificações com {summary['compliance_rate']}% de conformidade."
+        return safe_format_message(
+            "Com base na análise dos últimos {period_days} dias: "
+            "A frota tem {vehicles} veículos, {drivers} motoristas, "
+            "realizou {total} verificações com {rate}% de conformidade.",
+            period_days=period_days, vehicles=vehicles, drivers=drivers, 
+            total=total, rate=compliance_rate
+        )
 
 def generate_dashboard_html(summary, vehicles, drivers, alerts, enterprise_id):
-    """Gera HTML do dashboard"""
+    """Gera HTML do dashboard com validação de dados"""
     
-    # Calcular estatísticas
-    total_vehicles = len(vehicles)
-    total_drivers = len(drivers)
-    avg_compliance = summary['compliance_rate']
+    # Validar e calcular estatísticas com segurança
+    total_vehicles = len(vehicles) if vehicles else 0
+    total_drivers = len(drivers) if drivers else 0
+    avg_compliance = safe_format_number(safe_get(summary, 'compliance_rate', 0))
+    total_checks = safe_get(summary, 'total', 0)
+    compliant_checks = safe_get(summary, 'compliant', 0)
+    non_compliant_checks = safe_get(summary, 'non_compliant', 0)
+    period_days = safe_get(summary, 'period_days', 30)
     
-    # Gerar lista de veículos
+    # Gerar lista de veículos com validação
     vehicles_html = ""
-    for vehicle in vehicles[:5]:  # Top 5
-        vehicles_html += f"""
-        <div class="vehicle-card">
-            <h4>{vehicle['vehicle_plate']}</h4>
-            <p>Conformidade: {vehicle['compliance_rate']}%</p>
-            <p>Verificações: {vehicle['total_checks']}</p>
-        </div>
-        """
+    if vehicles and len(vehicles) > 0:
+        for vehicle in vehicles[:5]:  # Top 5
+            plate = vehicle.get('vehicle_plate', 'N/A')
+            compliance = safe_format_number(safe_get(vehicle, 'compliance_rate', 0))
+            checks = safe_get(vehicle, 'total_checks', 0)
+            
+            vehicles_html += f"""
+            <div class="vehicle-card">
+                <h4>{plate}</h4>
+                <p>Conformidade: {compliance}%</p>
+                <p>Verificações: {checks}</p>
+            </div>
+            """
+    else:
+        vehicles_html = '<p>Nenhum veículo encontrado no período</p>'
     
-    # Gerar lista de alertas
+    # Gerar lista de alertas com validação
     alerts_html = ""
-    for alert in alerts[:3]:  # Top 3
-        priority_color = {'high': '#ff4444', 'medium': '#ffaa00', 'low': '#44ff44'}.get(alert['priority'], '#666')
-        alerts_html += f"""
-        <div class="alert-card" style="border-left: 4px solid {priority_color};">
-            <p><strong>{alert['message']}</strong></p>
-            <small>Prioridade: {alert['priority']}</small>
-        </div>
-        """
+    if alerts and len(alerts) > 0:
+        for alert in alerts[:3]:  # Top 3
+            if isinstance(alert, dict) and alert.get('message'):
+                priority = alert.get('priority', 'medium')
+                priority_color = {'high': '#ff4444', 'medium': '#ffaa00', 'low': '#44ff44'}.get(priority, '#666')
+                message = str(alert.get('message', 'Alerta sem descrição'))
+                
+                alerts_html += f"""
+                <div class="alert-card" style="border-left: 4px solid {priority_color};">
+                    <p><strong>{message}</strong></p>
+                    <small>Prioridade: {priority}</small>
+                </div>
+                """
+    
+    if not alerts_html:
+        alerts_html = '<p>✅ Nenhum alerta ativo no momento</p>'
     
     html_template = f"""
     <!DOCTYPE html>
@@ -500,6 +627,11 @@ def generate_dashboard_html(summary, vehicles, drivers, alerts, enterprise_id):
                 cursor: pointer;
                 font-size: 18px;
             }}
+            .no-data {{
+                text-align: center;
+                color: #666;
+                font-style: italic;
+            }}
             @media (max-width: 768px) {{
                 .stats-grid {{
                     grid-template-columns: repeat(2, 1fr);
@@ -522,7 +654,7 @@ def generate_dashboard_html(summary, vehicles, drivers, alerts, enterprise_id):
             
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-value">{summary['total']}</div>
+                    <div class="stat-value">{total_checks}</div>
                     <div class="stat-label">Verificações</div>
                 </div>
                 <div class="stat-card">
@@ -541,19 +673,19 @@ def generate_dashboard_html(summary, vehicles, drivers, alerts, enterprise_id):
             
             <div class="section">
                 <h3>🚗 Top Veículos</h3>
-                {vehicles_html if vehicles_html else '<p>Nenhum veículo encontrado</p>'}
+                {vehicles_html}
             </div>
             
             <div class="section">
-                <h3>⚠️ Alertas Ativos</h3>
-                {alerts_html if alerts_html else '<p>Nenhum alerta ativo</p>'}
+                <h3>⚠️ Alertas Importantes</h3>
+                {alerts_html}
             </div>
             
             <div class="section">
                 <h3>📊 Resumo do Período</h3>
-                <p><strong>Período:</strong> Últimos {summary['period_days']} dias</p>
-                <p><strong>Conformes:</strong> {summary['compliant']} verificações</p>
-                <p><strong>Não Conformes:</strong> {summary['non_compliant']} verificações</p>
+                <p><strong>Período:</strong> Últimos {period_days} dias</p>
+                <p><strong>Conformes:</strong> {compliant_checks} verificações</p>
+                <p><strong>Não Conformes:</strong> {non_compliant_checks} verificações</p>
                 <p><strong>Última Atualização:</strong> {datetime.now().strftime('%d/%m/%Y %H:%M')}</p>
             </div>
         </div>
@@ -563,10 +695,17 @@ def generate_dashboard_html(summary, vehicles, drivers, alerts, enterprise_id):
             setTimeout(function() {{
                 location.reload();
             }}, 300000);
+            
+            // Log para debug
+            console.log('Dashboard carregado:', {{
+                totalChecks: {total_checks},
+                compliance: '{avg_compliance}%',
+                vehicles: {total_vehicles},
+                drivers: {total_drivers}
+            }});
         </script>
     </body>
     </html>
     """
     
     return html_template
-
