@@ -1,530 +1,470 @@
 """
-Rotas Backend para Sistema de IA Dinâmica
-Suporte para múltiplas collections com geração automática de componentes
+Dynamic BI Routes - Rotas para múltiplas collections
+Fleet Copilot Enhanced API
 """
 
 from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin
+import requests
 import pandas as pd
-import numpy as np
-from datetime import datetime, timedelta
 import logging
+from datetime import datetime, timedelta
+import os
 
-# Create blueprint
-dynamic_bi_bp = Blueprint('dynamic_bi', __name__)
-
-# Configure logging
+# Configurar logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def get_copilot_components():
-    """Get copilot components (processor, etc.)"""
-    try:
-        from fleet_data_connector import FleetDataConnector
+# Blueprint para rotas dinâmicas
+dynamic_bi_bp = Blueprint('dynamic_bi', __name__)
+
+# Configuração da API Firebase
+FIREBASE_API_URL = os.getenv('FIREBASE_API_URL', 'https://firebase-bi-api.onrender.com')
+
+class DynamicBIProcessor:
+    """Processador dinâmico para múltiplas collections"""
+    
+    def __init__(self):
+        self.firebase_url = FIREBASE_API_URL
         
-        processor = FleetDataConnector()
+    def fetch_collection_data(self, collection_name: str, enterprise_id: str = None, days: int = 30):
+        """Busca dados de qualquer collection"""
+        try:
+            url = f"{self.firebase_url}/{collection_name}"
+            params = {}
+            
+            if enterprise_id:
+                params['enterpriseId'] = enterprise_id
+            if days:
+                params['days'] = days
+                
+            logger.info(f"🔗 Buscando dados de {collection_name}: {url}")
+            
+            response = requests.get(url, params=params, timeout=30)
+            response.raise_for_status()
+            
+            data = response.json()
+            logger.info(f"✅ Recebidos {len(data)} registros de /{collection_name}")
+            
+            return data
+            
+        except requests.exceptions.RequestException as e:
+            logger.error(f"❌ Erro ao buscar {collection_name}: {e}")
+            raise Exception(f"Erro na API externa: {str(e)}")
+    
+    def process_checklist_data(self, data, enterprise_id: str, days: int):
+        """Processa dados de checklist"""
+        if not data:
+            return self._empty_checklist_response(enterprise_id, days)
+            
+        df = pd.DataFrame(data)
+        
+        # Filtrar por enterprise_id se especificado
+        if enterprise_id and 'enterpriseId' in df.columns:
+            df = df[df['enterpriseId'] == enterprise_id]
+        
+        # Filtrar por período
+        if 'timestamp' in df.columns:
+            cutoff_date = datetime.now() - timedelta(days=days)
+            df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+            df = df[df['timestamp'] >= cutoff_date]
+        
+        total = len(df)
+        
+        # Calcular conformidade
+        if 'noCompliant' in df.columns:
+            non_compliant = len(df[df['noCompliant'] == True])
+            compliant = total - non_compliant
+        else:
+            compliant = total
+            non_compliant = 0
+        
+        compliance_rate = (compliant / total * 100) if total > 0 else 0
+        
+        # Contar veículos e motoristas únicos
+        vehicles = df['vehiclePlate'].nunique() if 'vehiclePlate' in df.columns else 0
+        drivers = df['driverName'].nunique() if 'driverName' in df.columns else 0
         
         return {
-            'processor': processor,
-            'status': 'success'
+            "total": total,
+            "compliant": compliant,
+            "non_compliant": non_compliant,
+            "compliance_rate": round(compliance_rate, 2),
+            "vehicles": vehicles,
+            "drivers": drivers,
+            "period_days": days,
+            "enterprise_id": enterprise_id,
+            "raw_data": data[:50]  # Primeiros 50 registros para tabela
         }
-    except Exception as e:
-        logger.error(f"Error getting copilot components: {str(e)}")
+    
+    def process_trips_data(self, data, enterprise_id: str, days: int):
+        """Processa dados de viagens"""
+        if not data:
+            return self._empty_trips_response(enterprise_id, days)
+            
+        df = pd.DataFrame(data)
+        
+        # Filtrar por enterprise_id se especificado
+        if enterprise_id and 'enterpriseId' in df.columns:
+            df = df[df['enterpriseId'] == enterprise_id]
+        
+        total_trips = len(df)
+        total_distance = df['distance'].sum() if 'distance' in df.columns else 0
+        total_time = df['duration'].sum() if 'duration' in df.columns else 0
+        avg_speed = (total_distance / total_time) if total_time > 0 else 0
+        
+        drivers = df['driverName'].nunique() if 'driverName' in df.columns else 0
+        vehicles = df['vehiclePlate'].nunique() if 'vehiclePlate' in df.columns else 0
+        
         return {
-            'processor': None,
-            'status': 'error',
-            'message': str(e)
+            "total_trips": total_trips,
+            "total_distance": round(total_distance, 2),
+            "total_time": round(total_time, 2),
+            "avg_speed": round(avg_speed, 2),
+            "drivers": drivers,
+            "vehicles": vehicles,
+            "period_days": days,
+            "enterprise_id": enterprise_id,
+            "raw_data": data[:50]
         }
+    
+    def process_alerts_data(self, data, enterprise_id: str, days: int):
+        """Processa dados de alertas"""
+        if not data:
+            return self._empty_alerts_response(enterprise_id, days)
+            
+        df = pd.DataFrame(data)
+        
+        # Filtrar por enterprise_id se especificado
+        if enterprise_id and 'enterpriseId' in df.columns:
+            df = df[df['enterpriseId'] == enterprise_id]
+        
+        total_alerts = len(df)
+        active_alerts = len(df[df['status'] == 'Ativo']) if 'status' in df.columns else 0
+        critical_alerts = len(df[df['priority'] == 'Alta']) if 'priority' in df.columns else 0
+        resolved_alerts = len(df[df['status'] == 'Resolvido']) if 'status' in df.columns else 0
+        
+        resolution_rate = (resolved_alerts / total_alerts * 100) if total_alerts > 0 else 0
+        avg_resolution_time = 24  # Placeholder
+        
+        return {
+            "total_alerts": total_alerts,
+            "active_alerts": active_alerts,
+            "critical_alerts": critical_alerts,
+            "resolved_alerts": resolved_alerts,
+            "resolution_rate": round(resolution_rate, 2),
+            "avg_resolution_time": avg_resolution_time,
+            "period_days": days,
+            "enterprise_id": enterprise_id,
+            "raw_data": data[:50]
+        }
+    
+    def process_maintenance_data(self, data, enterprise_id: str, days: int):
+        """Processa dados de manutenção"""
+        if not data:
+            return self._empty_maintenance_response(enterprise_id, days)
+            
+        df = pd.DataFrame(data)
+        
+        # Filtrar por enterprise_id se especificado
+        if enterprise_id and 'enterpriseId' in df.columns:
+            df = df[df['enterpriseId'] == enterprise_id]
+        
+        total_services = len(df)
+        total_cost = df['cost'].sum() if 'cost' in df.columns else 0
+        pending_services = len(df[df['status'] == 'Pendente']) if 'status' in df.columns else 0
+        avg_service_time = df['duration'].mean() if 'duration' in df.columns else 0
+        
+        vehicles = df['vehiclePlate'].nunique() if 'vehiclePlate' in df.columns else 0
+        
+        return {
+            "total_services": total_services,
+            "total_cost": round(total_cost, 2),
+            "pending_services": pending_services,
+            "avg_service_time": round(avg_service_time, 2),
+            "vehicles": vehicles,
+            "period_days": days,
+            "enterprise_id": enterprise_id,
+            "raw_data": data[:50]
+        }
+    
+    def _empty_checklist_response(self, enterprise_id: str, days: int):
+        """Resposta vazia para checklist"""
+        return {
+            "total": 0,
+            "compliant": 0,
+            "non_compliant": 0,
+            "compliance_rate": 0,
+            "vehicles": 0,
+            "drivers": 0,
+            "period_days": days,
+            "enterprise_id": enterprise_id,
+            "raw_data": []
+        }
+    
+    def _empty_trips_response(self, enterprise_id: str, days: int):
+        """Resposta vazia para viagens"""
+        return {
+            "total_trips": 0,
+            "total_distance": 0,
+            "total_time": 0,
+            "avg_speed": 0,
+            "drivers": 0,
+            "vehicles": 0,
+            "period_days": days,
+            "enterprise_id": enterprise_id,
+            "raw_data": []
+        }
+    
+    def _empty_alerts_response(self, enterprise_id: str, days: int):
+        """Resposta vazia para alertas"""
+        return {
+            "total_alerts": 0,
+            "active_alerts": 0,
+            "critical_alerts": 0,
+            "resolved_alerts": 0,
+            "resolution_rate": 0,
+            "avg_resolution_time": 0,
+            "period_days": days,
+            "enterprise_id": enterprise_id,
+            "raw_data": []
+        }
+    
+    def _empty_maintenance_response(self, enterprise_id: str, days: int):
+        """Resposta vazia para manutenção"""
+        return {
+            "total_services": 0,
+            "total_cost": 0,
+            "pending_services": 0,
+            "avg_service_time": 0,
+            "vehicles": 0,
+            "period_days": days,
+            "enterprise_id": enterprise_id,
+            "raw_data": []
+        }
+
+# Instância do processador
+processor = DynamicBIProcessor()
 
 @dynamic_bi_bp.route('/collections', methods=['GET'])
 @cross_origin()
-def get_available_collections():
-    """Get list of available collections for BI analysis"""
+def get_collections():
+    """Lista collections disponíveis"""
     try:
         collections = {
-            'checklist': {
-                'name': 'Checklist de Veículos',
-                'description': 'Inspeções e verificações de conformidade dos veículos',
-                'icon': 'fas fa-clipboard-check',
-                'color': '#1abc9c',
-                'endpoint': '/checklist',
-                'fields': ['vehiclePlate', 'driverName', 'itemName', 'noCompliant', 'created_at']
+            "checklist": {
+                "name": "Checklist de Veículos",
+                "description": "Inspeções e verificações de conformidade",
+                "icon": "fas fa-clipboard-check",
+                "color": "#1abc9c",
+                "available": True
             },
-            'trips': {
-                'name': 'Viagens',
-                'description': 'Histórico de viagens e rotas dos veículos',
-                'icon': 'fas fa-route',
-                'color': '#3498db',
-                'endpoint': '/driver-trips',
-                'fields': ['vehiclePlate', 'driverName', 'origin', 'destination', 'distance', 'duration']
+            "trips": {
+                "name": "Viagens",
+                "description": "Histórico de viagens e rotas",
+                "icon": "fas fa-route",
+                "color": "#3498db",
+                "available": True
             },
-            'alerts': {
-                'name': 'Alertas',
-                'description': 'Alertas e notificações do sistema de monitoramento',
-                'icon': 'fas fa-exclamation-triangle',
-                'color': '#e74c3c',
-                'endpoint': '/alerts-checkin',
-                'fields': ['vehiclePlate', 'alertType', 'severity', 'timestamp', 'status']
+            "alerts": {
+                "name": "Alertas",
+                "description": "Alertas e notificações do sistema",
+                "icon": "fas fa-exclamation-triangle",
+                "color": "#e74c3c",
+                "available": True
             },
-            'maintenance': {
-                'name': 'Manutenção',
-                'description': 'Agendamentos e histórico de manutenção preventiva e corretiva',
-                'icon': 'fas fa-tools',
-                'color': '#f39c12',
-                'endpoint': '/maintenance',
-                'fields': ['vehiclePlate', 'maintenanceType', 'scheduledDate', 'status', 'cost']
-            },
-            'drivers': {
-                'name': 'Motoristas',
-                'description': 'Performance e dados dos motoristas da frota',
-                'icon': 'fas fa-user-tie',
-                'color': '#9b59b6',
-                'endpoint': '/drivers',
-                'fields': ['driverName', 'score', 'violations', 'totalTrips', 'status']
-            },
-            'vehicles': {
-                'name': 'Veículos',
-                'description': 'Informações e status da frota de veículos',
-                'icon': 'fas fa-truck',
-                'color': '#27ae60',
-                'endpoint': '/vehicles',
-                'fields': ['vehiclePlate', 'vehicleType', 'status', 'mileage', 'lastMaintenance']
+            "maintenance": {
+                "name": "Manutenção",
+                "description": "Serviços e manutenção de veículos",
+                "icon": "fas fa-tools",
+                "color": "#f39c12",
+                "available": True
             }
         }
         
         return jsonify({
             'success': True,
-            'data': collections,
-            'message': 'Collections retrieved successfully'
+            'data': collections
         })
         
     except Exception as e:
-        logger.error(f"Error getting collections: {str(e)}")
+        logger.error(f"❌ Erro ao listar collections: {e}")
         return jsonify({
             'success': False,
-            'message': f'Error getting collections: {str(e)}'
+            'message': str(e)
         }), 500
+
+@dynamic_bi_bp.route('/checklist', methods=['GET'])
+@cross_origin()
+def get_checklist_data():
+    """Dados de checklist"""
+    try:
+        enterprise_id = request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7')
+        days = int(request.args.get('days', 30))
+        
+        # Buscar dados reais da API
+        raw_data = processor.fetch_collection_data('checklist', enterprise_id, days)
+        
+        # Processar dados
+        processed_data = processor.process_checklist_data(raw_data, enterprise_id, days)
+        
+        return jsonify({
+            'success': True,
+            'data': processed_data
+        })
+        
+    except Exception as e:
+        logger.error(f"❌ Erro ao buscar dados de checklist: {e}")
+        return jsonify({
+            'success': False,
+            'message': str(e),
+            'data': processor._empty_checklist_response(
+                request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7'),
+                int(request.args.get('days', 30))
+            )
+        }), 200  # Retorna 200 com dados vazios em caso de erro
 
 @dynamic_bi_bp.route('/trips', methods=['GET'])
 @cross_origin()
-def get_trips_analysis():
-    """Get trips analysis data"""
+def get_trips_data():
+    """Dados de viagens"""
     try:
         enterprise_id = request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7')
         days = int(request.args.get('days', 30))
         
-        components = get_copilot_components()
-        if components['status'] == 'error':
-            return jsonify({
-                'success': False,
-                'message': components['message']
-            }), 500
+        # Buscar dados reais da API
+        raw_data = processor.fetch_collection_data('trips', enterprise_id, days)
         
-        processor = components['processor']
-        
-        # Get trips data (simulated for now)
-        trips_data = generate_sample_trips_data(enterprise_id, days)
-        
-        # Calculate metrics
-        metrics = calculate_trips_metrics(trips_data)
-        
-        # Generate chart data
-        chart_data = generate_trips_charts(trips_data)
+        # Processar dados
+        processed_data = processor.process_trips_data(raw_data, enterprise_id, days)
         
         return jsonify({
             'success': True,
-            'data': {
-                **metrics,
-                'chart_data': chart_data,
-                'raw_data': trips_data,
-                'period_days': days,
-                'enterprise_id': enterprise_id
-            }
+            'data': processed_data
         })
         
     except Exception as e:
-        logger.error(f"Error in trips analysis: {str(e)}")
+        logger.error(f"❌ Erro ao buscar dados de viagens: {e}")
         return jsonify({
             'success': False,
-            'message': f'Error in trips analysis: {str(e)}'
-        }), 500
+            'message': str(e),
+            'data': processor._empty_trips_response(
+                request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7'),
+                int(request.args.get('days', 30))
+            )
+        }), 200
 
 @dynamic_bi_bp.route('/alerts', methods=['GET'])
 @cross_origin()
-def get_alerts_analysis():
-    """Get alerts analysis data"""
+def get_alerts_data():
+    """Dados de alertas"""
     try:
         enterprise_id = request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7')
         days = int(request.args.get('days', 30))
         
-        components = get_copilot_components()
-        if components['status'] == 'error':
-            return jsonify({
-                'success': False,
-                'message': components['message']
-            }), 500
+        # Buscar dados reais da API
+        raw_data = processor.fetch_collection_data('alerts', enterprise_id, days)
         
-        processor = components['processor']
-        
-        # Get alerts data (simulated for now)
-        alerts_data = generate_sample_alerts_data(enterprise_id, days)
-        
-        # Calculate metrics
-        metrics = calculate_alerts_metrics(alerts_data)
-        
-        # Generate chart data
-        chart_data = generate_alerts_charts(alerts_data)
+        # Processar dados
+        processed_data = processor.process_alerts_data(raw_data, enterprise_id, days)
         
         return jsonify({
             'success': True,
-            'data': {
-                **metrics,
-                'chart_data': chart_data,
-                'raw_data': alerts_data,
-                'period_days': days,
-                'enterprise_id': enterprise_id
-            }
+            'data': processed_data
         })
         
     except Exception as e:
-        logger.error(f"Error in alerts analysis: {str(e)}")
+        logger.error(f"❌ Erro ao buscar dados de alertas: {e}")
         return jsonify({
             'success': False,
-            'message': f'Error in alerts analysis: {str(e)}'
-        }), 500
+            'message': str(e),
+            'data': processor._empty_alerts_response(
+                request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7'),
+                int(request.args.get('days', 30))
+            )
+        }), 200
 
 @dynamic_bi_bp.route('/maintenance', methods=['GET'])
 @cross_origin()
-def get_maintenance_analysis():
-    """Get maintenance analysis data"""
+def get_maintenance_data():
+    """Dados de manutenção"""
     try:
         enterprise_id = request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7')
         days = int(request.args.get('days', 30))
         
-        components = get_copilot_components()
-        if components['status'] == 'error':
-            return jsonify({
-                'success': False,
-                'message': components['message']
-            }), 500
+        # Buscar dados reais da API
+        raw_data = processor.fetch_collection_data('maintenance', enterprise_id, days)
         
-        processor = components['processor']
-        
-        # Get maintenance data (simulated for now)
-        maintenance_data = generate_sample_maintenance_data(enterprise_id, days)
-        
-        # Calculate metrics
-        metrics = calculate_maintenance_metrics(maintenance_data)
-        
-        # Generate chart data
-        chart_data = generate_maintenance_charts(maintenance_data)
+        # Processar dados
+        processed_data = processor.process_maintenance_data(raw_data, enterprise_id, days)
         
         return jsonify({
             'success': True,
-            'data': {
-                **metrics,
-                'chart_data': chart_data,
-                'raw_data': maintenance_data,
-                'period_days': days,
-                'enterprise_id': enterprise_id
-            }
+            'data': processed_data
         })
         
     except Exception as e:
-        logger.error(f"Error in maintenance analysis: {str(e)}")
+        logger.error(f"❌ Erro ao buscar dados de manutenção: {e}")
         return jsonify({
             'success': False,
-            'message': f'Error in maintenance analysis: {str(e)}'
-        }), 500
+            'message': str(e),
+            'data': processor._empty_maintenance_response(
+                request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7'),
+                int(request.args.get('days', 30))
+            )
+        }), 200
 
-@dynamic_bi_bp.route('/drivers', methods=['GET'])
+# Endpoint genérico para qualquer collection
+@dynamic_bi_bp.route('/<collection_name>', methods=['GET'])
 @cross_origin()
-def get_drivers_analysis():
-    """Get drivers analysis data"""
+def get_dynamic_collection_data(collection_name):
+    """Endpoint genérico para qualquer collection"""
     try:
         enterprise_id = request.args.get('enterpriseId', 'sA9EmrE3ymtnBqJKcYn7')
         days = int(request.args.get('days', 30))
         
-        components = get_copilot_components()
-        if components['status'] == 'error':
+        # Mapear collection para processador
+        processors = {
+            'checklist': processor.process_checklist_data,
+            'trips': processor.process_trips_data,
+            'alerts': processor.process_alerts_data,
+            'maintenance': processor.process_maintenance_data
+        }
+        
+        if collection_name not in processors:
             return jsonify({
                 'success': False,
-                'message': components['message']
-            }), 500
+                'message': f'Collection {collection_name} não suportada'
+            }), 404
         
-        processor = components['processor']
+        # Buscar dados reais da API
+        raw_data = processor.fetch_collection_data(collection_name, enterprise_id, days)
         
-        # Get drivers data (simulated for now)
-        drivers_data = generate_sample_drivers_data(enterprise_id, days)
-        
-        # Calculate metrics
-        metrics = calculate_drivers_metrics(drivers_data)
-        
-        # Generate chart data
-        chart_data = generate_drivers_charts(drivers_data)
+        # Processar dados
+        processed_data = processors[collection_name](raw_data, enterprise_id, days)
         
         return jsonify({
             'success': True,
-            'data': {
-                **metrics,
-                'chart_data': chart_data,
-                'raw_data': drivers_data,
-                'period_days': days,
-                'enterprise_id': enterprise_id
-            }
+            'data': processed_data
         })
         
     except Exception as e:
-        logger.error(f"Error in drivers analysis: {str(e)}")
+        logger.error(f"❌ Erro ao buscar dados de {collection_name}: {e}")
+        
+        # Retornar dados vazios em caso de erro
+        empty_responses = {
+            'checklist': processor._empty_checklist_response,
+            'trips': processor._empty_trips_response,
+            'alerts': processor._empty_alerts_response,
+            'maintenance': processor._empty_maintenance_response
+        }
+        
+        empty_data = empty_responses.get(collection_name, processor._empty_checklist_response)(
+            enterprise_id, days
+        )
+        
         return jsonify({
             'success': False,
-            'message': f'Error in drivers analysis: {str(e)}'
-        }), 500
-
-# Helper functions for data generation and analysis
-
-def generate_sample_trips_data(enterprise_id, days):
-    """Generate sample trips data"""
-    import random
-    from datetime import datetime, timedelta
-    
-    vehicles = ['ABC1234', 'DEF5678', '4564564', 'GHI9012']
-    drivers = ['João Silva', 'Maria Santos', 'Pedro Costa', 'Ana Oliveira']
-    origins = ['São Paulo', 'Rio de Janeiro', 'Belo Horizonte', 'Brasília']
-    destinations = ['Campinas', 'Niterói', 'Contagem', 'Goiânia']
-    
-    trips = []
-    for i in range(random.randint(20, 50)):
-        trip_date = datetime.now() - timedelta(days=random.randint(0, days))
-        trips.append({
-            'id': f'trip_{i}',
-            'date': trip_date.isoformat(),
-            'vehiclePlate': random.choice(vehicles),
-            'driverName': random.choice(drivers),
-            'origin': random.choice(origins),
-            'destination': random.choice(destinations),
-            'distance': random.randint(50, 500),
-            'duration': f"{random.randint(1, 8)}h{random.randint(0, 59)}m",
-            'avgSpeed': random.randint(60, 90),
-            'fuelConsumption': round(random.uniform(8, 15), 2),
-            'enterpriseId': enterprise_id
-        })
-    
-    return trips
-
-def generate_sample_alerts_data(enterprise_id, days):
-    """Generate sample alerts data"""
-    import random
-    from datetime import datetime, timedelta
-    
-    vehicles = ['ABC1234', 'DEF5678', '4564564', 'GHI9012']
-    alert_types = ['Velocidade Excessiva', 'Freada Brusca', 'Aceleração Brusca', 'Manutenção Preventiva']
-    severities = ['low', 'medium', 'high', 'critical']
-    statuses = ['active', 'resolved']
-    
-    alerts = []
-    for i in range(random.randint(10, 30)):
-        alert_date = datetime.now() - timedelta(days=random.randint(0, days))
-        alerts.append({
-            'id': f'alert_{i}',
-            'timestamp': alert_date.isoformat(),
-            'vehiclePlate': random.choice(vehicles),
-            'alertType': random.choice(alert_types),
-            'severity': random.choice(severities),
-            'description': f'Alerta de {random.choice(alert_types)} detectado',
-            'status': random.choice(statuses),
-            'enterpriseId': enterprise_id
-        })
-    
-    return alerts
-
-def generate_sample_maintenance_data(enterprise_id, days):
-    """Generate sample maintenance data"""
-    import random
-    from datetime import datetime, timedelta
-    
-    vehicles = ['ABC1234', 'DEF5678', '4564564', 'GHI9012']
-    maintenance_types = ['Preventiva', 'Corretiva', 'Preditiva', 'Emergencial']
-    statuses = ['scheduled', 'in_progress', 'completed', 'cancelled']
-    technicians = ['Carlos Mecânico', 'José Técnico', 'Roberto Silva', 'Fernando Costa']
-    
-    maintenance = []
-    for i in range(random.randint(15, 25)):
-        scheduled_date = datetime.now() + timedelta(days=random.randint(-days, 30))
-        maintenance.append({
-            'id': f'maintenance_{i}',
-            'scheduledDate': scheduled_date.isoformat(),
-            'vehiclePlate': random.choice(vehicles),
-            'maintenanceType': random.choice(maintenance_types),
-            'description': f'Manutenção {random.choice(maintenance_types)} programada',
-            'status': random.choice(statuses),
-            'cost': random.randint(200, 2000),
-            'technician': random.choice(technicians),
-            'enterpriseId': enterprise_id
-        })
-    
-    return maintenance
-
-def generate_sample_drivers_data(enterprise_id, days):
-    """Generate sample drivers data"""
-    import random
-    
-    drivers = ['João Silva', 'Maria Santos', 'Pedro Costa', 'Ana Oliveira', 'Carlos Souza']
-    
-    drivers_data = []
-    for driver in drivers:
-        drivers_data.append({
-            'id': f'driver_{driver.replace(" ", "_").lower()}',
-            'driverName': driver,
-            'score': random.randint(60, 100),
-            'violations': random.randint(0, 5),
-            'totalTrips': random.randint(10, 50),
-            'totalDistance': random.randint(1000, 5000),
-            'avgSpeed': random.randint(65, 85),
-            'status': random.choice(['active', 'inactive']),
-            'lastActivity': (datetime.now() - timedelta(days=random.randint(0, days))).isoformat(),
-            'enterpriseId': enterprise_id
-        })
-    
-    return drivers_data
-
-def calculate_trips_metrics(trips_data):
-    """Calculate trips metrics"""
-    if not trips_data:
-        return {
-            'total_trips': 0,
-            'total_distance': 0,
-            'avg_speed': 0,
-            'fuel_efficiency': 0
-        }
-    
-    total_trips = len(trips_data)
-    total_distance = sum(trip['distance'] for trip in trips_data)
-    avg_speed = sum(trip['avgSpeed'] for trip in trips_data) / total_trips if total_trips > 0 else 0
-    fuel_efficiency = sum(trip.get('fuelConsumption', 10) for trip in trips_data) / total_trips if total_trips > 0 else 0
-    
-    return {
-        'total_trips': total_trips,
-        'total_distance': total_distance,
-        'avg_speed': round(avg_speed, 1),
-        'fuel_efficiency': round(fuel_efficiency, 2)
-    }
-
-def calculate_alerts_metrics(alerts_data):
-    """Calculate alerts metrics"""
-    if not alerts_data:
-        return {
-            'total_alerts': 0,
-            'critical_alerts': 0,
-            'resolved_alerts': 0,
-            'avg_resolution_time': 0
-        }
-    
-    total_alerts = len(alerts_data)
-    critical_alerts = len([a for a in alerts_data if a['severity'] == 'critical'])
-    resolved_alerts = len([a for a in alerts_data if a['status'] == 'resolved'])
-    
-    return {
-        'total_alerts': total_alerts,
-        'critical_alerts': critical_alerts,
-        'resolved_alerts': resolved_alerts,
-        'avg_resolution_time': 45  # minutes (simulated)
-    }
-
-def calculate_maintenance_metrics(maintenance_data):
-    """Calculate maintenance metrics"""
-    if not maintenance_data:
-        return {
-            'scheduled_maintenance': 0,
-            'completed_maintenance': 0,
-            'overdue_maintenance': 0,
-            'total_cost': 0
-        }
-    
-    scheduled = len([m for m in maintenance_data if m['status'] == 'scheduled'])
-    completed = len([m for m in maintenance_data if m['status'] == 'completed'])
-    overdue = len([m for m in maintenance_data if m['status'] == 'scheduled' and 
-                   datetime.fromisoformat(m['scheduledDate'].replace('Z', '+00:00')) < datetime.now()])
-    total_cost = sum(m['cost'] for m in maintenance_data if m['status'] == 'completed')
-    
-    return {
-        'scheduled_maintenance': scheduled,
-        'completed_maintenance': completed,
-        'overdue_maintenance': overdue,
-        'total_cost': total_cost
-    }
-
-def calculate_drivers_metrics(drivers_data):
-    """Calculate drivers metrics"""
-    if not drivers_data:
-        return {
-            'total_drivers': 0,
-            'active_drivers': 0,
-            'avg_score': 0,
-            'violations': 0
-        }
-    
-    total_drivers = len(drivers_data)
-    active_drivers = len([d for d in drivers_data if d['status'] == 'active'])
-    avg_score = sum(d['score'] for d in drivers_data) / total_drivers if total_drivers > 0 else 0
-    total_violations = sum(d['violations'] for d in drivers_data)
-    
-    return {
-        'total_drivers': total_drivers,
-        'active_drivers': active_drivers,
-        'avg_score': round(avg_score, 1),
-        'violations': total_violations
-    }
-
-def generate_trips_charts(trips_data):
-    """Generate chart data for trips"""
-    return {
-        'trips_timeline': {
-            'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-            'data': [12, 19, 3, 5, 2]
-        },
-        'driver_distances': {
-            'labels': ['João', 'Maria', 'Pedro', 'Ana'],
-            'data': [1200, 1900, 800, 1500]
-        }
-    }
-
-def generate_alerts_charts(alerts_data):
-    """Generate chart data for alerts"""
-    return {
-        'severity_distribution': {
-            'labels': ['Baixa', 'Média', 'Alta', 'Crítica'],
-            'data': [5, 8, 3, 2]
-        },
-        'alert_types': {
-            'labels': ['Velocidade', 'Freada', 'Aceleração', 'Manutenção'],
-            'data': [7, 4, 3, 4]
-        }
-    }
-
-def generate_maintenance_charts(maintenance_data):
-    """Generate chart data for maintenance"""
-    return {
-        'maintenance_timeline': {
-            'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-            'data': [3, 5, 2, 4, 6]
-        },
-        'maintenance_types': {
-            'labels': ['Preventiva', 'Corretiva', 'Preditiva'],
-            'data': [8, 5, 3]
-        }
-    }
-
-def generate_drivers_charts(drivers_data):
-    """Generate chart data for drivers"""
-    return {
-        'driver_scores': {
-            'labels': [d['driverName'] for d in drivers_data[:5]],
-            'data': [d['score'] for d in drivers_data[:5]]
-        },
-        'score_evolution': {
-            'labels': ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-            'data': [85, 87, 83, 89, 91]
-        }
-    }
-
+            'message': str(e),
+            'data': empty_data
+        }), 200
