@@ -1,0 +1,46 @@
+# Configuração para Deploy no Render.com
+# Copiloto Inteligente de Gestão de Frotas
+
+services:
+  # Backend API Flask
+  - type: web
+    name: fleet-copilot-api
+    env: python
+    plan: free
+    buildCommand: |
+      cd fleet-copilot-api
+      pip install -r requirements.txt
+    startCommand: |
+      cd fleet-copilot-api
+      python src/main.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: PORT
+        value: 5000
+      - key: FLASK_ENV
+        value: production
+    healthCheckPath: /api/copilot/health
+    
+  # Frontend React (Static Site)
+  - type: static
+    name: fleet-copilot-web
+    buildCommand: |
+      cd fleet-copilot-web
+      npm install
+      npm run build
+    staticPublishPath: fleet-copilot-web/dist
+    envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: VITE_API_BASE_URL
+        value: https://fleet-copilot-api.onrender.com/api/copilot
+
+# Configurações de ambiente
+databases: []
+
+# Configurações de rede
+networking:
+  allowedOrigins:
+    - "*"
+
