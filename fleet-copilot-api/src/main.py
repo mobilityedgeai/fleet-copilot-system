@@ -50,22 +50,78 @@ with app.app_context():
 def register_blueprints():
     """Registra blueprints de forma segura"""
     try:
-        # Tentar importar blueprints originais
-        try:
-            from routes.copilot import copilot_bp
-            app.register_blueprint(copilot_bp, url_prefix='/api/copilot')
-            logger.info("✅ Blueprint copilot registrado")
-        except ImportError as e:
-            logger.warning(f"⚠️ Blueprint copilot não encontrado: {e}")
+        # Tentar importar blueprints originais com diferentes caminhos
+        blueprint_registered = False
+        
+        # Tentar diferentes caminhos para o blueprint copilot
+        copilot_paths = [
+            'routes.copilot',
+            'src.routes.copilot', 
+            'fleet_data_connector',
+            'src.fleet_data_connector'
+        ]
+        
+        for path in copilot_paths:
+            try:
+                if path == 'routes.copilot':
+                    from routes.copilot import copilot_bp
+                    app.register_blueprint(copilot_bp, url_prefix='/api/copilot')
+                    logger.info("✅ Blueprint copilot registrado (routes.copilot)")
+                    blueprint_registered = True
+                    break
+                elif path == 'src.routes.copilot':
+                    from src.routes.copilot import copilot_bp
+                    app.register_blueprint(copilot_bp, url_prefix='/api/copilot')
+                    logger.info("✅ Blueprint copilot registrado (src.routes.copilot)")
+                    blueprint_registered = True
+                    break
+            except ImportError:
+                continue
+        
+        if not blueprint_registered:
+            logger.warning("⚠️ Blueprint copilot não encontrado, criando rotas mínimas")
             create_minimal_copilot_routes()
         
         # Tentar importar blueprint dinâmico
-        try:
-            from dynamic_bi_routes_corrigido import dynamic_bi_bp
-            app.register_blueprint(dynamic_bi_bp, url_prefix='/api/copilot')
-            logger.info("✅ Blueprint dynamic_bi registrado")
-        except ImportError as e:
-            logger.warning(f"⚠️ Blueprint dynamic_bi não encontrado: {e}")
+        dynamic_registered = False
+        dynamic_paths = [
+            'dynamic_bi_routes_corrigido',
+            'src.dynamic_bi_routes_corrigido',
+            'dynamic_bi_routes',
+            'src.dynamic_bi_routes'
+        ]
+        
+        for path in dynamic_paths:
+            try:
+                if path == 'dynamic_bi_routes_corrigido':
+                    from dynamic_bi_routes_corrigido import dynamic_bi_bp
+                    app.register_blueprint(dynamic_bi_bp, url_prefix='/api/copilot')
+                    logger.info("✅ Blueprint dynamic_bi registrado (dynamic_bi_routes_corrigido)")
+                    dynamic_registered = True
+                    break
+                elif path == 'src.dynamic_bi_routes_corrigido':
+                    from src.dynamic_bi_routes_corrigido import dynamic_bi_bp
+                    app.register_blueprint(dynamic_bi_bp, url_prefix='/api/copilot')
+                    logger.info("✅ Blueprint dynamic_bi registrado (src.dynamic_bi_routes_corrigido)")
+                    dynamic_registered = True
+                    break
+                elif path == 'dynamic_bi_routes':
+                    from dynamic_bi_routes import dynamic_bi_bp
+                    app.register_blueprint(dynamic_bi_bp, url_prefix='/api/copilot')
+                    logger.info("✅ Blueprint dynamic_bi registrado (dynamic_bi_routes)")
+                    dynamic_registered = True
+                    break
+                elif path == 'src.dynamic_bi_routes':
+                    from src.dynamic_bi_routes import dynamic_bi_bp
+                    app.register_blueprint(dynamic_bi_bp, url_prefix='/api/copilot')
+                    logger.info("✅ Blueprint dynamic_bi registrado (src.dynamic_bi_routes)")
+                    dynamic_registered = True
+                    break
+            except ImportError:
+                continue
+        
+        if not dynamic_registered:
+            logger.warning("⚠️ Blueprint dynamic_bi não encontrado, criando rotas mínimas")
             create_minimal_bi_routes()
             
     except Exception as e:
@@ -155,27 +211,31 @@ def create_fallback_routes():
             'version': '2.0.0'
         })
 
-# Enhanced dashboard routes
 @app.route('/api/copilot/enhanced-dashboard')
 def enhanced_dashboard():
     """Serve enhanced dashboard"""
     try:
-        # Tentar encontrar arquivo do dashboard
+        # Tentar encontrar arquivo do dashboard corrigido primeiro
         possible_paths = [
             os.path.join(os.path.dirname(__file__), 'dashboard_corrigido_final.html'),
             os.path.join(os.path.dirname(__file__), 'src', 'dashboard_corrigido_final.html'),
+            os.path.join(os.path.dirname(__file__), 'dashboard_melhorado_corrigido.html'),
+            os.path.join(os.path.dirname(__file__), 'src', 'dashboard_melhorado_corrigido.html'),
             os.path.join(os.path.dirname(__file__), 'dashboard_melhorado.html'),
             os.path.join(os.path.dirname(__file__), 'src', 'dashboard_melhorado.html'),
             'dashboard_corrigido_final.html',
+            'dashboard_melhorado_corrigido.html',
             'dashboard_melhorado.html'
         ]
         
         dashboard_content = None
+        dashboard_file = None
         for path in possible_paths:
             if os.path.exists(path):
                 with open(path, 'r', encoding='utf-8') as f:
                     dashboard_content = f.read()
-                logger.info(f"✅ Dashboard encontrado em: {path}")
+                dashboard_file = os.path.basename(path)
+                logger.info(f"✅ Dashboard encontrado em: {path} (arquivo: {dashboard_file})")
                 break
         
         if dashboard_content:
@@ -186,9 +246,15 @@ def enhanced_dashboard():
                 f"'{api_base_url}'"
             )
             
+            # Log do arquivo usado
+            if 'corrigido' in dashboard_file:
+                logger.info("✅ Usando dashboard corrigido com cores e layout corretos")
+            else:
+                logger.warning("⚠️ Usando dashboard antigo - recomenda-se atualizar para versão corrigida")
+            
             return dashboard_content, 200, {'Content-Type': 'text/html; charset=utf-8'}
         else:
-            logger.warning("⚠️ Dashboard melhorado não encontrado, servindo versão básica")
+            logger.warning("⚠️ Nenhum dashboard encontrado, servindo versão básica")
             return create_basic_dashboard(), 200, {'Content-Type': 'text/html; charset=utf-8'}
             
     except Exception as e:
