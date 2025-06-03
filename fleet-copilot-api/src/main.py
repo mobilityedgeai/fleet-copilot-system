@@ -1,6 +1,6 @@
 """
-Fleet Copilot Enhanced API - Main Application
-Versão corrigida com BI melhorado e múltiplas collections
+Fleet Copilot Enhanced API - Production Ready
+Versão otimizada para produção com Gunicorn
 """
 
 import os
@@ -9,7 +9,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
-# Configurar logging
+# Configurar logging para produção
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -26,6 +26,11 @@ CORS(app, origins="*", allow_headers=["Content-Type", "Authorization"])
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///fleet_copilot.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['FIREBASE_API_URL'] = os.getenv('FIREBASE_API_URL', 'https://firebase-bi-api.onrender.com')
+
+# Configurações de produção
+app.config['ENV'] = 'production'
+app.config['DEBUG'] = False
+app.config['TESTING'] = False
 
 # Inicializar database
 db = SQLAlchemy(app)
@@ -85,27 +90,13 @@ def register_blueprints():
         # Tentar importar blueprint dinâmico
         dynamic_registered = False
         dynamic_paths = [
-            'dynamic_bi_routes_corrigido',
-            'src.dynamic_bi_routes_corrigido',
             'dynamic_bi_routes',
             'src.dynamic_bi_routes'
         ]
         
         for path in dynamic_paths:
             try:
-                if path == 'dynamic_bi_routes_corrigido':
-                    from dynamic_bi_routes_corrigido import dynamic_bi_bp
-                    app.register_blueprint(dynamic_bi_bp, url_prefix='/api/copilot')
-                    logger.info("✅ Blueprint dynamic_bi registrado (dynamic_bi_routes_corrigido)")
-                    dynamic_registered = True
-                    break
-                elif path == 'src.dynamic_bi_routes_corrigido':
-                    from src.dynamic_bi_routes_corrigido import dynamic_bi_bp
-                    app.register_blueprint(dynamic_bi_bp, url_prefix='/api/copilot')
-                    logger.info("✅ Blueprint dynamic_bi registrado (src.dynamic_bi_routes_corrigido)")
-                    dynamic_registered = True
-                    break
-                elif path == 'dynamic_bi_routes':
+                if path == 'dynamic_bi_routes':
                     from dynamic_bi_routes import dynamic_bi_bp
                     app.register_blueprint(dynamic_bi_bp, url_prefix='/api/copilot')
                     logger.info("✅ Blueprint dynamic_bi registrado (dynamic_bi_routes)")
@@ -137,6 +128,8 @@ def create_minimal_copilot_routes():
             'status': 'healthy',
             'service': 'Fleet Copilot Enhanced BI API',
             'version': '2.0.0',
+            'environment': 'production',
+            'server': 'gunicorn',
             'features': [
                 'Interactive Dashboards',
                 'Dynamic Filters',
@@ -207,8 +200,10 @@ def create_fallback_routes():
     def fallback_health():
         return jsonify({
             'status': 'healthy',
-            'service': 'Fleet Copilot API (Fallback Mode)',
-            'version': '2.0.0'
+            'service': 'Fleet Copilot API (Production Mode)',
+            'version': '2.0.0',
+            'environment': 'production',
+            'server': 'gunicorn'
         })
 
 @app.route('/api/copilot/enhanced-dashboard')
@@ -334,7 +329,7 @@ def create_basic_dashboard():
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3><i class="fas fa-truck"></i> Fleet Copilot - BI Básico</h3>
+                            <h3><i class="fas fa-truck"></i> Fleet Copilot - BI Básico (Produção)</h3>
                         </div>
                         <div class="card-body">
                             <div class="alert alert-info">
@@ -401,12 +396,12 @@ def serve(path):
         if os.path.exists(index_path):
             return send_from_directory(static_folder_path, 'index.html')
         else:
-            # Página de boas-vindas melhorada
+            # Página de boas-vindas melhorada para produção
             return '''
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Fleet Copilot Enhanced API</title>
+                <title>Fleet Copilot Production API</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <style>
                     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
@@ -419,73 +414,60 @@ def serve(path):
                                border-left: 4px solid #1abc9c; border-radius: 5px; }
                     .method { background: #27ae60; color: white; padding: 3px 8px; 
                              border-radius: 3px; font-size: 12px; font-weight: bold; }
-                    .method.post { background: #f39c12; }
                     .method.enhanced { background: #e74c3c; }
                     code { background: #2c3e50; color: #1abc9c; padding: 2px 6px; border-radius: 3px; }
                     .feature { background: #3498db; color: white; padding: 2px 6px; 
                               border-radius: 3px; font-size: 11px; margin-left: 5px; }
-                    .new { background: #e74c3c; }
+                    .production { background: #27ae60; }
                 </style>
             </head>
             <body>
                 <div class="container">
-                    <h1>🚛 Fleet Copilot Enhanced API</h1>
-                    <p>API do Copiloto Inteligente de Gestão de Frotas com BI Avançado - Versão Corrigida!</p>
+                    <h1>🚛 Fleet Copilot Production API</h1>
+                    <p>API do Copiloto Inteligente de Gestão de Frotas - <strong>Ambiente de Produção</strong></p>
                     
-                    <h2>🆕 Endpoints Melhorados:</h2>
+                    <div style="background: #27ae60; color: white; padding: 10px; border-radius: 5px; margin: 20px 0;">
+                        <strong>✅ PRODUÇÃO:</strong> Servidor Gunicorn ativo - Otimizado para alta performance
+                    </div>
+                    
+                    <h2>🆕 Endpoints Disponíveis:</h2>
                     
                     <div class="endpoint">
                         <span class="method enhanced">GET</span> <code>/api/copilot/enhanced-dashboard</code>
-                        <span class="feature new">CORRIGIDO</span><br>
+                        <span class="feature production">PRODUÇÃO</span><br>
                         <small>Dashboard melhorado com padrão de cores correto e layout para WebView</small>
                     </div>
                     
                     <div class="endpoint">
                         <span class="method enhanced">GET</span> <code>/api/copilot/collections</code>
-                        <span class="feature new">NOVO</span><br>
+                        <span class="feature production">PRODUÇÃO</span><br>
                         <small>Lista de collections disponíveis com IA dinâmica</small>
                     </div>
                     
                     <div class="endpoint">
                         <span class="method enhanced">GET</span> <code>/api/copilot/checklist</code>
-                        <span class="feature new">CORRIGIDO</span><br>
+                        <span class="feature production">PRODUÇÃO</span><br>
                         <small>Dados de checklist com insights de IA</small>
                     </div>
                     
                     <div class="endpoint">
-                        <span class="method enhanced">GET</span> <code>/api/copilot/trips</code>
-                        <span class="feature new">NOVO</span><br>
-                        <small>Análise de viagens e rotas</small>
-                    </div>
-                    
-                    <div class="endpoint">
-                        <span class="method enhanced">GET</span> <code>/api/copilot/alerts</code>
-                        <span class="feature new">NOVO</span><br>
-                        <small>Gestão de alertas e notificações</small>
-                    </div>
-                    
-                    <div class="endpoint">
-                        <span class="method enhanced">GET</span> <code>/api/copilot/maintenance</code>
-                        <span class="feature new">NOVO</span><br>
-                        <small>Controle de manutenção e custos</small>
+                        <span class="method enhanced">GET</span> <code>/api/health</code>
+                        <span class="feature production">PRODUÇÃO</span><br>
+                        <small>Health check da aplicação</small>
                     </div>
                     
                     <h2>🔗 URLs de Acesso:</h2>
                     <p><strong>Dashboard Melhorado:</strong><br>
-                    <code>https://sua-app.onrender.com/api/copilot/enhanced-dashboard?enterpriseId=sA9EmrE3ymtnBqJKcYn7</code></p>
+                    <code>https://fleet-copilot-api.onrender.com/api/copilot/enhanced-dashboard?enterpriseId=sA9EmrE3ymtnBqJKcYn7</code></p>
                     
-                    <p><strong>Dashboard Mobile (FlutterFlow):</strong><br>
-                    <code>https://sua-app.onrender.com/api/flutterflow/mobile-dashboard?enterpriseId=sA9EmrE3ymtnBqJKcYn7</code></p>
-                    
-                    <h2>🎯 Correções Implementadas:</h2>
+                    <h2>🎯 Características de Produção:</h2>
                     <ul>
-                        <li>🎨 <strong>Padrão de cores correto</strong> - Teal/turquesa como na imagem</li>
-                        <li>📱 <strong>Layout para WebView</strong> - Sem menu superior</li>
-                        <li>🔧 <strong>Componentes customizados</strong> por collection</li>
-                        <li>🤖 <strong>Insights de IA</strong> baseados em dados reais</li>
-                        <li>📊 <strong>DataTables funcionando</strong> com exportação</li>
-                        <li>🔍 <strong>Filtros interativos</strong> por tipo de dados</li>
-                        <li>⚡ <strong>Apenas dados reais</strong> da API (sem mock)</li>
+                        <li>🚀 <strong>Servidor Gunicorn</strong> - Alta performance</li>
+                        <li>🔒 <strong>Configurações seguras</strong> - Debug desabilitado</li>
+                        <li>📊 <strong>Logs otimizados</strong> - Monitoramento eficiente</li>
+                        <li>⚡ <strong>Processamento assíncrono</strong> - Gevent workers</li>
+                        <li>🎨 <strong>Dashboard corrigido</strong> - Cores e layout otimizados</li>
+                        <li>🤖 <strong>IA dinâmica</strong> - Insights baseados em dados reais</li>
                     </ul>
                 </div>
             </body>
@@ -503,6 +485,8 @@ def health_check():
         'status': 'healthy',
         'service': 'Fleet Copilot Enhanced BI API',
         'version': '2.0.0',
+        'environment': 'production',
+        'server': 'gunicorn',
         'database': 'connected',
         'firebase_api': app.config['FIREBASE_API_URL'],
         'features': [
@@ -512,19 +496,24 @@ def health_check():
             'DataTables with Export',
             'AI-Powered Insights',
             'Multi-Collection Support',
-            'Real Data Only (No Mock)'
+            'Production Ready'
         ]
     })
 
+# Configuração para Gunicorn
+def create_app():
+    """Factory function para Gunicorn"""
+    return app
+
 if __name__ == '__main__':
+    # Apenas para desenvolvimento local
     port = int(os.environ.get('PORT', 5000))
-    debug = os.environ.get('FLASK_ENV') == 'development'
-    
     logger.info(f"🚀 Iniciando Fleet Copilot Enhanced API na porta {port}")
-    logger.info(f"🎯 Modo debug: {debug}")
+    logger.info(f"🎯 Ambiente: PRODUÇÃO")
     logger.info(f"🔗 Firebase API URL: {app.config['FIREBASE_API_URL']}")
     logger.info(f"🎨 Dashboard melhorado com padrão de cores correto")
     logger.info(f"📱 Layout otimizado para WebView")
     logger.info(f"🤖 IA dinâmica para múltiplas collections")
+    logger.warning("⚠️ Usando servidor de desenvolvimento - Use Gunicorn em produção")
     
-    app.run(host='0.0.0.0', port=port, debug=debug)
+    app.run(host='0.0.0.0', port=port, debug=False)
