@@ -770,8 +770,10 @@
         let dataTable = null;
         let charts = {};
         
-        // API Configuration
-        const API_BASE_URL = window.location.origin + '/api';
+        // API Configuration - FORÇA HTTPS para evitar Mixed Content
+        const API_BASE_URL = window.location.protocol === 'https:' 
+            ? window.location.origin + '/api'
+            : 'https://fleet-copilot-api.onrender.com/api';
         const ENTERPRISE_ID = 'sA9EmrE3ymtnBqJKcYn7';
         
         // Initialize the dashboard
@@ -1323,4 +1325,3 @@
     </script>
 </body>
 </html>
-
