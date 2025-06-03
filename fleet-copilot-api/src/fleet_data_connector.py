@@ -1,6 +1,6 @@
 """
 Copiloto Inteligente de Gestão de Frotas
-Módulo de Conexão e Processamento de Dados
+Módulo de Conexão e Processamento de Dados - Versão Corrigida
 """
 
 import requests
@@ -12,6 +12,7 @@ import json
 import logging
 from dataclasses import dataclass
 from urllib.parse import urljoin
+import os
 
 # Configuração de logging
 logging.basicConfig(level=logging.INFO)
@@ -20,9 +21,13 @@ logger = logging.getLogger(__name__)
 @dataclass
 class FleetAPIConfig:
     """Configuração da API de gestão de frotas"""
-    base_url: str = "https://firebase-bi-api.onrender.com"
+    base_url: str = None
     timeout: int = 30
     max_retries: int = 3
+    
+    def __post_init__(self):
+        if self.base_url is None:
+            self.base_url = os.getenv('FIREBASE_API_URL', 'https://firebase-bi-api.onrender.com')
 
 class FleetDataConnector:
     """Conector para APIs de gestão de frotas"""
@@ -49,7 +54,8 @@ class FleetDataConnector:
             except requests.exceptions.RequestException as e:
                 logger.warning(f"Erro na tentativa {attempt + 1}: {e}")
                 if attempt == self.config.max_retries - 1:
-                    raise
+                    logger.error(f"Falha após {self.config.max_retries} tentativas: {e}")
+                    return []
                     
         return []
     
@@ -61,18 +67,30 @@ class FleetDataConnector:
             params['enterpriseId'] = enterprise_id
             
         data = self._make_request('/checklist', params)
+        
+        if not data:
+            return pd.DataFrame()
+            
         df = pd.DataFrame(data)
         
         if not df.empty:
-            # Conversão de tipos
-            df['timestamp'] = pd.to_datetime(df['timestamp'])
-            df['issueOpenDate'] = pd.to_datetime(df['issueOpenDate'])
-            
-            # Filtros de data
-            if start_date:
-                df = df[df['timestamp'] >= start_date]
-            if end_date:
-                df = df[df['timestamp'] <= end_date]
+            # Conversão de tipos com tratamento de erro
+            try:
+                if 'timestamp' in df.columns:
+                    df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+                if 'issueOpenDate' in df.columns:
+                    df['issueOpenDate'] = pd.to_datetime(df['issueOpenDate'], errors='coerce')
+                
+                # Filtros de data
+                if start_date and 'timestamp' in df.columns:
+                    start_dt = pd.to_datetime(start_date)
+                    df = df[df['timestamp'] >= start_dt]
+                if end_date and 'timestamp' in df.columns:
+                    end_dt = pd.to_datetime(end_date)
+                    df = df[df['timestamp'] <= end_dt]
+                    
+            except Exception as e:
+                logger.warning(f"Erro na conversão de datas: {e}")
                 
         return df
     
@@ -84,22 +102,33 @@ class FleetDataConnector:
             params['enterpriseId'] = enterprise_id
             
         data = self._make_request('/alerts-checkin', params)
+        
+        if not data:
+            return pd.DataFrame()
+            
         df = pd.DataFrame(data)
         
         if not df.empty:
-            # Conversão de tipos
-            df['timestamp'] = pd.to_datetime(df['timestamp'])
-            
-            # Extração de coordenadas
-            if 'location' in df.columns:
-                df['latitude'] = df['location'].apply(lambda x: x.get('latitude') if isinstance(x, dict) else None)
-                df['longitude'] = df['location'].apply(lambda x: x.get('longitude') if isinstance(x, dict) else None)
-            
-            # Filtros de data
-            if start_date:
-                df = df[df['timestamp'] >= start_date]
-            if end_date:
-                df = df[df['timestamp'] <= end_date]
+            try:
+                # Conversão de tipos
+                if 'timestamp' in df.columns:
+                    df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+                
+                # Extração de coordenadas se existir
+                if 'location' in df.columns:
+                    df['latitude'] = df['location'].apply(lambda x: x.get('latitude') if isinstance(x, dict) else None)
+                    df['longitude'] = df['location'].apply(lambda x: x.get('longitude') if isinstance(x, dict) else None)
+                
+                # Filtros de data
+                if start_date and 'timestamp' in df.columns:
+                    start_dt = pd.to_datetime(start_date)
+                    df = df[df['timestamp'] >= start_dt]
+                if end_date and 'timestamp' in df.columns:
+                    end_dt = pd.to_datetime(end_date)
+                    df = df[df['timestamp'] <= end_dt]
+                    
+            except Exception as e:
+                logger.warning(f"Erro no processamento de alertas: {e}")
                 
         return df
     
@@ -111,38 +140,27 @@ class FleetDataConnector:
             params['enterpriseId'] = enterprise_id
             
         data = self._make_request('/driver-trips', params)
+        
+        if not data:
+            return pd.DataFrame()
+            
         df = pd.DataFrame(data)
         
-        if not df.empty and start_date:
-            # Assumindo que existe campo de timestamp
-            if 'timestamp' in df.columns:
-                df['timestamp'] = pd.to_datetime(df['timestamp'])
-                if start_date:
-                    df = df[df['timestamp'] >= start_date]
-                if end_date:
-                    df = df[df['timestamp'] <= end_date]
+        if not df.empty:
+            try:
+                # Assumindo que existe campo de timestamp
+                if 'timestamp' in df.columns:
+                    df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+                    if start_date:
+                        start_dt = pd.to_datetime(start_date)
+                        df = df[df['timestamp'] >= start_dt]
+                    if end_date:
+                        end_dt = pd.to_datetime(end_date)
+                        df = df[df['timestamp'] <= end_dt]
+                        
+            except Exception as e:
+                logger.warning(f"Erro no processamento de viagens: {e}")
                     
-        return df
-    
-    def get_incidents_data(self, enterprise_id: str = None,
-                          start_date: str = None, end_date: str = None) -> pd.DataFrame:
-        """Obtém dados de incidentes"""
-        params = {}
-        if enterprise_id:
-            params['enterpriseId'] = enterprise_id
-            
-        data = self._make_request('/incidents', params)
-        df = pd.DataFrame(data)
-        
-        if not df.empty and 'timestamp' in df.columns:
-            df['timestamp'] = pd.to_datetime(df['timestamp'])
-            
-            # Filtros de data
-            if start_date:
-                df = df[df['timestamp'] >= start_date]
-            if end_date:
-                df = df[df['timestamp'] <= end_date]
-                
         return df
 
 class FleetDataProcessor:
@@ -153,152 +171,242 @@ class FleetDataProcessor:
         
     def get_checklist_summary(self, enterprise_id: str = None, days: int = 7) -> Dict[str, Any]:
         """Gera resumo de checklists"""
-        end_date = datetime.now()
-        start_date = end_date - timedelta(days=days)
-        
-        df = self.connector.get_checklist_data(
-            enterprise_id=enterprise_id,
-            start_date=start_date.isoformat(),
-            end_date=end_date.isoformat()
-        )
-        
-        if df.empty:
-            return {"total": 0, "compliant": 0, "non_compliant": 0, "compliance_rate": 0}
-        
-        # Calcular métricas de conformidade
-        if 'noCompliant' in df.columns:
-            # Usar a coluna noCompliant (True = não conforme, False = conforme)
-            compliant = len(df[df['noCompliant'] == False])
-            non_compliant = len(df[df['noCompliant'] == True])
-        else:
-            # Fallback se não houver coluna de conformidade
-            compliant = len(df)
-            non_compliant = 0
-        
-        total = len(df)
-        compliance_rate = (compliant / total * 100) if total > 0 else 0
-        
-        return {
-            "total": total,
-            "compliant": compliant,
-            "non_compliant": non_compliant,
-            "compliance_rate": round(compliance_rate, 2),
-            "period_days": days,
-            "vehicles": df['vehiclePlate'].nunique() if 'vehiclePlate' in df.columns else 0,
-            "drivers": df['driverName'].nunique() if 'driverName' in df.columns else 0
-        }
+        try:
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=days)
+            
+            df = self.connector.get_checklist_data(
+                enterprise_id=enterprise_id,
+                start_date=start_date.isoformat(),
+                end_date=end_date.isoformat()
+            )
+            
+            if df.empty:
+                return {
+                    "total": 0, 
+                    "compliant": 0, 
+                    "non_compliant": 0, 
+                    "compliance_rate": 0,
+                    "period_days": days,
+                    "vehicles": 0,
+                    "drivers": 0
+                }
+            
+            # Calcular métricas de conformidade baseado na estrutura real
+            total = len(df)
+            
+            # Verificar diferentes campos de conformidade
+            if 'noCompliant' in df.columns:
+                # noCompliant: True = não conforme, False = conforme
+                non_compliant = len(df[df['noCompliant'] == True])
+                compliant = total - non_compliant
+            elif 'compliant' in df.columns:
+                # compliant: True = conforme, False = não conforme
+                compliant = len(df[df['compliant'] == True])
+                non_compliant = total - compliant
+            else:
+                # Se não há campo de conformidade, assumir todos conformes
+                compliant = total
+                non_compliant = 0
+            
+            compliance_rate = (compliant / total * 100) if total > 0 else 0
+            
+            # Contar veículos e motoristas únicos
+            vehicles = df['vehiclePlate'].nunique() if 'vehiclePlate' in df.columns else 0
+            drivers = df['driverName'].nunique() if 'driverName' in df.columns and df['driverName'].notna().any() else 0
+            
+            return {
+                "total": total,
+                "compliant": compliant,
+                "non_compliant": non_compliant,
+                "compliance_rate": round(compliance_rate, 2),
+                "period_days": days,
+                "vehicles": vehicles,
+                "drivers": drivers
+            }
+            
+        except Exception as e:
+            logger.error(f"Erro ao gerar resumo de checklist: {e}")
+            return {
+                "total": 0, 
+                "compliant": 0, 
+                "non_compliant": 0, 
+                "compliance_rate": 0,
+                "period_days": days,
+                "vehicles": 0,
+                "drivers": 0,
+                "error": str(e)
+            }
     
-    def get_vehicle_performance(self, enterprise_id: str = None, days: int = 30) -> pd.DataFrame:
+    def get_vehicle_performance(self, enterprise_id: str = None, days: int = 30) -> List[Dict[str, Any]]:
         """Análise de performance por veículo"""
-        end_date = datetime.now()
-        start_date = end_date - timedelta(days=days)
-        
-        # Dados de checklist
-        checklist_df = self.connector.get_checklist_data(
-            enterprise_id=enterprise_id,
-            start_date=start_date.isoformat(),
-            end_date=end_date.isoformat()
-        )
-        
-        # Dados de telemática
-        telemetry_df = self.connector.get_alerts_checkin_data(
-            enterprise_id=enterprise_id,
-            start_date=start_date.isoformat(),
-            end_date=end_date.isoformat()
-        )
-        
-        performance_data = []
-        
-        if not checklist_df.empty:
+        try:
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=days)
+            
+            # Dados de checklist
+            checklist_df = self.connector.get_checklist_data(
+                enterprise_id=enterprise_id,
+                start_date=start_date.isoformat(),
+                end_date=end_date.isoformat()
+            )
+            
+            if checklist_df.empty:
+                return []
+            
+            performance_data = []
+            
             # Análise por veículo
             for vehicle in checklist_df['vehiclePlate'].unique():
+                if pd.isna(vehicle):
+                    continue
+                    
                 vehicle_data = checklist_df[checklist_df['vehiclePlate'] == vehicle]
                 
                 # Métricas de checklist
                 total_checks = len(vehicle_data)
-                compliant_checks = len(vehicle_data[vehicle_data['noCompliant'] == False]) if 'noCompliant' in vehicle_data.columns else len(vehicle_data)
+                
+                # Calcular conformidade
+                if 'noCompliant' in vehicle_data.columns:
+                    compliant_checks = len(vehicle_data[vehicle_data['noCompliant'] == False])
+                elif 'compliant' in vehicle_data.columns:
+                    compliant_checks = len(vehicle_data[vehicle_data['compliant'] == True])
+                else:
+                    compliant_checks = total_checks
+                
                 compliance_rate = (compliant_checks / total_checks * 100) if total_checks > 0 else 0
                 
-                # Dados de telemática para o veículo
-                vehicle_telemetry = telemetry_df[telemetry_df['vehiclePlate'] == vehicle] if not telemetry_df.empty else pd.DataFrame()
+                # Última atividade
+                last_check = vehicle_data['timestamp'].max() if 'timestamp' in vehicle_data.columns else None
                 
-                avg_temp = vehicle_telemetry['temperature'].mean() if not vehicle_telemetry.empty and 'temperature' in vehicle_telemetry.columns else None
-                avg_humidity = vehicle_telemetry['humidity'].mean() if not vehicle_telemetry.empty and 'humidity' in vehicle_telemetry.columns else None
-                total_distance = vehicle_telemetry['distance'].sum() if not vehicle_telemetry.empty and 'distance' in vehicle_telemetry.columns else None
+                # Itens mais verificados
+                top_items = []
+                if 'itemName' in vehicle_data.columns:
+                    item_counts = vehicle_data['itemName'].value_counts().head(3)
+                    top_items = [{"item": item, "count": count} for item, count in item_counts.items()]
                 
                 performance_data.append({
                     'vehicle_plate': vehicle,
                     'total_checks': total_checks,
                     'compliance_rate': round(compliance_rate, 2),
-                    'avg_temperature': round(avg_temp, 2) if avg_temp else None,
-                    'avg_humidity': round(avg_humidity, 2) if avg_humidity else None,
-                    'total_distance': total_distance,
-                    'last_check': vehicle_data['timestamp'].max()
+                    'last_check': last_check.isoformat() if last_check and pd.notna(last_check) else None,
+                    'top_items': top_items,
+                    'status': 'active' if total_checks > 0 else 'inactive'
                 })
-        
-        return pd.DataFrame(performance_data)
+            
+            # Ordenar por taxa de conformidade
+            performance_data.sort(key=lambda x: x['compliance_rate'], reverse=True)
+            return performance_data
+            
+        except Exception as e:
+            logger.error(f"Erro ao analisar performance de veículos: {e}")
+            return []
     
-    def get_driver_performance(self, enterprise_id: str = None, days: int = 30) -> pd.DataFrame:
+    def get_driver_performance(self, enterprise_id: str = None, days: int = 30) -> List[Dict[str, Any]]:
         """Análise de performance por motorista"""
-        end_date = datetime.now()
-        start_date = end_date - timedelta(days=days)
-        
-        checklist_df = self.connector.get_checklist_data(
-            enterprise_id=enterprise_id,
-            start_date=start_date.isoformat(),
-            end_date=end_date.isoformat()
-        )
-        
-        if checklist_df.empty:
-            return pd.DataFrame()
-        
-        driver_performance = []
-        
-        for driver in checklist_df['driverName'].unique():
-            driver_data = checklist_df[checklist_df['driverName'] == driver]
+        try:
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=days)
             
-            total_checks = len(driver_data)
-            compliant_checks = len(driver_data[driver_data['noCompliant'] == False]) if 'noCompliant' in driver_data.columns else len(driver_data)
-            compliance_rate = (compliant_checks / total_checks * 100) if total_checks > 0 else 0
+            checklist_df = self.connector.get_checklist_data(
+                enterprise_id=enterprise_id,
+                start_date=start_date.isoformat(),
+                end_date=end_date.isoformat()
+            )
             
-            vehicles_operated = driver_data['vehiclePlate'].nunique()
+            if checklist_df.empty or 'driverName' not in checklist_df.columns:
+                return []
             
-            driver_performance.append({
-                'driver_name': driver,
-                'total_checks': total_checks,
-                'compliance_rate': round(compliance_rate, 2),
-                'vehicles_operated': vehicles_operated,
-                'last_activity': driver_data['timestamp'].max()
-            })
-        
-        return pd.DataFrame(driver_performance).sort_values('compliance_rate', ascending=False)
+            driver_performance = []
+            
+            for driver in checklist_df['driverName'].unique():
+                if pd.isna(driver) or driver == "":
+                    continue
+                    
+                driver_data = checklist_df[checklist_df['driverName'] == driver]
+                
+                total_checks = len(driver_data)
+                
+                # Calcular conformidade
+                if 'noCompliant' in driver_data.columns:
+                    compliant_checks = len(driver_data[driver_data['noCompliant'] == False])
+                elif 'compliant' in driver_data.columns:
+                    compliant_checks = len(driver_data[driver_data['compliant'] == True])
+                else:
+                    compliant_checks = total_checks
+                
+                compliance_rate = (compliant_checks / total_checks * 100) if total_checks > 0 else 0
+                
+                vehicles_operated = driver_data['vehiclePlate'].nunique() if 'vehiclePlate' in driver_data.columns else 0
+                last_activity = driver_data['timestamp'].max() if 'timestamp' in driver_data.columns else None
+                
+                driver_performance.append({
+                    'driver_name': driver,
+                    'total_checks': total_checks,
+                    'compliance_rate': round(compliance_rate, 2),
+                    'vehicles_operated': vehicles_operated,
+                    'last_activity': last_activity.isoformat() if last_activity and pd.notna(last_activity) else None
+                })
+            
+            # Ordenar por taxa de conformidade
+            driver_performance.sort(key=lambda x: x['compliance_rate'], reverse=True)
+            return driver_performance
+            
+        except Exception as e:
+            logger.error(f"Erro ao analisar performance de motoristas: {e}")
+            return []
     
     def get_maintenance_alerts(self, enterprise_id: str = None) -> List[Dict[str, Any]]:
         """Identifica alertas de manutenção baseados nos dados"""
-        checklist_df = self.connector.get_checklist_data(enterprise_id=enterprise_id)
-        
-        if checklist_df.empty:
-            return []
-        
-        alerts = []
-        
-        # Veículos com muitas não conformidades
-        non_compliant = checklist_df[checklist_df['compliant'] == False]
-        
-        if not non_compliant.empty:
-            vehicle_issues = non_compliant.groupby('vehiclePlate').size().sort_values(ascending=False)
+        try:
+            checklist_df = self.connector.get_checklist_data(enterprise_id=enterprise_id)
             
-            for vehicle, count in vehicle_issues.head(5).items():
-                if count >= 3:  # Threshold para alerta
-                    alerts.append({
-                        'type': 'maintenance_required',
-                        'vehicle': vehicle,
-                        'issue_count': count,
-                        'priority': 'high' if count >= 5 else 'medium',
-                        'message': f'Veículo {vehicle} tem {count} não conformidades recentes'
-                    })
-        
-        return alerts
+            if checklist_df.empty:
+                return []
+            
+            alerts = []
+            
+            # Veículos com muitas não conformidades
+            if 'noCompliant' in checklist_df.columns:
+                non_compliant = checklist_df[checklist_df['noCompliant'] == True]
+            elif 'compliant' in checklist_df.columns:
+                non_compliant = checklist_df[checklist_df['compliant'] == False]
+            else:
+                non_compliant = pd.DataFrame()
+            
+            if not non_compliant.empty and 'vehiclePlate' in non_compliant.columns:
+                vehicle_issues = non_compliant.groupby('vehiclePlate').size().sort_values(ascending=False)
+                
+                for vehicle, count in vehicle_issues.head(5).items():
+                    if count >= 2:  # Threshold reduzido para alerta
+                        priority = 'high' if count >= 3 else 'medium'
+                        alerts.append({
+                            'type': 'maintenance_required',
+                            'vehicle': vehicle,
+                            'issue_count': int(count),
+                            'priority': priority,
+                            'message': f'Veículo {vehicle} tem {count} não conformidades recentes'
+                        })
+            
+            # Alertas de itens específicos
+            if 'itemName' in checklist_df.columns and 'noCompliant' in checklist_df.columns:
+                critical_items = checklist_df[checklist_df['noCompliant'] == True]['itemName'].value_counts()
+                
+                for item, count in critical_items.head(3).items():
+                    if count >= 2:
+                        alerts.append({
+                            'type': 'item_alert',
+                            'item': item,
+                            'issue_count': int(count),
+                            'priority': 'medium',
+                            'message': f'Item "{item}" apresenta {count} não conformidades'
+                        })
+            
+            return alerts
+            
+        except Exception as e:
+            logger.error(f"Erro ao gerar alertas de manutenção: {e}")
+            return []
 
 if __name__ == "__main__":
     # Teste básico do módulo
@@ -307,20 +415,25 @@ if __name__ == "__main__":
     
     # Teste de conexão
     try:
-        summary = processor.get_checklist_summary(days=30)
+        test_enterprise_id = "sA9EmrE3ymtnBqJKcYn7"
+        
+        summary = processor.get_checklist_summary(enterprise_id=test_enterprise_id, days=30)
         print("Resumo de Checklists (últimos 30 dias):")
         print(json.dumps(summary, indent=2, default=str))
         
-        vehicle_perf = processor.get_vehicle_performance(days=30)
-        if not vehicle_perf.empty:
-            print("\nTop 5 Veículos por Performance:")
-            print(vehicle_perf.head().to_string(index=False))
+        vehicle_perf = processor.get_vehicle_performance(enterprise_id=test_enterprise_id, days=30)
+        if vehicle_perf:
+            print(f"\nPerformance de Veículos ({len(vehicle_perf)} veículos):")
+            for vehicle in vehicle_perf[:3]:  # Top 3
+                print(f"- {vehicle['vehicle_plate']}: {vehicle['compliance_rate']}% conformidade")
         
-        alerts = processor.get_maintenance_alerts()
+        alerts = processor.get_maintenance_alerts(enterprise_id=test_enterprise_id)
         if alerts:
-            print("\nAlertas de Manutenção:")
+            print(f"\nAlertas de Manutenção ({len(alerts)} alertas):")
             for alert in alerts:
                 print(f"- {alert['message']} (Prioridade: {alert['priority']})")
+        else:
+            print("\nNenhum alerta de manutenção encontrado.")
                 
     except Exception as e:
         logger.error(f"Erro no teste: {e}")
