@@ -796,9 +796,18 @@
             container.appendChild(actionsCol);
         }
 
+        // Mapeamento de collections para rotas da API Firebase BI
+        const API_ROUTES = {
+            'checklist': 'checklist',
+            'trips': 'driver-trips', 
+            'alerts': 'alerts-checkin',
+            'maintenance': 'incidents'
+        };
+
         // Buscar dados da collection
         async function fetchCollectionData(collection) {
-            const url = `${CONFIG.API_BASE_URL}/copilot/${collection}?enterpriseId=${CONFIG.ENTERPRISE_ID}&days=${CONFIG.DAYS}`;
+            const apiRoute = API_ROUTES[collection] || collection;
+            const url = `${CONFIG.API_BASE_URL}/${apiRoute}?enterpriseId=${CONFIG.ENTERPRISE_ID}&days=${CONFIG.DAYS}`;
             
             console.log('🔗 Fazendo requisição para:', url);
             
