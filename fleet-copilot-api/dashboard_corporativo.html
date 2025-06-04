@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Copilot BI - Enterprise Dashboard</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        /* Reset e Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Variáveis CSS - Paleta Corporativa */
+        :root {
+            --primary: #1abc9c;
+            --primary-dark: #16a085;
+            --primary-light: #48c9b0;
+            --background: #14181B;
+            --surface: #7F57636C;
+            --surface-light: rgba(127, 87, 99, 0.8);
+            --surface-dark: rgba(127, 87, 99, 0.9);
+            --text-primary: #ffffff;
+            --text-secondary: #e0e0e0;
+            --text-muted: #b0b0b0;
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --info: #3498db;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --card-hover: rgba(127, 87, 99, 0.9);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Layout Principal - Sem Header */
+        .app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+        }
+
+        /* Container Principal */
+        .main {
+            flex: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Navigation Grid - Ícones Profissionais */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .nav-item {
+            background: var(--surface);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(26, 188, 156, 0.1), rgba(22, 160, 133, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-6px);
+            box-shadow: 0 15px 40px rgba(26, 188, 156, 0.2);
+            background: var(--card-hover);
+        }
+
+        .nav-item:hover::before {
+            opacity: 1;
+        }
+
+        .nav-item.active {
+            border-color: var(--primary);
+            background: var(--surface-dark);
+            box-shadow: 0 8px 25px rgba(26, 188, 156, 0.3);
+        }
+
+        .nav-item.active::before {
+            opacity: 1;
+        }
+
+        /* Ícones Profissionais SVG */
+        .nav-icon {
+            width: 4.5rem;
+            height: 4.5rem;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .nav-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: var(--primary);
+            filter: drop-shadow(0 4px 8px rgba(26, 188, 156, 0.3));
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover .nav-icon svg {
+            fill: #ffffff;
+            transform: scale(1.1);
+        }
+
+        .nav-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            position: relative;
+            z-index: 2;
+        }
+
+        .nav-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Content Area */
+        .content {
+            background: var(--surface);
+            border-radius: 16px;
+            min-height: 600px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .content-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 2rem 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .content-header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .content-icon {
+            font-size: 2rem;
+        }
+
+        .content-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .content-body {
+            padding: 2.5rem;
+        }
+
+        /* Filters Section */
+        .filters-section {
+            background: var(--background);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .filters-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .filters-title::before {
+            content: '';
+            width: 24px;
+            height: 24px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%231abc9c' viewBox='0 0 24 24'%3E%3Cpath d='M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z'/%3E%3C/svg%3E") no-repeat center;
+            background-size: contain;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .filter-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .filter-input {
+            padding: 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.2);
+            background: var(--surface-light);
+        }
+
+        .filter-button {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .filter-button:hover {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(26, 188, 156, 0.3);
+        }
+
+        .clear-filters {
+            background: linear-gradient(135deg, var(--danger), #c0392b);
+        }
+
+        .clear-filters:hover {
+            background: linear-gradient(135deg, #c0392b, var(--danger));
+        }
+
+        /* Tabs */
+        .tabs-container {
+            margin-bottom: 2.5rem;
+        }
+
+        .tabs-nav {
+            display: flex;
+            background: var(--background);
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 12px rgba(26, 188, 156, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .chart-card {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 280px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.025em;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Data Table */
+        .data-table {
+            background: var(--background);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .table-header {
+            background: var(--surface-dark);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .export-btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(26, 188, 156, 0.3);
+        }
+
+        .export-btn.excel {
+            background: linear-gradient(135deg, var(--success), #229954);
+        }
+
+        .export-btn.excel:hover {
+            box-shadow: 0 6px 16px rgba(39, 174, 96, 0.3);
+        }
+
+        .export-btn.pdf {
+            background: linear-gradient(135deg, var(--danger), #c0392b);
+        }
+
+        .export-btn.pdf:hover {
+            box-shadow: 0 6px 16px rgba(231, 76, 60, 0.3);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            background: var(--surface);
+            color: var(--text-primary);
+            font-weight: 700;
+            padding: 1.25rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.85rem;
+        }
+
+        .table td {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .table tr:hover {
+            background: rgba(26, 188, 156, 0.08);
+        }
+
+        /* Status Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .badge-success { 
+            background: linear-gradient(135deg, var(--success), #229954); 
+            color: white; 
+        }
+        .badge-warning { 
+            background: linear-gradient(135deg, var(--warning), #e67e22); 
+            color: white; 
+        }
+        .badge-danger { 
+            background: linear-gradient(135deg, var(--danger), #c0392b); 
+            color: white; 
+        }
+        .badge-info { 
+            background: linear-gradient(135deg, var(--info), #2980b9); 
+            color: white; 
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 4rem;
+            height: 4rem;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 2rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Welcome State */
+        .welcome {
+            text-align: center;
+            padding: 5rem 2rem;
+        }
+
+        .welcome-icon {
+            font-size: 5rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            letter-spacing: -0.025em;
+        }
+
+        .welcome-description {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            font-weight: 500;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app {
+                padding: 1rem;
+            }
+
+            .nav-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .content-body {
+                padding: 1.5rem;
+            }
+
+            .tabs-nav {
+                flex-direction: column;
+            }
+
+            .export-buttons {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table th,
+            .table td {
+                padding: 1rem 0.75rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-muted { color: var(--text-muted); }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 1.5rem; }
+        .hidden { display: none; }
+
+        /* Professional Icons */
+        .icon-checklist {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%231abc9c' viewBox='0 0 24 24'%3E%3Cpath d='M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z'/%3E%3C/svg%3E") no-repeat center;
+        }
+
+        .icon-trips {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%231abc9c' viewBox='0 0 24 24'%3E%3Cpath d='M18,18.5A1.5,1.5 0 0,1 16.5,17A1.5,1.5 0 0,1 18,15.5A1.5,1.5 0 0,1 19.5,17A1.5,1.5 0 0,1 18,18.5M19.5,9.5L21.46,12H17V9.5M6,18.5A1.5,1.5 0 0,1 4.5,17A1.5,1.5 0 0,1 6,15.5A1.5,1.5 0 0,1 7.5,17A1.5,1.5 0 0,1 6,18.5M20,8H17V4H3C1.89,4 1,4.89 1,6V17H3A3,3 0 0,0 6,20A3,3 0 0,0 9,17H15A3,3 0 0,0 18,20A3,3 0 0,0 21,17H23V12L20,8Z'/%3E%3C/svg%3E") no-repeat center;
+        }
+
+        .icon-alerts {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%231abc9c' viewBox='0 0 24 24'%3E%3Cpath d='M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z'/%3E%3C/svg%3E") no-repeat center;
+        }
+
+        .icon-maintenance {
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%231abc9c' viewBox='0 0 24 24'%3E%3Cpath d='M22.7,19L13.6,9.9C14.5,7.6 14,4.9 12.1,3C10.1,1 7.1,0.6 4.7,1.7L9,6L6,9L1.6,4.7C0.4,7.1 0.9,10.1 2.9,12.1C4.8,14 7.5,14.5 9.8,13.6L18.9,22.7C19.3,23.1 19.9,23.1 20.3,22.7L22.6,20.4C23.1,20 23.1,19.3 22.7,19Z'/%3E%3C/svg%3E") no-repeat center;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Main Content - Sem Header -->
+        <main class="main">
+            <!-- Navigation Grid com Ícones Profissionais -->
+            <section class="nav-grid">
+                <div class="nav-item" data-collection="checklist">
+                    <div class="nav-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z M8,12V14H16V12H8M8,16V18H13V16H8Z"/>
+                        </svg>
+                    </div>
+                    <div class="nav-title">Checklist</div>
+                    <div class="nav-description">Auditoria e Conformidade</div>
+                </div>
+                
+                <div class="nav-item" data-collection="trips">
+                    <div class="nav-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M18,18.5A1.5,1.5 0 0,1 16.5,17A1.5,1.5 0 0,1 18,15.5A1.5,1.5 0 0,1 19.5,17A1.5,1.5 0 0,1 18,18.5M19.5,9.5L21.46,12H17V9.5M6,18.5A1.5,1.5 0 0,1 4.5,17A1.5,1.5 0 0,1 6,15.5A1.5,1.5 0 0,1 7.5,17A1.5,1.5 0 0,1 6,18.5M20,8H17V4H3C1.89,4 1,4.89 1,6V17H3A3,3 0 0,0 6,20A3,3 0 0,0 9,17H15A3,3 0 0,0 18,20A3,3 0 0,0 21,17H23V12L20,8Z"/>
+                        </svg>
+                    </div>
+                    <div class="nav-title">Viagens</div>
+                    <div class="nav-description">Logística e Rotas</div>
+                </div>
+                
+                <div class="nav-item" data-collection="alerts">
+                    <div class="nav-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                        </svg>
+                    </div>
+                    <div class="nav-title">Alertas</div>
+                    <div class="nav-description">Monitoramento e Segurança</div>
+                </div>
+                
+                <div class="nav-item" data-collection="maintenance">
+                    <div class="nav-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M22.7,19L13.6,9.9C14.5,7.6 14,4.9 12.1,3C10.1,1 7.1,0.6 4.7,1.7L9,6L6,9L1.6,4.7C0.4,7.1 0.9,10.1 2.9,12.1C4.8,14 7.5,14.5 9.8,13.6L18.9,22.7C19.3,23.1 19.9,23.1 20.3,22.7L22.6,20.4C23.1,20 23.1,19.3 22.7,19Z"/>
+                        </svg>
+                    </div>
+                    <div class="nav-title">Manutenção</div>
+                    <div class="nav-description">Engenharia e Serviços</div>
+                </div>
+            </section>
+
+            <!-- Content Area -->
+            <section class="content">
+                <div id="app-content">
+                    <div class="welcome">
+                        <div class="welcome-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="#1abc9c">
+                                <path d="M18,18.5A1.5,1.5 0 0,1 16.5,17A1.5,1.5 0 0,1 18,15.5A1.5,1.5 0 0,1 19.5,17A1.5,1.5 0 0,1 18,18.5M19.5,9.5L21.46,12H17V9.5M6,18.5A1.5,1.5 0 0,1 4.5,17A1.5,1.5 0 0,1 6,15.5A1.5,1.5 0 0,1 7.5,17A1.5,1.5 0 0,1 6,18.5M20,8H17V4H3C1.89,4 1,4.89 1,6V17H3A3,3 0 0,0 6,20A3,3 0 0,0 9,17H15A3,3 0 0,0 18,20A3,3 0 0,0 21,17H23V12L20,8Z"/>
+                            </svg>
+                        </div>
+                        <h1 class="welcome-title">Fleet Copilot BI</h1>
+                        <p class="welcome-description">
+                            Plataforma Enterprise de Business Intelligence para gestão avançada de frotas. 
+                            Selecione um módulo para acessar análises detalhadas e relatórios corporativos.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Configuração Global
+        const CONFIG = {
+            API_BASE_URL: 'https://firebase-bi-api.onrender.com',
+            ENTERPRISE_ID: new URLSearchParams(window.location.search).get('enterpriseId') || 'sA9EmrE3ymtnBqJKcYn7',
+            DAYS: parseInt(new URLSearchParams(window.location.search).get('days')) || 30
+        };
+
+        // Mapeamento de Rotas da API
+        const API_ROUTES = {
+            checklist: 'checklist',
+            trips: 'driver-trips',
+            alerts: 'alerts-checkin',
+            maintenance: 'incidents'
+        };
+
+        // Estado da Aplicação
+        let currentCollection = null;
+        let currentData = null;
+        let filteredData = null;
+        let currentFilters = {};
+        let charts = {};
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Fleet Copilot BI Enterprise - Inicializando');
+            console.log('🎨 Design: Corporativo com paleta profissional');
+            console.log('🔧 Configurações:', CONFIG);
+            
+            initializeApp();
+        });
+
+        // Inicializar Aplicação
+        function initializeApp() {
+            // Event listeners para navegação
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const collection = this.dataset.collection;
+                    selectCollection(collection);
+                });
+            });
+
+            console.log('✅ Aplicação Enterprise inicializada com sucesso');
+        }
+
+        // Selecionar Collection
+        function selectCollection(collection) {
+            console.log(`📊 Selecionando módulo: ${collection}`);
+            
+            // Atualizar estado visual
+            updateNavigationState(collection);
+            
+            // Carregar dados
+            loadCollectionData(collection);
+        }
+
+        // Atualizar Estado da Navegação
+        function updateNavigationState(collection) {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const activeItem = document.querySelector(`[data-collection="${collection}"]`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+            }
+        }
+
+        // Carregar Dados da Collection
+        async function loadCollectionData(collection) {
+            currentCollection = collection;
+            
+            try {
+                // Mostrar loading
+                showLoading(collection);
+                
+                // Buscar dados
+                const data = await fetchData(collection);
+                currentData = data;
+                filteredData = data;
+                currentFilters = {};
+                
+                // Renderizar interface específica
+                if (collection === 'checklist') {
+                    renderChecklistInterface(data);
+                } else {
+                    renderBasicInterface(collection, data);
+                }
+                
+                console.log(`✅ Dados de ${collection} carregados: ${data.length} registros`);
+                
+            } catch (error) {
+                console.error(`❌ Erro ao carregar ${collection}:`, error);
+                showError(error.message);
+            }
+        }
+
+        // Buscar Dados da API
+        async function fetchData(collection) {
+            const route = API_ROUTES[collection];
+            const url = `${CONFIG.API_BASE_URL}/${route}?enterpriseId=${CONFIG.ENTERPRISE_ID}&days=${CONFIG.DAYS}`;
+            
+            console.log(`🔗 Requisição Enterprise: ${url}`);
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            
+            // Normalizar resposta
+            if (Array.isArray(result)) {
+                return result;
+            } else if (result && result.data) {
+                return Array.isArray(result.data) ? result.data : [result.data];
+            } else if (result && typeof result === 'object') {
+                return [result];
+            } else {
+                throw new Error('Formato de dados inválido');
+            }
+        }
+
+        // Mostrar Loading
+        function showLoading(collection) {
+            const content = document.getElementById('app-content');
+            const icon = getCollectionIcon(collection);
+            content.innerHTML = `
+                <div class="content-header">
+                    <div class="content-header-left">
+                        <div class="content-icon">${icon}</div>
+                        <div class="content-title">Carregando ${getCollectionTitle(collection)}...</div>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">Processando dados corporativos...</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Mostrar Erro
+        function showError(message) {
+            const content = document.getElementById('app-content');
+            content.innerHTML = `
+                <div class="content-body">
+                    <div class="error">
+                        <div class="error-icon">⚠️</div>
+                        <div class="error-title">Erro no Sistema Enterprise</div>
+                        <div class="error-message">${message}</div>
+                        <button class="filter-button" onclick="location.reload()">
+                            🔄 Reconectar Sistema
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Renderizar Interface do Checklist (Avançada)
+        function renderChecklistInterface(data) {
+            const content = document.getElementById('app-content');
+            content.innerHTML = `
+                <div class="content-header">
+                    <div class="content-header-left">
+                        <div class="content-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
+                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z M8,12V14H16V12H8M8,16V18H13V16H8Z"/>
+                            </svg>
+                        </div>
+                        <div class="content-title">Auditoria e Conformidade</div>
+                    </div>
+                </div>
+                <div class="content-body">
+                    ${renderFiltersSection()}
+                    ${renderStatsGrid(data)}
+                    ${renderTabsContainer()}
+                </div>
+            `;
+
+            // Inicializar funcionalidades
+            initializeFilters();
+            initializeTabs();
+            updateTabsContent(data);
+        }
+
+        // Renderizar Seção de Filtros
+        function renderFiltersSection() {
+            return `
+                <div class="filters-section">
+                    <div class="filters-title">
+                        Filtros de Análise Corporativa
+                    </div>
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label class="filter-label">Data Inicial</label>
+                            <input type="date" class="filter-input" id="filter-date-start">
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Data Final</label>
+                            <input type="date" class="filter-input" id="filter-date-end">
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Garagem</label>
+                            <select class="filter-input" id="filter-garage">
+                                <option value="">Todas as Unidades</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Filial</label>
+                            <select class="filter-input" id="filter-branch">
+                                <option value="">Todas as Filiais</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Responsável</label>
+                            <select class="filter-input" id="filter-driver">
+                                <option value="">Todos os Responsáveis</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Placa do Veículo</label>
+                            <input type="text" class="filter-input" id="filter-plate" placeholder="Digite a placa">
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Tipo de Ativo</label>
+                            <select class="filter-input" id="filter-asset-type">
+                                <option value="">Todos os Tipos</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <button class="filter-button" onclick="applyFilters()">
+                                Aplicar Análise
+                            </button>
+                        </div>
+                        <div class="filter-group">
+                            <button class="filter-button clear-filters" onclick="clearFilters()">
+                                Limpar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Renderizar Grid de Estatísticas
+        function renderStatsGrid(data) {
+            const stats = calculateChecklistStats(data);
+            
+            return `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.total}</div>
+                        <div class="stat-label">Total de Registros</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.conforme}</div>
+                        <div class="stat-label">Em Conformidade</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.pendente}</div>
+                        <div class="stat-label">Pendentes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.percentual}%</div>
+                        <div class="stat-label">Taxa de Conformidade</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Renderizar Container de Abas
+        function renderTabsContainer() {
+            return `
+                <div class="tabs-container">
+                    <div class="tabs-nav">
+                        <button class="tab-button active" data-tab="assets">Inventário de Ativos</button>
+                        <button class="tab-button" data-tab="status">Análise por Status</button>
+                        <button class="tab-button" data-tab="non-compliant">Não Conformidades</button>
+                    </div>
+                    
+                    <div class="tab-content active" id="tab-assets">
+                        <div id="assets-content"></div>
+                    </div>
+                    
+                    <div class="tab-content" id="tab-status">
+                        <div id="status-content"></div>
+                    </div>
+                    
+                    <div class="tab-content" id="tab-non-compliant">
+                        <div id="non-compliant-content"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Calcular Estatísticas do Checklist
+        function calculateChecklistStats(data) {
+            const total = data.length;
+            const conforme = data.filter(item => 
+                item.noCompliant === true || 
+                item.statusOs === 'Finalizado' ||
+                item.statusOs === 'Conforme'
+            ).length;
+            const pendente = total - conforme;
+            const percentual = total > 0 ? Math.round((conforme / total) * 100) : 0;
+            
+            return { total, conforme, pendente, percentual };
+        }
+
+        // Inicializar Filtros
+        function initializeFilters() {
+            if (!currentData) return;
+            
+            // Popular dropdowns com valores únicos dos dados
+            populateFilterOptions('filter-garage', 'garage');
+            populateFilterOptions('filter-branch', 'branch');
+            populateFilterOptions('filter-driver', 'assignedTo');
+            populateFilterOptions('filter-asset-type', 'planName');
+            
+            // Definir datas padrão
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+            
+            document.getElementById('filter-date-start').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('filter-date-end').value = today.toISOString().split('T')[0];
+        }
+
+        // Popular Opções dos Filtros
+        function populateFilterOptions(selectId, field) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            
+            const uniqueValues = [...new Set(currentData
+                .map(item => item[field])
+                .filter(value => value && value !== '')
+            )].sort();
+            
+            uniqueValues.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                select.appendChild(option);
+            });
+        }
+
+        // Aplicar Filtros
+        function applyFilters() {
+            if (!currentData) return;
+            
+            // Coletar valores dos filtros
+            currentFilters = {
+                dateStart: document.getElementById('filter-date-start').value,
+                dateEnd: document.getElementById('filter-date-end').value,
+                garage: document.getElementById('filter-garage').value,
+                branch: document.getElementById('filter-branch').value,
+                driver: document.getElementById('filter-driver').value,
+                plate: document.getElementById('filter-plate').value.toLowerCase(),
+                assetType: document.getElementById('filter-asset-type').value
+            };
+            
+            // Aplicar filtros aos dados
+            filteredData = currentData.filter(item => {
+                // Filtro de data (se disponível)
+                if (currentFilters.dateStart && item.issueOpenDate) {
+                    const itemDate = new Date(item.issueOpenDate);
+                    const startDate = new Date(currentFilters.dateStart);
+                    if (itemDate < startDate) return false;
+                }
+                
+                if (currentFilters.dateEnd && item.issueOpenDate) {
+                    const itemDate = new Date(item.issueOpenDate);
+                    const endDate = new Date(currentFilters.dateEnd);
+                    if (itemDate > endDate) return false;
+                }
+                
+                // Outros filtros
+                if (currentFilters.garage && item.garage !== currentFilters.garage) return false;
+                if (currentFilters.branch && item.branch !== currentFilters.branch) return false;
+                if (currentFilters.driver && item.assignedTo !== currentFilters.driver) return false;
+                if (currentFilters.assetType && item.planName !== currentFilters.assetType) return false;
+                
+                // Filtro de placa (busca parcial)
+                if (currentFilters.plate && !item.vehiclePlate?.toLowerCase().includes(currentFilters.plate)) return false;
+                
+                return true;
+            });
+            
+            console.log(`🔍 Análise aplicada: ${filteredData.length} de ${currentData.length} registros`);
+            
+            // Atualizar interface
+            updateStatsGrid();
+            updateTabsContent(filteredData);
+        }
+
+        // Limpar Filtros
+        function clearFilters() {
+            // Limpar campos
+            document.getElementById('filter-date-start').value = '';
+            document.getElementById('filter-date-end').value = '';
+            document.getElementById('filter-garage').value = '';
+            document.getElementById('filter-branch').value = '';
+            document.getElementById('filter-driver').value = '';
+            document.getElementById('filter-plate').value = '';
+            document.getElementById('filter-asset-type').value = '';
+            
+            // Resetar dados
+            filteredData = currentData;
+            currentFilters = {};
+            
+            // Atualizar interface
+            updateStatsGrid();
+            updateTabsContent(filteredData);
+            
+            console.log('🗑️ Filtros corporativos limpos');
+        }
+
+        // Atualizar Grid de Estatísticas
+        function updateStatsGrid() {
+            const stats = calculateChecklistStats(filteredData);
+            
+            const statCards = document.querySelectorAll('.stat-card .stat-value');
+            if (statCards.length >= 4) {
+                statCards[0].textContent = stats.total;
+                statCards[1].textContent = stats.conforme;
+                statCards[2].textContent = stats.pendente;
+                statCards[3].textContent = stats.percentual + '%';
+            }
+        }
+
+        // Inicializar Abas
+        function initializeTabs() {
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabId = this.dataset.tab;
+                    switchTab(tabId);
+                });
+            });
+        }
+
+        // Trocar Aba
+        function switchTab(tabId) {
+            // Atualizar botões
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+            
+            // Atualizar conteúdo
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            
+            // Atualizar conteúdo da aba
+            updateTabContent(tabId);
+        }
+
+        // Atualizar Conteúdo das Abas
+        function updateTabsContent(data) {
+            updateTabContent('assets', data);
+        }
+
+        // Atualizar Conteúdo de uma Aba
+        function updateTabContent(tabId, data = null) {
+            if (!data) data = filteredData;
+            
+            switch (tabId) {
+                case 'assets':
+                    updateAssetsTab(data);
+                    break;
+                case 'status':
+                    updateStatusTab(data);
+                    break;
+                case 'non-compliant':
+                    updateNonCompliantTab(data);
+                    break;
+            }
+        }
+
+        // Atualizar Aba Lista de Ativos
+        function updateAssetsTab(data) {
+            const container = document.getElementById('assets-content');
+            container.innerHTML = renderDataTable(data, 'Inventário de Ativos Corporativos', [
+                { field: 'planName', label: 'Tipo de Ativo' },
+                { field: 'vehiclePlate', label: 'Placa do Veículo' },
+                { field: 'costCenter', label: 'Centro de Custo' },
+                { field: 'branch', label: 'Filial' },
+                { field: 'garage', label: 'Unidade Operacional' }
+            ]);
+        }
+
+        // Atualizar Aba Inspeções por Status
+        function updateStatusTab(data) {
+            const container = document.getElementById('status-content');
+            
+            // Adicionar gráfico de status
+            const chartHtml = `
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-title">Distribuição Corporativa por Status</div>
+                        <div class="chart-container">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const tableHtml = renderDataTable(data, 'Análise Detalhada por Status', [
+                { field: 'planName', label: 'Tipo de Ativo' },
+                { field: 'vehiclePlate', label: 'Placa do Veículo' },
+                { field: 'costCenter', label: 'Centro de Custo' },
+                { field: 'statusOs', label: 'Status Operacional' },
+                { field: 'assignedTo', label: 'Responsável' }
+            ]);
+            
+            container.innerHTML = chartHtml + tableHtml;
+            
+            // Criar gráfico
+            setTimeout(() => createStatusChart(data), 100);
+        }
+
+        // Atualizar Aba Inspeções Não Conformes
+        function updateNonCompliantTab(data) {
+            const nonCompliantData = data.filter(item => 
+                item.noCompliant === false || 
+                item.statusOs === 'Pendente' ||
+                item.priority === 'Emergência'
+            );
+            
+            const container = document.getElementById('non-compliant-content');
+            container.innerHTML = renderDataTable(nonCompliantData, 'Relatório de Não Conformidades', [
+                { field: 'planName', label: 'Tipo de Ativo' },
+                { field: 'vehiclePlate', label: 'Placa do Veículo' },
+                { field: 'priority', label: 'Nível de Prioridade' },
+                { field: 'statusOs', label: 'Status Operacional' },
+                { field: 'assignedTo', label: 'Responsável Designado' }
+            ]);
+        }
+
+        // Renderizar Tabela de Dados
+        function renderDataTable(data, title, columns) {
+            if (data.length === 0) {
+                return `
+                    <div class="data-table">
+                        <div class="table-header">
+                            <div class="table-title">${title} - Nenhum registro encontrado</div>
+                        </div>
+                        <div class="content-body">
+                            <div class="text-center text-muted">
+                                Nenhum registro encontrado com os filtros corporativos aplicados.
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            const tableHeaders = columns.map(col => `<th>${col.label}</th>`).join('');
+            const tableRows = data.slice(0, 100).map(item => {
+                const cells = columns.map(col => {
+                    const value = item[col.field];
+                    const formattedValue = formatCellValue(col.field, value);
+                    return `<td>${formattedValue}</td>`;
+                }).join('');
+                
+                return `<tr>${cells}</tr>`;
+            }).join('');
+            
+            const showingText = data.length > 100 ? 
+                `${title} - Exibindo 100 de ${data.length} registros` : 
+                `${title} - ${data.length} registros encontrados`;
+            
+            return `
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-title">${showingText}</div>
+                        <div class="export-buttons">
+                            <button class="export-btn excel" onclick="exportToExcel('${title}')">
+                                📊 Excel
+                            </button>
+                            <button class="export-btn pdf" onclick="exportToPDF('${title}')">
+                                📄 PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>${tableHeaders}</tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Formatar Valor da Célula
+        function formatCellValue(field, value) {
+            if (value === null || value === undefined || value === '') {
+                return '<span class="text-muted">-</span>';
+            }
+            
+            switch (field) {
+                case 'priority':
+                    if (value === 'Emergência' || value === 'Alta') {
+                        return `<span class="badge badge-danger">${value}</span>`;
+                    } else if (value === 'Média') {
+                        return `<span class="badge badge-warning">${value}</span>`;
+                    } else {
+                        return `<span class="badge badge-info">${value}</span>`;
+                    }
+                    
+                case 'statusOs':
+                    if (value === 'Finalizado' || value === 'Conforme') {
+                        return `<span class="badge badge-success">${value}</span>`;
+                    } else if (value === 'Pendente') {
+                        return `<span class="badge badge-warning">${value}</span>`;
+                    } else {
+                        return `<span class="badge badge-info">${value}</span>`;
+                    }
+                    
+                default:
+                    if (typeof value === 'string' && value.length > 30) {
+                        return `<span title="${value}">${value.substring(0, 30)}...</span>`;
+                    }
+                    return value;
+            }
+        }
+
+        // Criar Gráfico de Status
+        function createStatusChart(data) {
+            const canvas = document.getElementById('statusChart');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Contar status
+            const statusCounts = {};
+            data.forEach(item => {
+                const status = item.statusOs || 'Indefinido';
+                statusCounts[status] = (statusCounts[status] || 0) + 1;
+            });
+            
+            const labels = Object.keys(statusCounts);
+            const values = Object.values(statusCounts);
+            const colors = labels.map(label => {
+                switch (label) {
+                    case 'Finalizado':
+                    case 'Conforme':
+                        return '#27ae60';
+                    case 'Pendente':
+                        return '#f39c12';
+                    default:
+                        return '#3498db';
+                }
+            });
+            
+            if (charts.statusChart) {
+                charts.statusChart.destroy();
+            }
+            
+            charts.statusChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors,
+                        borderWidth: 3,
+                        borderColor: '#14181B'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#ffffff',
+                                padding: 25,
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Exportar para Excel
+        function exportToExcel(title) {
+            if (!filteredData || filteredData.length === 0) {
+                alert('Nenhum dado corporativo para exportar');
+                return;
+            }
+            
+            // Preparar dados para exportação
+            const exportData = filteredData.map(item => ({
+                'Tipo de Ativo': item.planName || '',
+                'Placa do Veículo': item.vehiclePlate || '',
+                'Centro de Custo': item.costCenter || '',
+                'Filial': item.branch || '',
+                'Unidade Operacional': item.garage || '',
+                'Status Operacional': item.statusOs || '',
+                'Nível de Prioridade': item.priority || '',
+                'Responsável Designado': item.assignedTo || '',
+                'Número da OS': item.osNumber || ''
+            }));
+            
+            // Criar workbook
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            
+            // Adicionar worksheet
+            XLSX.utils.book_append_sheet(wb, ws, title);
+            
+            // Gerar nome do arquivo
+            const fileName = `${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+            
+            // Fazer download
+            XLSX.writeFile(wb, fileName);
+            
+            console.log(`📊 Relatório corporativo exportado: ${fileName}`);
+        }
+
+        // Exportar para PDF
+        function exportToPDF(title) {
+            if (!filteredData || filteredData.length === 0) {
+                alert('Nenhum dado corporativo para exportar');
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Título
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.text(title, 20, 25);
+            
+            // Subtítulo
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text('Relatório Corporativo Fleet Copilot BI', 20, 35);
+            
+            // Data
+            doc.setFontSize(10);
+            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, 45);
+            
+            // Filtros aplicados
+            if (Object.keys(currentFilters).length > 0) {
+                doc.setFontSize(11);
+                doc.setFont(undefined, 'bold');
+                doc.text('Filtros Corporativos Aplicados:', 20, 55);
+                let yPos = 60;
+                Object.entries(currentFilters).forEach(([key, value]) => {
+                    if (value) {
+                        doc.setFont(undefined, 'normal');
+                        doc.text(`${key}: ${value}`, 25, yPos);
+                        yPos += 5;
+                    }
+                });
+            }
+            
+            // Preparar dados da tabela
+            const tableData = filteredData.slice(0, 50).map(item => [
+                item.planName || '',
+                item.vehiclePlate || '',
+                item.costCenter || '',
+                item.statusOs || '',
+                item.priority || ''
+            ]);
+            
+            // Adicionar tabela
+            doc.autoTable({
+                head: [['Tipo de Ativo', 'Placa', 'Centro de Custo', 'Status', 'Prioridade']],
+                body: tableData,
+                startY: 75,
+                styles: {
+                    fontSize: 9,
+                    cellPadding: 3
+                },
+                headStyles: {
+                    fillColor: [26, 188, 156],
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold'
+                },
+                alternateRowStyles: {
+                    fillColor: [245, 245, 245]
+                }
+            });
+            
+            // Nota sobre limitação
+            if (filteredData.length > 50) {
+                const finalY = doc.lastAutoTable.finalY + 15;
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'italic');
+                doc.text(`Nota: Exibindo primeiros 50 registros de ${filteredData.length} total para otimização do relatório`, 20, finalY);
+            }
+            
+            // Gerar nome do arquivo
+            const fileName = `${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+            
+            // Fazer download
+            doc.save(fileName);
+            
+            console.log(`📄 Relatório corporativo PDF exportado: ${fileName}`);
+        }
+
+        // Renderizar Interface Básica (para outras collections)
+        function renderBasicInterface(collection, data) {
+            const stats = calculateBasicStats(collection, data);
+            
+            const content = document.getElementById('app-content');
+            content.innerHTML = `
+                <div class="content-header">
+                    <div class="content-header-left">
+                        <div class="content-icon">${getCollectionIcon(collection)}</div>
+                        <div class="content-title">${getCollectionTitle(collection)}</div>
+                    </div>
+                </div>
+                <div class="content-body">
+                    ${renderBasicStatsGrid(stats)}
+                    ${renderBasicDataTable(collection, data)}
+                </div>
+            `;
+        }
+
+        // Calcular Estatísticas Básicas
+        function calculateBasicStats(collection, data) {
+            return {
+                total: data.length
+            };
+        }
+
+        // Renderizar Grid de Estatísticas Básicas
+        function renderBasicStatsGrid(stats) {
+            return `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.total}</div>
+                        <div class="stat-label">Total de Registros Corporativos</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Renderizar Tabela Básica
+        function renderBasicDataTable(collection, data) {
+            const columns = getBasicColumns(collection);
+            return renderDataTable(data, getCollectionTitle(collection), columns);
+        }
+
+        // Obter Colunas Básicas por Collection
+        function getBasicColumns(collection) {
+            switch (collection) {
+                case 'trips':
+                    return [
+                        { field: 'vehiclePlate', label: 'Placa do Veículo' },
+                        { field: 'driverName', label: 'Motorista' },
+                        { field: 'startTime', label: 'Horário de Início' },
+                        { field: 'distance', label: 'Distância Percorrida' }
+                    ];
+                case 'alerts':
+                    return [
+                        { field: 'type', label: 'Tipo de Alerta' },
+                        { field: 'vehiclePlate', label: 'Placa do Veículo' },
+                        { field: 'severity', label: 'Nível de Severidade' },
+                        { field: 'timestamp', label: 'Data/Hora do Evento' }
+                    ];
+                case 'maintenance':
+                    return [
+                        { field: 'vehiclePlate', label: 'Placa do Veículo' },
+                        { field: 'serviceType', label: 'Tipo de Serviço' },
+                        { field: 'cost', label: 'Custo do Serviço' },
+                        { field: 'date', label: 'Data do Serviço' }
+                    ];
+                default:
+                    return [
+                        { field: 'id', label: 'Identificador' },
+                        { field: 'name', label: 'Descrição' }
+                    ];
+            }
+        }
+
+        // Obter Ícone da Collection
+        function getCollectionIcon(collection) {
+            const icons = {
+                checklist: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
+                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z M8,12V14H16V12H8M8,16V18H13V16H8Z"/>
+                </svg>`,
+                trips: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
+                    <path d="M18,18.5A1.5,1.5 0 0,1 16.5,17A1.5,1.5 0 0,1 18,15.5A1.5,1.5 0 0,1 19.5,17A1.5,1.5 0 0,1 18,18.5M19.5,9.5L21.46,12H17V9.5M6,18.5A1.5,1.5 0 0,1 4.5,17A1.5,1.5 0 0,1 6,15.5A1.5,1.5 0 0,1 7.5,17A1.5,1.5 0 0,1 6,18.5M20,8H17V4H3C1.89,4 1,4.89 1,6V17H3A3,3 0 0,0 6,20A3,3 0 0,0 9,17H15A3,3 0 0,0 18,20A3,3 0 0,0 21,17H23V12L20,8Z"/>
+                </svg>`,
+                alerts: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
+                    <path d="M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                </svg>`,
+                maintenance: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="white">
+                    <path d="M22.7,19L13.6,9.9C14.5,7.6 14,4.9 12.1,3C10.1,1 7.1,0.6 4.7,1.7L9,6L6,9L1.6,4.7C0.4,7.1 0.9,10.1 2.9,12.1C4.8,14 7.5,14.5 9.8,13.6L18.9,22.7C19.3,23.1 19.9,23.1 20.3,22.7L22.6,20.4C23.1,20 23.1,19.3 22.7,19Z"/>
+                </svg>`
+            };
+            return icons[collection] || '📊';
+        }
+
+        // Obter Título da Collection
+        function getCollectionTitle(collection) {
+            const titles = {
+                checklist: 'Auditoria e Conformidade',
+                trips: 'Logística e Rotas',
+                alerts: 'Monitoramento e Segurança',
+                maintenance: 'Engenharia e Serviços'
+            };
+            return titles[collection] || collection;
+        }
+
+        // Log de inicialização
+        console.log('🏢 Fleet Copilot BI - Enterprise Dashboard');
+        console.log('🎨 Design: Corporativo com paleta profissional');
+        console.log('🔍 Filtros: Sistema avançado de análise');
+        console.log('📊 Visualizações: Múltiplas perspectivas corporativas');
+        console.log('📤 Exportação: Relatórios Excel e PDF');
+        console.log('🛡️ Segurança: Ambiente enterprise');
+    </script>
+</body>
+</html>
+
