@@ -19,15 +19,16 @@
             box-sizing: border-box;
         }
 
-        /* Variáveis CSS - Paleta Corporativa */
+        /* Variáveis CSS - Paleta Corporativa Corrigida */
         :root {
             --primary: #1abc9c;
             --primary-dark: #16a085;
             --primary-light: #48c9b0;
             --background: #14181B;
-            --surface: #7F57636C;
-            --surface-light: rgba(127, 87, 99, 0.8);
-            --surface-dark: rgba(127, 87, 99, 0.9);
+            --surface: #3c444c;
+            --surface-light: #3c444c;
+            --surface-dark: #21262b;
+            --table-header: #21262b;
             --text-primary: #ffffff;
             --text-secondary: #e0e0e0;
             --text-muted: #b0b0b0;
@@ -37,7 +38,7 @@
             --danger: #e74c3c;
             --info: #3498db;
             --shadow: rgba(0, 0, 0, 0.3);
-            --card-hover: rgba(127, 87, 99, 0.9);
+            --card-hover: #4a5259;
         }
 
         body {
@@ -305,7 +306,7 @@
 
         .tabs-nav {
             display: flex;
-            background: var(--background);
+            background: var(--table-header);
             border-radius: 12px;
             padding: 0.5rem;
             margin-bottom: 1.5rem;
