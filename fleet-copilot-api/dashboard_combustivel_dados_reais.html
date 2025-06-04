@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fleet Copilot BI - Dashboard Corporativo</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: #14b8a6;
+            --primary-dark: #0f766e;
+            --background: #14181B;
+            --surface: #3c444c;
+            --surface-dark: #21262b;
+            --text: #ffffff;
+            --text-secondary: #a1a1aa;
+            --border: #374151;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --table-header: #21262b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Cards de Navegação */
+        .nav-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .nav-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 25px rgba(20, 184, 166, 0.15);
+        }
+
+        .nav-card.active {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, var(--surface) 0%, rgba(20, 184, 166, 0.1) 100%);
+        }
+
+        .nav-card-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+            fill: var(--primary);
+        }
+
+        .nav-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .nav-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Seção de Filtros */
+        .filters-section {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .filters-section.active {
+            display: block;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            background: var(--surface-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--surface-dark);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        /* Estatísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Insights */
+        .insights-section {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+
+        .insights-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            color: var(--warning);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .insight-item {
+            background: var(--surface-dark);
+            border-left: 4px solid var(--warning);
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* Gráficos */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .chart-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            color: var(--warning);
+            font-weight: 600;
+        }
+
+        /* Tabelas */
+        .tables-section {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+        }
+
+        .table-tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table-tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+        }
+
+        .table-tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .table-content {
+            display: none;
+        }
+
+        .table-content.active {
+            display: block;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface-dark);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--table-header);
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        td {
+            color: var(--text-secondary);
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border);
+            border-top: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .nav-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-actions {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Cards de Navegação -->
+        <div class="nav-cards">
+            <div class="nav-card active" data-collection="checklist">
+                <svg class="nav-card-icon" viewBox="0 0 24 24">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <h3>Checklist</h3>
+                <p>Inspeções e verificações de conformidade</p>
+            </div>
+            <div class="nav-card" data-collection="trips">
+                <svg class="nav-card-icon" viewBox="0 0 24 24">
+                    <path d="M8 17l4 4 4-4m-4-5v9m-6-9a9 9 0 1118 0"/>
+                </svg>
+                <h3>Viagens</h3>
+                <p>Rotas e deslocamentos da frota</p>
+            </div>
+            <div class="nav-card" data-collection="fuel">
+                <svg class="nav-card-icon" viewBox="0 0 24 24">
+                    <path d="M3.5 2L1.5 6v14.5c0 .83.67 1.5 1.5 1.5h9c.83 0 1.5-.67 1.5-1.5V12h4l1.5-2h-1.5V6c0-.83-.67-1.5-1.5-1.5H14v2h1v3h-2V6c0-.83-.67-1.5-1.5-1.5h-8z"/>
+                    <path d="M6 16.5c0 .83.67 1.5 1.5 1.5S9 17.33 9 16.5 8.33 15 7.5 15 6 15.67 6 16.5z"/>
+                </svg>
+                <h3>Combustível</h3>
+                <p>Gestão e análise de abastecimento</p>
+            </div>
+            <div class="nav-card" data-collection="maintenance">
+                <svg class="nav-card-icon" viewBox="0 0 24 24">
+                    <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <h3>Manutenção</h3>
+                <p>Serviços e reparos da frota</p>
+            </div>
+        </div>
+
+        <!-- Seção de Filtros para Combustível -->
+        <div class="filters-section" id="fuelFilters" style="display: none;">
+            <h3 style="margin-bottom: 20px; color: var(--text);">🔍 Filtros de Análise</h3>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="dateStart">Data Inicial</label>
+                    <input type="date" id="dateStart">
+                </div>
+                <div class="filter-group">
+                    <label for="dateEnd">Data Final</label>
+                    <input type="date" id="dateEnd">
+                </div>
+                <div class="filter-group">
+                    <label for="plateFilter">Placa do Veículo</label>
+                    <select id="plateFilter">
+                        <option value="">Todas as placas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="driverFilter">Motorista</label>
+                    <select id="driverFilter">
+                        <option value="">Todos os motoristas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="fuelTypeFilter">Tipo de Combustível</label>
+                    <select id="fuelTypeFilter">
+                        <option value="">Todos os tipos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="stateFilter">Estado</label>
+                    <select id="stateFilter">
+                        <option value="">Todos os estados</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="costCenterFilter">Centro de Custo</label>
+                    <select id="costCenterFilter">
+                        <option value="">Todos os centros</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary" onclick="applyFuelFilters()">
+                    🔍 Aplicar Filtros
+                </button>
+                <button class="btn btn-secondary" onclick="clearFuelFilters()">
+                    🗑️ Limpar
+                </button>
+                <button class="btn btn-secondary" onclick="exportFuelToExcel()">
+                    📊 Excel
+                </button>
+                <button class="btn btn-secondary" onclick="exportFuelToPDF()">
+                    📄 PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Estatísticas de Combustível -->
+        <div class="stats-grid" id="fuelStats" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-value" id="totalSupplies">-</div>
+                <div class="stat-label">Total Abastecimentos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalLiters">-</div>
+                <div class="stat-label">Total Litros</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalCost">-</div>
+                <div class="stat-label">Custo Total (R$)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgCostPerKm">-</div>
+                <div class="stat-label">Custo Médio/Km (R$)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgConsumption">-</div>
+                <div class="stat-label">Consumo Médio (Km/L)</div>
+            </div>
+        </div>
+
+        <!-- Insights Automáticos -->
+        <div class="insights-section" id="fuelInsights" style="display: none;">
+            <div class="insights-title">
+                🧠 Insights Automáticos
+            </div>
+            <div id="insightsContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Analisando dados para gerar insights...
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="charts-grid" id="fuelCharts" style="display: none;">
+            <div class="chart-container">
+                <div class="chart-title">
+                    📈 Custo por Km ao Longo do Tempo
+                </div>
+                <canvas id="costPerKmChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">
+                    🏆 Ranking de Eficiência por Motorista
+                </div>
+                <canvas id="efficiencyChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">
+                    🗺️ Abastecimentos por Estado
+                </div>
+                <canvas id="stateChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">
+                    ⛽ Distribuição por Tipo de Combustível
+                </div>
+                <canvas id="fuelTypeChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Tabelas de Dados -->
+        <div class="tables-section" id="fuelTables" style="display: none;">
+            <div class="table-tabs">
+                <button class="table-tab active" onclick="switchTable('byPlate')">🚗 Abastecimentos por Placa</button>
+                <button class="table-tab" onclick="switchTable('byDriver')">👤 Abastecimentos por Motorista</button>
+                <button class="table-tab" onclick="switchTable('cardBalance')">💳 Saldo Cartão por Motorista</button>
+            </div>
+
+            <!-- Tabela por Placa -->
+            <div class="table-content active" id="byPlateTable">
+                <div class="filter-actions" style="margin-bottom: 16px;">
+                    <button class="btn btn-secondary" onclick="exportTableToExcel('byPlate')">📊 Excel</button>
+                    <button class="btn btn-secondary" onclick="exportTableToPDF('byPlate')">📄 PDF</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Placa</th>
+                                <th>Modelo</th>
+                                <th>Combustível</th>
+                                <th>Litros</th>
+                                <th>Valor Unit.</th>
+                                <th>Valor Total</th>
+                                <th>Odômetro</th>
+                                <th>Km Rodados</th>
+                                <th>Centro Custo</th>
+                                <th>Estado</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="plateTableBody">
+                            <tr><td colspan="11" class="loading">Carregando dados...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tabela por Motorista -->
+            <div class="table-content" id="byDriverTable">
+                <div class="filter-actions" style="margin-bottom: 16px;">
+                    <button class="btn btn-secondary" onclick="exportTableToExcel('byDriver')">📊 Excel</button>
+                    <button class="btn btn-secondary" onclick="exportTableToPDF('byDriver')">📄 PDF</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Motorista</th>
+                                <th>Modelo Veículo</th>
+                                <th>Combustível</th>
+                                <th>Litros</th>
+                                <th>Valor Unit.</th>
+                                <th>Valor Total</th>
+                                <th>Odômetro</th>
+                                <th>Km Rodados</th>
+                                <th>Centro Custo</th>
+                                <th>Estado</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="driverTableBody">
+                            <tr><td colspan="11" class="loading">Carregando dados...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tabela Saldo Cartão -->
+            <div class="table-content" id="cardBalanceTable">
+                <div class="filter-actions" style="margin-bottom: 16px;">
+                    <button class="btn btn-secondary" onclick="exportTableToExcel('cardBalance')">📊 Excel</button>
+                    <button class="btn btn-secondary" onclick="exportTableToPDF('cardBalance')">📄 PDF</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Motorista</th>
+                                <th>Cartão</th>
+                                <th>Saldo</th>
+                                <th>Base</th>
+                                <th>Centro Custo</th>
+                                <th>Estado</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cardBalanceTableBody">
+                            <tr><td colspan="7" class="loading">Carregando dados...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração
+        const CONFIG = {
+            API_BASE_URL: 'https://firebase-bi-api.onrender.com',
+            ENTERPRISE_ID: getUrlParameter('enterpriseId') || 'sA9EmrE3ymtnBqJKcYn7',
+            ITEMS_PER_PAGE: 50
+        };
+
+        // Estado global
+        let fuelData = [];
+        let filteredFuelData = [];
+        let currentActiveTab = 'byPlate';
+
+        // Função para obter parâmetros da URL
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            setupNavigation();
+            loadFuelData();
+        });
+
+        // Configurar navegação entre cards
+        function setupNavigation() {
+            const navCards = document.querySelectorAll('.nav-card');
+            navCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const collection = this.dataset.collection;
+                    switchToCollection(collection);
+                });
+            });
+        }
+
+        // Alternar entre coleções
+        function switchToCollection(collection) {
+            // Atualizar cards ativos
+            document.querySelectorAll('.nav-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.querySelector(`[data-collection="${collection}"]`).classList.add('active');
+
+            // Mostrar/ocultar seções
+            const sections = ['fuelFilters', 'fuelStats', 'fuelInsights', 'fuelCharts', 'fuelTables'];
+            sections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (collection === 'fuel') {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+
+            if (collection === 'fuel' && fuelData.length === 0) {
+                loadFuelData();
+            }
+        }
+
+        // Carregar dados de combustível da API
+        async function loadFuelData() {
+            try {
+                showLoading();
+                
+                const response = await fetch(`${CONFIG.API_BASE_URL}/alelo-supply-history?enterpriseId=${CONFIG.ENTERPRISE_ID}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.data && Array.isArray(result.data)) {
+                    fuelData = result.data;
+                    filteredFuelData = [...fuelData];
+                    
+                    populateFilters();
+                    updateFuelStatistics();
+                    generateInsights();
+                    renderCharts();
+                    renderTables();
+                    
+                    console.log(`✅ Carregados ${fuelData.length} registros de abastecimento`);
+                } else {
+                    throw new Error('Dados não encontrados na resposta da API');
+                }
+                
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados:', error);
+                showError('Erro ao carregar dados de combustível. Verifique a conexão com a API.');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Popular filtros com dados reais
+        function populateFilters() {
+            const plates = [...new Set(fuelData.map(item => item.VehiclePlate).filter(Boolean))].sort();
+            const drivers = [...new Set(fuelData.map(item => item.DriverName).filter(Boolean))].sort();
+            const fuelTypes = [...new Set(fuelData.map(item => item.FuelType).filter(Boolean))].sort();
+            const states = [...new Set(fuelData.map(item => item.MerchantState).filter(Boolean))].sort();
+            const costCenters = [...new Set(fuelData.map(item => item.CostCenter).filter(Boolean))].sort();
+
+            populateSelect('plateFilter', plates);
+            populateSelect('driverFilter', drivers);
+            populateSelect('fuelTypeFilter', fuelTypes);
+            populateSelect('stateFilter', states);
+            populateSelect('costCenterFilter', costCenters);
+        }
+
+        function populateSelect(selectId, options) {
+            const select = document.getElementById(selectId);
+            const currentValue = select.value;
+            
+            // Manter primeira opção (Todos)
+            const firstOption = select.children[0];
+            select.innerHTML = '';
+            select.appendChild(firstOption);
+            
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                select.appendChild(optionElement);
+            });
+            
+            select.value = currentValue;
+        }
+
+        // Aplicar filtros
+        function applyFuelFilters() {
+            const filters = {
+                dateStart: document.getElementById('dateStart').value,
+                dateEnd: document.getElementById('dateEnd').value,
+                plate: document.getElementById('plateFilter').value,
+                driver: document.getElementById('driverFilter').value,
+                fuelType: document.getElementById('fuelTypeFilter').value,
+                state: document.getElementById('stateFilter').value,
+                costCenter: document.getElementById('costCenterFilter').value
+            };
+
+            filteredFuelData = fuelData.filter(item => {
+                // Filtro de data
+                if (filters.dateStart || filters.dateEnd) {
+                    const itemDate = new Date(item.TransactionDate);
+                    if (filters.dateStart && itemDate < new Date(filters.dateStart)) return false;
+                    if (filters.dateEnd && itemDate > new Date(filters.dateEnd + 'T23:59:59')) return false;
+                }
+
+                // Outros filtros
+                if (filters.plate && item.VehiclePlate !== filters.plate) return false;
+                if (filters.driver && item.DriverName !== filters.driver) return false;
+                if (filters.fuelType && item.FuelType !== filters.fuelType) return false;
+                if (filters.state && item.MerchantState !== filters.state) return false;
+                if (filters.costCenter && item.CostCenter !== filters.costCenter) return false;
+
+                return true;
+            });
+
+            updateFuelStatistics();
+            generateInsights();
+            renderCharts();
+            renderTables();
+        }
+
+        // Limpar filtros
+        function clearFuelFilters() {
+            document.getElementById('dateStart').value = '';
+            document.getElementById('dateEnd').value = '';
+            document.getElementById('plateFilter').value = '';
+            document.getElementById('driverFilter').value = '';
+            document.getElementById('fuelTypeFilter').value = '';
+            document.getElementById('stateFilter').value = '';
+            document.getElementById('costCenterFilter').value = '';
+            
+            filteredFuelData = [...fuelData];
+            updateFuelStatistics();
+            generateInsights();
+            renderCharts();
+            renderTables();
+        }
+
+        // Atualizar estatísticas
+        function updateFuelStatistics() {
+            const totalSupplies = filteredFuelData.length;
+            const totalLiters = filteredFuelData.reduce((sum, item) => sum + (parseFloat(item.AmountLiters) || 0), 0);
+            const totalCost = filteredFuelData.reduce((sum, item) => sum + (parseFloat(item.StockedValue) || 0), 0);
+            
+            // Calcular consumo médio (km/l)
+            const validConsumption = filteredFuelData.filter(item => 
+                item.KmTraveled && item.AmountLiters && 
+                parseFloat(item.KmTraveled) > 0 && parseFloat(item.AmountLiters) > 0
+            );
+            const avgConsumption = validConsumption.length > 0 
+                ? validConsumption.reduce((sum, item) => 
+                    sum + (parseFloat(item.KmTraveled) / parseFloat(item.AmountLiters)), 0) / validConsumption.length
+                : 0;
+
+            // Calcular custo médio por km
+            const validCostPerKm = filteredFuelData.filter(item => 
+                item.KmTraveled && item.StockedValue && 
+                parseFloat(item.KmTraveled) > 0 && parseFloat(item.StockedValue) > 0
+            );
+            const avgCostPerKm = validCostPerKm.length > 0 
+                ? validCostPerKm.reduce((sum, item) => 
+                    sum + (parseFloat(item.StockedValue) / parseFloat(item.KmTraveled)), 0) / validCostPerKm.length
+                : 0;
+
+            document.getElementById('totalSupplies').textContent = totalSupplies.toLocaleString();
+            document.getElementById('totalLiters').textContent = totalLiters.toLocaleString('pt-BR', {maximumFractionDigits: 1});
+            document.getElementById('totalCost').textContent = `R$ ${totalCost.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('avgCostPerKm').textContent = `R$ ${avgCostPerKm.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('avgConsumption').textContent = `${avgConsumption.toLocaleString('pt-BR', {maximumFractionDigits: 1})} km/L`;
+        }
+
+        // Gerar insights automáticos
+        function generateInsights() {
+            const insights = [];
+            
+            if (filteredFuelData.length === 0) {
+                document.getElementById('insightsContainer').innerHTML = 
+                    '<div class="insight-item">Nenhum dado disponível para análise.</div>';
+                return;
+            }
+
+            // Análise de consumo por veículo
+            const vehicleConsumption = {};
+            filteredFuelData.forEach(item => {
+                if (item.VehiclePlate && item.KmTraveled && item.AmountLiters) {
+                    const plate = item.VehiclePlate;
+                    const consumption = parseFloat(item.KmTraveled) / parseFloat(item.AmountLiters);
+                    if (consumption > 0) {
+                        if (!vehicleConsumption[plate]) vehicleConsumption[plate] = [];
+                        vehicleConsumption[plate].push(consumption);
+                    }
+                }
+            });
+
+            // Veículo mais eficiente
+            let mostEfficient = null;
+            let highestConsumption = 0;
+            Object.keys(vehicleConsumption).forEach(plate => {
+                const avgConsumption = vehicleConsumption[plate].reduce((a, b) => a + b, 0) / vehicleConsumption[plate].length;
+                if (avgConsumption > highestConsumption) {
+                    highestConsumption = avgConsumption;
+                    mostEfficient = plate;
+                }
+            });
+
+            if (mostEfficient) {
+                insights.push(`🏆 O veículo ${mostEfficient} é o mais eficiente com ${highestConsumption.toFixed(1)} km/L.`);
+            }
+
+            // Análise por estado
+            const stateAnalysis = {};
+            filteredFuelData.forEach(item => {
+                if (item.MerchantState && item.StockedValue && item.KmTraveled) {
+                    const state = item.MerchantState;
+                    const costPerKm = parseFloat(item.StockedValue) / parseFloat(item.KmTraveled);
+                    if (costPerKm > 0) {
+                        if (!stateAnalysis[state]) stateAnalysis[state] = [];
+                        stateAnalysis[state].push(costPerKm);
+                    }
+                }
+            });
+
+            let cheapestState = null;
+            let lowestCost = Infinity;
+            Object.keys(stateAnalysis).forEach(state => {
+                const avgCost = stateAnalysis[state].reduce((a, b) => a + b, 0) / stateAnalysis[state].length;
+                if (avgCost < lowestCost) {
+                    lowestCost = avgCost;
+                    cheapestState = state;
+                }
+            });
+
+            if (cheapestState) {
+                insights.push(`💰 O estado ${cheapestState} apresenta o menor custo por km: R$ ${lowestCost.toFixed(2)}.`);
+            }
+
+            // Análise de combustível
+            const fuelTypeCount = {};
+            filteredFuelData.forEach(item => {
+                if (item.FuelType) {
+                    fuelTypeCount[item.FuelType] = (fuelTypeCount[item.FuelType] || 0) + 1;
+                }
+            });
+
+            const mostUsedFuel = Object.keys(fuelTypeCount).reduce((a, b) => 
+                fuelTypeCount[a] > fuelTypeCount[b] ? a : b, Object.keys(fuelTypeCount)[0]);
+            
+            if (mostUsedFuel) {
+                const percentage = ((fuelTypeCount[mostUsedFuel] / filteredFuelData.length) * 100).toFixed(1);
+                insights.push(`⛽ ${mostUsedFuel} representa ${percentage}% dos abastecimentos realizados.`);
+            }
+
+            // Análise de motoristas
+            const driverCount = {};
+            filteredFuelData.forEach(item => {
+                if (item.DriverName) {
+                    driverCount[item.DriverName] = (driverCount[item.DriverName] || 0) + 1;
+                }
+            });
+
+            const topDriver = Object.keys(driverCount).reduce((a, b) => 
+                driverCount[a] > driverCount[b] ? a : b, Object.keys(driverCount)[0]);
+            
+            if (topDriver) {
+                insights.push(`👤 O motorista ${topDriver} realizou ${driverCount[topDriver]} abastecimentos no período analisado.`);
+            }
+
+            // Renderizar insights
+            const container = document.getElementById('insightsContainer');
+            container.innerHTML = insights.map(insight => 
+                `<div class="insight-item">${insight}</div>`
+            ).join('');
+        }
+
+        // Renderizar gráficos
+        function renderCharts() {
+            renderCostPerKmChart();
+            renderEfficiencyChart();
+            renderStateChart();
+            renderFuelTypeChart();
+        }
+
+        function renderCostPerKmChart() {
+            const ctx = document.getElementById('costPerKmChart').getContext('2d');
+            
+            // Agrupar por data
+            const dailyData = {};
+            filteredFuelData.forEach(item => {
+                if (item.TransactionDate && item.StockedValue && item.KmTraveled) {
+                    const date = new Date(item.TransactionDate).toLocaleDateString('pt-BR');
+                    const costPerKm = parseFloat(item.StockedValue) / parseFloat(item.KmTraveled);
+                    if (costPerKm > 0) {
+                        if (!dailyData[date]) dailyData[date] = [];
+                        dailyData[date].push(costPerKm);
+                    }
+                }
+            });
+
+            const labels = Object.keys(dailyData).sort();
+            const data = labels.map(date => {
+                const costs = dailyData[date];
+                return costs.reduce((a, b) => a + b, 0) / costs.length;
+            });
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Custo por Km (R$)',
+                        data: data,
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#ffffff' }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#a1a1aa' } },
+                        y: { ticks: { color: '#a1a1aa' } }
+                    }
+                }
+            });
+        }
+
+        function renderEfficiencyChart() {
+            const ctx = document.getElementById('efficiencyChart').getContext('2d');
+            
+            // Calcular eficiência por motorista
+            const driverEfficiency = {};
+            filteredFuelData.forEach(item => {
+                if (item.DriverName && item.KmTraveled && item.AmountLiters) {
+                    const driver = item.DriverName;
+                    const efficiency = parseFloat(item.KmTraveled) / parseFloat(item.AmountLiters);
+                    if (efficiency > 0) {
+                        if (!driverEfficiency[driver]) driverEfficiency[driver] = [];
+                        driverEfficiency[driver].push(efficiency);
+                    }
+                }
+            });
+
+            const drivers = Object.keys(driverEfficiency).slice(0, 10); // Top 10
+            const efficiencies = drivers.map(driver => {
+                const effs = driverEfficiency[driver];
+                return effs.reduce((a, b) => a + b, 0) / effs.length;
+            });
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: drivers,
+                    datasets: [{
+                        label: 'Eficiência (Km/L)',
+                        data: efficiencies,
+                        backgroundColor: '#f59e0b'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#ffffff' }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#a1a1aa' } },
+                        y: { ticks: { color: '#a1a1aa' } }
+                    }
+                }
+            });
+        }
+
+        function renderStateChart() {
+            const ctx = document.getElementById('stateChart').getContext('2d');
+            
+            const stateCount = {};
+            filteredFuelData.forEach(item => {
+                if (item.MerchantState) {
+                    stateCount[item.MerchantState] = (stateCount[item.MerchantState] || 0) + 1;
+                }
+            });
+
+            const labels = Object.keys(stateCount);
+            const data = Object.values(stateCount);
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            '#f59e0b', '#14b8a6', '#8b5cf6', '#ef4444', '#10b981',
+                            '#f97316', '#06b6d4', '#84cc16', '#f43f5e', '#6366f1'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#ffffff' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderFuelTypeChart() {
+            const ctx = document.getElementById('fuelTypeChart').getContext('2d');
+            
+            const fuelTypeCount = {};
+            filteredFuelData.forEach(item => {
+                if (item.FuelType) {
+                    fuelTypeCount[item.FuelType] = (fuelTypeCount[item.FuelType] || 0) + 1;
+                }
+            });
+
+            const labels = Object.keys(fuelTypeCount);
+            const data = Object.values(fuelTypeCount);
+
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            '#f59e0b', '#14b8a6', '#8b5cf6', '#ef4444', '#10b981'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#ffffff' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Renderizar tabelas
+        function renderTables() {
+            renderPlateTable();
+            renderDriverTable();
+            renderCardBalanceTable();
+        }
+
+        function renderPlateTable() {
+            const tbody = document.getElementById('plateTableBody');
+            tbody.innerHTML = '';
+
+            if (filteredFuelData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: var(--text-secondary);">Nenhum dado encontrado</td></tr>';
+                return;
+            }
+
+            filteredFuelData.forEach(item => {
+                const row = document.createElement('tr');
+                const date = new Date(item.TransactionDate).toLocaleDateString('pt-BR');
+                const kmTraveled = item.KmTraveled ? (parseFloat(item.Odometer) - parseFloat(item.PreviousOdometer)).toFixed(0) : '-';
+
+                row.innerHTML = `
+                    <td>${item.VehiclePlate || '-'}</td>
+                    <td>${item.VehicleModel || '-'}</td>
+                    <td>${item.FuelType || '-'}</td>
+                    <td>${parseFloat(item.AmountLiters || 0).toFixed(1)}</td>
+                    <td>R$ ${parseFloat(item.UnitValue || 0).toFixed(2)}</td>
+                    <td>R$ ${parseFloat(item.StockedValue || 0).toFixed(2)}</td>
+                    <td>${parseFloat(item.Odometer || 0).toLocaleString()}</td>
+                    <td>${kmTraveled}</td>
+                    <td>${item.CostCenter || '-'}</td>
+                    <td>${item.MerchantState || '-'}</td>
+                    <td>${date}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function renderDriverTable() {
+            const tbody = document.getElementById('driverTableBody');
+            tbody.innerHTML = '';
+
+            if (filteredFuelData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: var(--text-secondary);">Nenhum dado encontrado</td></tr>';
+                return;
+            }
+
+            filteredFuelData.forEach(item => {
+                const row = document.createElement('tr');
+                const date = new Date(item.TransactionDate).toLocaleDateString('pt-BR');
+                const kmTraveled = item.KmTraveled ? (parseFloat(item.Odometer) - parseFloat(item.PreviousOdometer)).toFixed(0) : '-';
+
+                row.innerHTML = `
+                    <td>${item.DriverName || 'Veículo sem motorista associado'}</td>
+                    <td>${item.VehicleModel || '-'}</td>
+                    <td>${item.FuelType || '-'}</td>
+                    <td>${parseFloat(item.AmountLiters || 0).toFixed(1)}</td>
+                    <td>R$ ${parseFloat(item.UnitValue || 0).toFixed(2)}</td>
+                    <td>R$ ${parseFloat(item.StockedValue || 0).toFixed(2)}</td>
+                    <td>${parseFloat(item.Odometer || 0).toLocaleString()}</td>
+                    <td>${kmTraveled}</td>
+                    <td>${item.CostCenter || '-'}</td>
+                    <td>${item.MerchantState || '-'}</td>
+                    <td>${date}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function renderCardBalanceTable() {
+            const tbody = document.getElementById('cardBalanceTableBody');
+            tbody.innerHTML = '';
+
+            if (filteredFuelData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-secondary);">Nenhum dado encontrado</td></tr>';
+                return;
+            }
+
+            // Agrupar por motorista para mostrar saldo mais recente
+            const driverCards = {};
+            filteredFuelData.forEach(item => {
+                const driver = item.DriverName || 'Veículo sem motorista associado';
+                if (!driverCards[driver] || new Date(item.TransactionDate) > new Date(driverCards[driver].TransactionDate)) {
+                    driverCards[driver] = item;
+                }
+            });
+
+            Object.values(driverCards).forEach(item => {
+                const row = document.createElement('tr');
+                const date = new Date(item.TransactionDate).toLocaleDateString('pt-BR');
+
+                row.innerHTML = `
+                    <td>${item.DriverName || 'Veículo sem motorista associado'}</td>
+                    <td>${item.Card || '-'}</td>
+                    <td>R$ ${parseFloat(item.CardBalance || 0).toFixed(2)}</td>
+                    <td>${item.BaseName || '-'}</td>
+                    <td>${item.CostCenter || '-'}</td>
+                    <td>${item.MerchantState || '-'}</td>
+                    <td>${date}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Alternar entre tabelas
+        function switchTable(tableType) {
+            // Atualizar tabs
+            document.querySelectorAll('.table-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Mostrar/ocultar conteúdo
+            document.querySelectorAll('.table-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${tableType}Table`).classList.add('active');
+
+            currentActiveTab = tableType;
+        }
+
+        // Funções de exportação
+        function exportFuelToExcel() {
+            exportTableToExcel(currentActiveTab);
+        }
+
+        function exportFuelToPDF() {
+            exportTableToPDF(currentActiveTab);
+        }
+
+        function exportTableToExcel(tableType) {
+            let data = [];
+            let filename = '';
+
+            switch(tableType) {
+                case 'byPlate':
+                    data = filteredFuelData.map(item => ({
+                        'Placa': item.VehiclePlate || '-',
+                        'Modelo': item.VehicleModel || '-',
+                        'Combustível': item.FuelType || '-',
+                        'Litros': parseFloat(item.AmountLiters || 0),
+                        'Valor Unitário': parseFloat(item.UnitValue || 0),
+                        'Valor Total': parseFloat(item.StockedValue || 0),
+                        'Odômetro': parseFloat(item.Odometer || 0),
+                        'Km Rodados': item.KmTraveled || '-',
+                        'Centro Custo': item.CostCenter || '-',
+                        'Estado': item.MerchantState || '-',
+                        'Data': new Date(item.TransactionDate).toLocaleDateString('pt-BR')
+                    }));
+                    filename = 'abastecimentos_por_placa.xlsx';
+                    break;
+                case 'byDriver':
+                    data = filteredFuelData.map(item => ({
+                        'Motorista': item.DriverName || 'Veículo sem motorista associado',
+                        'Modelo Veículo': item.VehicleModel || '-',
+                        'Combustível': item.FuelType || '-',
+                        'Litros': parseFloat(item.AmountLiters || 0),
+                        'Valor Unitário': parseFloat(item.UnitValue || 0),
+                        'Valor Total': parseFloat(item.StockedValue || 0),
+                        'Odômetro': parseFloat(item.Odometer || 0),
+                        'Km Rodados': item.KmTraveled || '-',
+                        'Centro Custo': item.CostCenter || '-',
+                        'Estado': item.MerchantState || '-',
+                        'Data': new Date(item.TransactionDate).toLocaleDateString('pt-BR')
+                    }));
+                    filename = 'abastecimentos_por_motorista.xlsx';
+                    break;
+                case 'cardBalance':
+                    const driverCards = {};
+                    filteredFuelData.forEach(item => {
+                        const driver = item.DriverName || 'Veículo sem motorista associado';
+                        if (!driverCards[driver] || new Date(item.TransactionDate) > new Date(driverCards[driver].TransactionDate)) {
+                            driverCards[driver] = item;
+                        }
+                    });
+                    data = Object.values(driverCards).map(item => ({
+                        'Motorista': item.DriverName || 'Veículo sem motorista associado',
+                        'Cartão': item.Card || '-',
+                        'Saldo': parseFloat(item.CardBalance || 0),
+                        'Base': item.BaseName || '-',
+                        'Centro Custo': item.CostCenter || '-',
+                        'Estado': item.MerchantState || '-',
+                        'Data': new Date(item.TransactionDate).toLocaleDateString('pt-BR')
+                    }));
+                    filename = 'saldo_cartao_por_motorista.xlsx';
+                    break;
+            }
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Dados');
+            XLSX.writeFile(wb, filename);
+        }
+
+        function exportTableToPDF(tableType) {
+            // Implementação básica de PDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.text(`Relatório de Combustível - ${tableType}`, 20, 20);
+            doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 20, 30);
+            doc.text(`Total de registros: ${filteredFuelData.length}`, 20, 40);
+            
+            doc.save(`relatorio_combustivel_${tableType}.pdf`);
+        }
+
+        // Funções auxiliares
+        function showLoading() {
+            // Implementar loading se necessário
+        }
+
+        function hideLoading() {
+            // Implementar hide loading se necessário
+        }
+
+        function showError(message) {
+            console.error(message);
+            // Implementar exibição de erro se necessário
+        }
+    </script>
+</body>
+</html>
+
