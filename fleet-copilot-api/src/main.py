@@ -1,165 +1,140 @@
 """
-Fleet Copilot API - Dashboard Avançado
-Sistema completo com filtros, múltiplas visualizações e exportação
+Fleet Copilot API - Dashboard Corporativo
+Versão 5.0.0 - Design Enterprise
+
+Características:
+- Design corporativo profissional
+- Paleta de cores enterprise (#7F57636C, #14181B)
+- Ícones SVG profissionais
+- Interface sem header/barra superior
+- Funcionalidades avançadas mantidas
 """
 
-from flask import Flask, render_template_string, request, jsonify
+from flask import Flask, render_template_string, jsonify, request
 from flask_cors import CORS
 import os
+import logging
+
+# Configuração de logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 CORS(app)
 
-# Configuração para produção
-app.config["DEBUG"] = False
+# Configuração
+app.config['DEBUG'] = False
 
-@app.route("/")
+def load_dashboard_template():
+    """Carrega o template do dashboard corporativo"""
+    possible_paths = [
+        '/opt/render/project/src/dashboard_corporativo.html',
+        'dashboard_corporativo.html',
+        'src/dashboard_corporativo.html',
+        '/app/dashboard_corporativo.html',
+        os.path.join(os.path.dirname(__file__), 'dashboard_corporativo.html'),
+        os.path.join(os.path.dirname(__file__), '..', 'dashboard_corporativo.html')
+    ]
+    
+    for path in possible_paths:
+        try:
+            if os.path.exists(path):
+                with open(path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    logger.info(f"✅ Dashboard corporativo carregado: {path}")
+                    return content
+        except Exception as e:
+            logger.warning(f"⚠️ Erro ao carregar {path}: {e}")
+            continue
+    
+    logger.error("❌ Dashboard corporativo não encontrado")
+    return None
+
+# Carregar template na inicialização
+DASHBOARD_TEMPLATE = load_dashboard_template()
+
+@app.route('/')
 def home():
     """Página inicial da API"""
     return jsonify({
-        "message": "Fleet Copilot API - Dashboard Avançado",
-        "status": "online",
-        "version": "4.0.0",
+        "service": "Fleet Copilot API",
+        "version": "5.0.0",
+        "status": "Enterprise Ready",
+        "design": "Corporate Professional",
         "features": [
-            "Filtros dinâmicos",
-            "Múltiplas visualizações",
-            "Exportação Excel/PDF",
-            "Gráficos interativos"
+            "Dashboard corporativo",
+            "Paleta enterprise",
+            "Ícones profissionais",
+            "Interface limpa",
+            "Filtros avançados",
+            "Exportação Excel/PDF"
         ],
-        "dashboard": "/api/copilot/enhanced-dashboard"
+        "endpoints": {
+            "dashboard": "/api/copilot/corporate-dashboard",
+            "enhanced": "/api/copilot/enhanced-dashboard"
+        }
     })
 
-@app.route("/health")
-def health():
-    """Health check para monitoramento"""
-    return jsonify({
-        "status": "healthy", 
-        "version": "4.0.0",
-        "features": "advanced"
-    })
+@app.route('/api/copilot/corporate-dashboard')
+def corporate_dashboard():
+    """Dashboard corporativo principal"""
+    if DASHBOARD_TEMPLATE:
+        logger.info("🏢 Servindo dashboard corporativo")
+        return DASHBOARD_TEMPLATE
+    else:
+        return jsonify({
+            "error": "Dashboard corporativo não disponível",
+            "message": "Template não encontrado no sistema",
+            "status": "error"
+        }), 404
 
-@app.route("/api/copilot/enhanced-dashboard")
+@app.route('/api/copilot/enhanced-dashboard')
 def enhanced_dashboard():
-    """Dashboard BI Avançado com todas as funcionalidades"""
-    try:
-        # Tentar carregar o dashboard avançado
-        dashboard_path = os.path.join(os.path.dirname(__file__), "..", "dashboard_avancado.html")
-        
-        if os.path.exists(dashboard_path):
-            with open(dashboard_path, "r", encoding="utf-8") as f:
-                dashboard_content = f.read()
-            return dashboard_content
-        else:
-            # Fallback para dashboard na raiz
-            root_path = os.path.join(os.path.dirname(__file__), "..", "..", "dashboard_avancado.html")
-            if os.path.exists(root_path):
-                with open(root_path, "r", encoding="utf-8") as f:
-                    dashboard_content = f.read()
-                return dashboard_content
-            else:
-                # Fallback final
-                return render_template_string(DASHBOARD_FALLBACK)
-            
-    except Exception as e:
-        print(f"Erro ao carregar dashboard avançado: {e}")
-        return render_template_string(DASHBOARD_FALLBACK)
+    """Alias para compatibilidade"""
+    return corporate_dashboard()
 
-# Dashboard fallback inline
-DASHBOARD_FALLBACK = """
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fleet Copilot - BI Avançado</title>
-    <style>
-        body { 
-            font-family: sans-serif; 
-            background: linear-gradient(135deg, #2c3e50, #34495e); 
-            color: #ecf0f1; 
-            padding: 40px 20px; 
-            text-align: center; 
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .container {
-            max-width: 600px;
-            background: rgba(52, 73, 94, 0.8);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        h1 { 
-            color: #1abc9c; 
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-        }
-        .icon { 
-            font-size: 4rem; 
-            margin-bottom: 20px; 
-        }
-        .error { 
-            background: linear-gradient(135deg, #e74c3c, #c0392b); 
-            color: white; 
-            padding: 20px; 
-            border-radius: 10px; 
-            margin-top: 20px;
-        }
-        .features {
-            text-align: left;
-            margin: 20px 0;
-            padding: 20px;
-            background: rgba(26, 188, 156, 0.1);
-            border-radius: 10px;
-            border-left: 4px solid #1abc9c;
-        }
-        .features h3 {
-            color: #1abc9c;
-            margin-bottom: 10px;
-        }
-        .features ul {
-            list-style: none;
-            padding: 0;
-        }
-        .features li {
-            padding: 5px 0;
-            padding-left: 20px;
-            position: relative;
-        }
-        .features li:before {
-            content: "✅";
-            position: absolute;
-            left: 0;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="icon">🚛</div>
-        <h1>Fleet Copilot BI</h1>
-        <div class="features">
-            <h3>Dashboard Avançado</h3>
-            <ul>
-                <li>Filtros dinâmicos por data, garagem, filial</li>
-                <li>Múltiplas visualizações em abas</li>
-                <li>Exportação para Excel e PDF</li>
-                <li>Gráficos interativos</li>
-                <li>Dados reais da API Firebase</li>
-            </ul>
-        </div>
-        <div class="error">
-            <h2>⚠️ Dashboard Avançado Carregando...</h2>
-            <p>Se esta mensagem persistir, verifique se o arquivo dashboard_avancado.html está na raiz do projeto.</p>
-            <p><strong>Versão:</strong> 4.0.0 - Dashboard Avançado</p>
-        </div>
-    </div>
-</body>
-</html>
-"""
+@app.route('/health')
+def health_check():
+    """Health check para monitoramento"""
+    dashboard_status = "available" if DASHBOARD_TEMPLATE else "unavailable"
+    
+    return jsonify({
+        "status": "healthy",
+        "version": "5.0.0",
+        "design": "Corporate Enterprise",
+        "dashboard": dashboard_status,
+        "timestamp": "2025-01-04T19:00:00Z"
+    })
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+@app.errorhandler(404)
+def not_found(error):
+    """Handler para 404"""
+    return jsonify({
+        "error": "Endpoint não encontrado",
+        "message": "Verifique a documentação da API",
+        "available_endpoints": [
+            "/api/copilot/corporate-dashboard",
+            "/api/copilot/enhanced-dashboard",
+            "/health"
+        ]
+    }), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    """Handler para 500"""
+    logger.error(f"Erro interno: {error}")
+    return jsonify({
+        "error": "Erro interno do servidor",
+        "message": "Entre em contato com o suporte técnico",
+        "status": "error"
+    }), 500
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    
+    logger.info("🚀 Iniciando Fleet Copilot API - Corporate Edition")
+    logger.info(f"🎨 Design: Enterprise Professional")
+    logger.info(f"🔧 Porta: {port}")
+    logger.info(f"📊 Dashboard: {'Disponível' if DASHBOARD_TEMPLATE else 'Indisponível'}")
+    
+    app.run(host='0.0.0.0', port=port, debug=False)
