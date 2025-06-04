@@ -49,18 +49,18 @@
         /* Cards de Navegação */
         .nav-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
 
         .nav-card {
             background: var(--surface);
+            border: 2px solid var(--border);
             border-radius: 12px;
             padding: 24px;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 2px solid var(--border);
             position: relative;
             overflow: hidden;
         }
@@ -69,42 +69,42 @@
             transform: translateY(-2px);
             border-color: var(--primary);
             box-shadow: 0 8px 25px rgba(20, 184, 166, 0.15);
-            background: var(--surface-light);
         }
 
         .nav-card.active {
             border-color: var(--primary);
-            background: linear-gradient(135deg, var(--surface-light) 0%, rgba(20, 184, 166, 0.1) 100%);
-            box-shadow: 0 4px 15px rgba(20, 184, 166, 0.2);
+            background: linear-gradient(135deg, var(--surface) 0%, var(--surface-light) 100%);
+            box-shadow: 0 8px 25px rgba(20, 184, 166, 0.2);
         }
 
         .nav-card-icon {
             width: 48px;
             height: 48px;
             margin-bottom: 16px;
-            fill: var(--primary);
+            color: var(--primary);
         }
 
         .nav-card h3 {
             font-size: 1.25rem;
+            font-weight: 600;
             margin-bottom: 8px;
             color: var(--text);
-            font-weight: 600;
         }
 
         .nav-card p {
             color: var(--text-secondary);
             font-size: 0.9rem;
+            line-height: 1.4;
         }
 
-        /* Seção de Filtros */
+        /* Seções de Filtros */
         .filters-section {
+            display: none;
             background: var(--surface);
+            border: 1px solid var(--border);
             border-radius: 12px;
             padding: 24px;
-            margin-bottom: 30px;
-            display: none;
-            border: 1px solid var(--border);
+            margin-bottom: 24px;
         }
 
         .filters-section.active {
@@ -115,22 +115,26 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid var(--border);
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .filters-title svg {
+            color: var(--primary);
         }
 
         .filters-title h2 {
             font-size: 1.5rem;
-            color: var(--text);
             font-weight: 600;
+            color: var(--text);
         }
 
         .filters-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
         .filter-group {
@@ -139,20 +143,20 @@
         }
 
         .filter-group label {
-            margin-bottom: 8px;
+            font-size: 0.9rem;
             font-weight: 500;
-            color: var(--text);
+            color: var(--text-secondary);
+            margin-bottom: 6px;
         }
 
         .filter-group input,
         .filter-group select {
-            padding: 12px;
-            border: 2px solid var(--border);
-            border-radius: 8px;
             background: var(--surface-dark);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px 12px;
             color: var(--text);
-            font-size: 14px;
-            transition: all 0.3s ease;
+            font-size: 0.9rem;
         }
 
         .filter-group input:focus,
@@ -160,7 +164,6 @@
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
-            background: var(--surface-darker);
         }
 
         .filter-actions {
@@ -170,39 +173,35 @@
         }
 
         .btn {
-            padding: 12px 24px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 8px;
-            cursor: pointer;
+            border-radius: 6px;
+            font-size: 0.9rem;
             font-weight: 500;
-            transition: all 0.3s ease;
+            cursor: pointer;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             gap: 8px;
-            border: 2px solid transparent;
         }
 
         .btn-primary {
             background: var(--primary);
             color: white;
-            border-color: var(--primary);
         }
 
         .btn-primary:hover {
             background: var(--primary-dark);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
         }
 
         .btn-secondary {
             background: var(--surface-dark);
             color: var(--text);
-            border: 2px solid var(--border-light);
+            border: 1px solid var(--border);
         }
 
         .btn-secondary:hover {
             background: var(--surface-light);
-            border-color: var(--text-secondary);
         }
 
         /* Estatísticas */
@@ -210,26 +209,20 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 24px;
         }
 
         .stat-card {
-            background: var(--surface-light);
-            border-radius: 12px;
-            padding: 24px;
+            background: var(--surface-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
             text-align: center;
-            border: 2px solid var(--border);
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            border-color: var(--border-light);
-            transform: translateY(-2px);
         }
 
         .stat-value {
             font-size: 2rem;
-            font-weight: bold;
+            font-weight: 700;
             color: var(--primary);
             margin-bottom: 8px;
         }
@@ -237,7 +230,6 @@
         .stat-label {
             color: var(--text-secondary);
             font-size: 0.9rem;
-            font-weight: 500;
         }
 
         /* Abas */
@@ -248,7 +240,6 @@
             background: var(--surface-dark);
             border-radius: 8px;
             padding: 4px;
-            border: 2px solid var(--border);
         }
 
         .tab {
@@ -257,47 +248,34 @@
             background: transparent;
             border: none;
             border-radius: 6px;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
             font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .tab.active {
             background: var(--primary);
             color: white;
-            box-shadow: 0 2px 8px rgba(20, 184, 166, 0.3);
-        }
-
-        .tab:hover:not(.active) {
-            color: var(--text-secondary);
-            background: var(--surface);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
         }
 
         /* Tabelas */
         .table-container {
-            background: var(--surface);
-            border-radius: 12px;
+            background: var(--surface-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
             overflow: hidden;
             margin-bottom: 20px;
-            border: 2px solid var(--border);
         }
 
         .table-header {
-            background: var(--table-header);
-            padding: 16px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid var(--border);
+            padding: 16px 20px;
+            background: var(--table-header);
+            border-bottom: 1px solid var(--border);
         }
 
         .table-title {
@@ -327,22 +305,21 @@
         }
 
         th {
-            background: var(--surface-dark);
+            background: var(--surface);
+            color: var(--text-secondary);
             font-weight: 600;
-            color: var(--text);
-            position: sticky;
-            top: 0;
-            border-bottom: 2px solid var(--border-light);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         td {
-            color: var(--text-secondary);
-            background: var(--surface);
+            color: var(--text);
+            font-size: 0.9rem;
         }
 
-        tr:hover td {
-            background: var(--surface-light);
-            color: var(--text);
+        tr:hover {
+            background: var(--surface);
         }
 
         /* Paginação */
@@ -356,27 +333,24 @@
 
         .pagination button {
             padding: 8px 12px;
-            border: 2px solid var(--border);
-            background: var(--surface);
+            border: 1px solid var(--border);
+            background: var(--surface-dark);
             color: var(--text);
-            border-radius: 6px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .pagination button:hover:not(:disabled) {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
+            background: var(--surface);
         }
 
         .pagination button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            color: var(--text-muted);
         }
 
-        .pagination .current {
+        .pagination .active {
             background: var(--primary);
             border-color: var(--primary);
             color: white;
@@ -384,22 +358,22 @@
 
         /* Loading */
         .loading {
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             padding: 40px;
             color: var(--text-secondary);
-            background: var(--surface);
-            border-radius: 12px;
-            border: 2px solid var(--border);
         }
 
         .spinner {
-            border: 3px solid var(--surface-dark);
-            border-top: 3px solid var(--primary);
-            border-radius: 50%;
             width: 40px;
             height: 40px;
+            border: 3px solid var(--surface-light);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
+            margin-bottom: 16px;
         }
 
         @keyframes spin {
@@ -407,7 +381,94 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Responsivo */
+        /* Combustível - Métricas */
+        .fuel-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .fuel-metric {
+            background: var(--surface-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .fuel-metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .fuel-metric-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Combustível - Insights */
+        .fuel-insights {
+            background: var(--surface-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .insights-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .insight-item {
+            background: var(--surface);
+            border-left: 4px solid var(--primary);
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .insight-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Combustível - Gráficos */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .chart-container {
+            background: var(--surface-dark);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .chart-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Responsividade */
         @media (max-width: 768px) {
             .container {
                 padding: 16px;
@@ -425,8 +486,26 @@
                 grid-template-columns: repeat(2, 1fr);
             }
 
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
             .filter-actions {
+                flex-direction: column;
+            }
+
+            .btn {
                 justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-direction: column;
             }
 
             .table-header {
@@ -439,174 +518,38 @@
                 justify-content: center;
             }
         }
-
-        /* Gráficos de Combustível */
-        .fuel-charts {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .chart-container {
-            background: var(--surface-light);
-            border-radius: 12px;
-            padding: 20px;
-            border: 2px solid var(--border);
-            transition: all 0.3s ease;
-        }
-
-        .chart-container:hover {
-            border-color: var(--border-light);
-        }
-
-        .chart-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 16px;
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid var(--border);
-        }
-
-        .chart-canvas {
-            position: relative;
-            height: 300px;
-        }
-
-        /* Insights */
-        .insights-section {
-            background: var(--surface);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 30px;
-            border: 2px solid var(--border);
-        }
-
-        .insights-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid var(--border);
-        }
-
-        .insights-title h2 {
-            color: var(--text);
-            font-weight: 600;
-        }
-
-        .insight-item {
-            background: var(--surface-light);
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border-left: 4px solid var(--primary);
-            border: 2px solid var(--border);
-            color: var(--text-secondary);
-            transition: all 0.3s ease;
-        }
-
-        .insight-item:hover {
-            background: var(--surface-dark);
-            color: var(--text);
-            border-color: var(--border-light);
-        }
-
-        .insight-item:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Métricas de Combustível */
-        .fuel-metrics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-            margin-bottom: 30px;
-        }
-
-        .metric-card {
-            background: var(--surface-light);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            border: 2px solid var(--border);
-            transition: all 0.3s ease;
-        }
-
-        .metric-card:hover {
-            border-color: var(--border-light);
-            transform: translateY(-2px);
-        }
-
-        .metric-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 8px;
-        }
-
-        .metric-label {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        /* Status badges */
-        .status {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .status.conforme {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--success);
-            border: 1px solid var(--success);
-        }
-
-        .status.nao-conforme {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--error);
-            border: 1px solid var(--error);
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Cards de Navegação -->
         <div class="nav-cards">
-            <div class="nav-card" data-collection="checklist" onclick="changeCollection('checklist')">
-                <svg class="nav-card-icon" viewBox="0 0 24 24">
+            <div class="nav-card" data-collection="checklist">
+                <svg class="nav-card-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                 </svg>
                 <h3>Checklist</h3>
                 <p>Inspeções e verificações de conformidade</p>
             </div>
 
-            <div class="nav-card" data-collection="trips" onclick="changeCollection('trips')">
-                <svg class="nav-card-icon" viewBox="0 0 24 24">
+            <div class="nav-card" data-collection="trips">
+                <svg class="nav-card-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
                 <h3>Viagens</h3>
                 <p>Rotas e deslocamentos da frota</p>
             </div>
 
-            <div class="nav-card" data-collection="fuel" onclick="changeCollection('fuel')">
-                <svg class="nav-card-icon" viewBox="0 0 24 24">
-                    <path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h6v-2.59c.73-.26 1.39-.71 1.91-1.32l.54-.75c.27-.38.73-.59 1.21-.59H17c1.66 0 3-1.34 3-3V9c0-.69-.28-1.32-.73-1.77zM12 10H6V5h6v5z"/>
+            <div class="nav-card" data-collection="fuel">
+                <svg class="nav-card-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2v-3h1c.55 0 1 .45 1 1v2.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V9c0-.69-.28-1.32-.73-1.77z"/>
                 </svg>
                 <h3>Combustível</h3>
                 <p>Gestão e análise de abastecimento</p>
             </div>
 
-            <div class="nav-card" data-collection="maintenance" onclick="changeCollection('maintenance')">
-                <svg class="nav-card-icon" viewBox="0 0 24 24">
+            <div class="nav-card" data-collection="maintenance">
+                <svg class="nav-card-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
                 </svg>
                 <h3>Manutenção</h3>
@@ -614,44 +557,44 @@
             </div>
         </div>
 
-        <!-- Seção de Filtros para Checklist -->
+        <!-- Seção Checklist -->
         <div id="checklist-section" class="filters-section">
             <div class="filters-title">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
                 </svg>
                 <h2>Filtros de Análise</h2>
             </div>
 
             <div class="filters-grid">
                 <div class="filter-group">
-                    <label>Data Inicial</label>
-                    <input type="date" id="startDate" value="">
+                    <label for="startDate">Data Inicial</label>
+                    <input type="date" id="startDate">
                 </div>
                 <div class="filter-group">
-                    <label>Data Final</label>
-                    <input type="date" id="endDate" value="">
+                    <label for="endDate">Data Final</label>
+                    <input type="date" id="endDate">
                 </div>
                 <div class="filter-group">
-                    <label>Responsável</label>
+                    <label for="responsibleFilter">Responsável</label>
                     <select id="responsibleFilter">
                         <option value="">Todos os responsáveis</option>
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label>Placa do Veículo</label>
+                    <label for="plateFilter">Placa do Veículo</label>
                     <select id="plateFilter">
                         <option value="">Todas as placas</option>
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label>Tipo de Ativo</label>
+                    <label for="assetTypeFilter">Tipo de Ativo</label>
                     <select id="assetTypeFilter">
                         <option value="">Todos os tipos</option>
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label>Motorista</label>
+                    <label for="driverFilter">Motorista</label>
                     <select id="driverFilter">
                         <option value="">Todos os motoristas</option>
                     </select>
@@ -680,169 +623,100 @@
                     <div class="stat-label">Total de Registros</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="conformeRecords">0</div>
+                    <div class="stat-value" id="compliantRecords">0</div>
                     <div class="stat-label">Conformes</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="nonConformeRecords">0</div>
+                    <div class="stat-value" id="nonCompliantRecords">0</div>
                     <div class="stat-label">Não Conformes</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="conformePercentage">0%</div>
+                    <div class="stat-value" id="complianceRate">0%</div>
                     <div class="stat-label">Taxa de Conformidade</div>
                 </div>
             </div>
 
             <!-- Abas -->
             <div class="tabs">
-                <button class="tab active" onclick="showTab('general')">Visão Geral</button>
-                <button class="tab" onclick="showTab('status')">Por Status</button>
-                <button class="tab" onclick="showTab('nonconforme')">Não Conformes</button>
+                <button class="tab active" onclick="switchTab('general')">Visão Geral</button>
+                <button class="tab" onclick="switchTab('status')">Por Status</button>
+                <button class="tab" onclick="switchTab('non-compliant')">Não Conformes</button>
             </div>
 
-            <!-- Conteúdo das Abas -->
-            <div id="general-tab" class="tab-content active">
-                <div class="table-container">
-                    <div class="table-header">
-                        <div class="table-title">Todos os Registros</div>
-                        <div class="table-actions">
-                            <button class="btn btn-secondary" onclick="exportCurrentTab('excel')">📊 Excel</button>
-                            <button class="btn btn-secondary" onclick="exportCurrentTab('pdf')">📄 PDF</button>
-                        </div>
-                    </div>
-                    <div class="table-wrapper">
-                        <table id="generalTable">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Responsável</th>
-                                    <th>Placa</th>
-                                    <th>Tipo de Ativo</th>
-                                    <th>Motorista</th>
-                                    <th>Status</th>
-                                    <th>Observações</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                    <div class="pagination" id="generalPagination"></div>
-                </div>
-            </div>
-
-            <div id="status-tab" class="tab-content">
-                <div class="table-container">
-                    <div class="table-header">
-                        <div class="table-title">Registros por Status</div>
-                        <div class="table-actions">
-                            <button class="btn btn-secondary" onclick="exportCurrentTab('excel')">📊 Excel</button>
-                            <button class="btn btn-secondary" onclick="exportCurrentTab('pdf')">📄 PDF</button>
-                        </div>
-                    </div>
-                    <div class="table-wrapper">
-                        <table id="statusTable">
-                            <thead>
-                                <tr>
-                                    <th>Status</th>
-                                    <th>Quantidade</th>
-                                    <th>Percentual</th>
-                                    <th>Última Ocorrência</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+            <!-- Tabelas -->
+            <div class="table-container">
+                <div class="table-header">
+                    <div class="table-title" id="tableTitle">Todos os Registros</div>
+                    <div class="table-actions">
+                        <button class="btn btn-secondary" onclick="exportToExcel()">📊 Excel</button>
+                        <button class="btn btn-secondary" onclick="exportToPDF()">📄 PDF</button>
                     </div>
                 </div>
-            </div>
-
-            <div id="nonconforme-tab" class="tab-content">
-                <div class="table-container">
-                    <div class="table-header">
-                        <div class="table-title">Registros Não Conformes</div>
-                        <div class="table-actions">
-                            <button class="btn btn-secondary" onclick="exportCurrentTab('excel')">📊 Excel</button>
-                            <button class="btn btn-secondary" onclick="exportCurrentTab('pdf')">📄 PDF</button>
-                        </div>
-                    </div>
-                    <div class="table-wrapper">
-                        <table id="nonconformeTable">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Responsável</th>
-                                    <th>Placa</th>
-                                    <th>Tipo de Ativo</th>
-                                    <th>Motorista</th>
-                                    <th>Problema</th>
-                                    <th>Observações</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                    <div class="pagination" id="nonconformePagination"></div>
+                <div class="table-wrapper">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Responsável</th>
+                                <th>Placa</th>
+                                <th>Tipo de Ativo</th>
+                                <th>Motorista</th>
+                                <th>Status</th>
+                                <th>Observações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
                 </div>
+                <div class="pagination" id="pagination"></div>
             </div>
         </div>
 
-        <!-- Seção de Filtros para Viagens -->
-        <div id="trips-section" class="filters-section">
-            <div class="filters-title">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                </svg>
-                <h2>Análise de Viagens</h2>
-            </div>
-            <div class="loading">
-                <div class="spinner"></div>
-                <p>Carregando dados de viagens...</p>
-            </div>
-        </div>
-
-        <!-- Seção de Filtros para Combustível -->
+        <!-- Seção Combustível -->
         <div id="fuel-section" class="filters-section">
             <div class="filters-title">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h6v-2.59c.73-.26 1.39-.71 1.91-1.32l.54-.75c.27-.38.73-.59 1.21-.59H17c1.66 0 3-1.34 3-3V9c0-.69-.28-1.32-.73-1.77zM12 10H6V5h6v5z"/>
+                    <path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2v-3h1c.55 0 1 .45 1 1v2.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V9c0-.69-.28-1.32-.73-1.77z"/>
                 </svg>
                 <h2>Gestão de Combustível</h2>
             </div>
 
             <div class="filters-grid">
                 <div class="filter-group">
-                    <label>Data Inicial</label>
-                    <input type="date" id="fuelStartDate" value="">
+                    <label for="fuelStartDate">Data Inicial</label>
+                    <input type="date" id="fuelStartDate">
                 </div>
                 <div class="filter-group">
-                    <label>Data Final</label>
-                    <input type="date" id="fuelEndDate" value="">
+                    <label for="fuelEndDate">Data Final</label>
+                    <input type="date" id="fuelEndDate">
                 </div>
                 <div class="filter-group">
-                    <label>Placa do Veículo</label>
+                    <label for="fuelPlateFilter">Placa do Veículo</label>
                     <select id="fuelPlateFilter">
                         <option value="">Todas as placas</option>
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label>Motorista</label>
+                    <label for="fuelDriverFilter">Motorista</label>
                     <select id="fuelDriverFilter">
                         <option value="">Todos os motoristas</option>
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label>Tipo de Combustível</label>
+                    <label for="fuelTypeFilter">Tipo de Combustível</label>
                     <select id="fuelTypeFilter">
                         <option value="">Todos os tipos</option>
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label>Estado</label>
+                    <label for="fuelStateFilter">Estado</label>
                     <select id="fuelStateFilter">
                         <option value="">Todos os estados</option>
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label>Centro de Custo</label>
+                    <label for="fuelCostCenterFilter">Centro de Custo</label>
                     <select id="fuelCostCenterFilter">
                         <option value="">Todos os centros</option>
                     </select>
@@ -856,198 +730,208 @@
                 <button class="btn btn-secondary" onclick="clearFuelFilters()">
                     🗑️ Limpar
                 </button>
-                <button class="btn btn-secondary" onclick="exportFuelData('excel')">
+                <button class="btn btn-secondary" onclick="exportFuelToExcel()">
                     📊 Excel
                 </button>
-                <button class="btn btn-secondary" onclick="exportFuelData('pdf')">
+                <button class="btn btn-secondary" onclick="exportFuelToPDF()">
                     📄 PDF
                 </button>
             </div>
 
             <!-- Métricas de Combustível -->
             <div class="fuel-metrics">
-                <div class="metric-card">
-                    <div class="metric-value" id="totalSupplies">0</div>
-                    <div class="metric-label">Total Abastecimentos</div>
+                <div class="fuel-metric">
+                    <div class="fuel-metric-value" id="totalSupplies">0</div>
+                    <div class="fuel-metric-label">Total Abastecimentos</div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value" id="totalLiters">0</div>
-                    <div class="metric-label">Total Litros</div>
+                <div class="fuel-metric">
+                    <div class="fuel-metric-value" id="totalLiters">0</div>
+                    <div class="fuel-metric-label">Total Litros</div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value" id="totalCost">R$ 0</div>
-                    <div class="metric-label">Custo Total (R$)</div>
+                <div class="fuel-metric">
+                    <div class="fuel-metric-value" id="totalCost">R$ 0,00</div>
+                    <div class="fuel-metric-label">Custo Total (R$)</div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value" id="avgCostPerKm">R$ 0</div>
-                    <div class="metric-label">Custo Médio/Km (R$)</div>
+                <div class="fuel-metric">
+                    <div class="fuel-metric-value" id="avgCostPerKm">R$ 0,000</div>
+                    <div class="fuel-metric-label">Custo Médio/Km (R$)</div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-value" id="avgConsumption">0 km/L</div>
-                    <div class="metric-label">Consumo Médio (Km/L)</div>
+                <div class="fuel-metric">
+                    <div class="fuel-metric-value" id="avgConsumption">0 km/L</div>
+                    <div class="fuel-metric-label">Consumo Médio (Km/L)</div>
                 </div>
             </div>
 
             <!-- Insights Automáticos -->
-            <div class="insights-section">
+            <div class="fuel-insights">
                 <div class="insights-title">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                     </svg>
-                    <h2>Insights Automáticos</h2>
+                    Insights Automáticos
                 </div>
                 <div id="fuelInsights">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Analisando dados para gerar insights...</p>
-                    </div>
+                    <div class="insight-item">Nenhum dado de combustível disponível para análise.</div>
                 </div>
             </div>
 
-            <!-- Gráficos de Combustível -->
-            <div class="fuel-charts">
+            <!-- Gráficos -->
+            <div class="charts-grid">
                 <div class="chart-container">
                     <div class="chart-title">
-                        📈 Custo por Km ao Longo do Tempo
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+                        </svg>
+                        Custo por Km ao Longo do Tempo
                     </div>
-                    <div class="chart-canvas">
+                    <div class="chart-wrapper">
                         <canvas id="costPerKmChart"></canvas>
                     </div>
                 </div>
 
                 <div class="chart-container">
                     <div class="chart-title">
-                        🏆 Ranking de Eficiência por Motorista
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Ranking de Eficiência por Motorista
                     </div>
-                    <div class="chart-canvas">
+                    <div class="chart-wrapper">
                         <canvas id="driverEfficiencyChart"></canvas>
                     </div>
                 </div>
 
                 <div class="chart-container">
                     <div class="chart-title">
-                        🗺️ Abastecimentos por Estado
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                        </svg>
+                        Abastecimentos por Estado
                     </div>
-                    <div class="chart-canvas">
-                        <canvas id="stateSupplyChart"></canvas>
+                    <div class="chart-wrapper">
+                        <canvas id="stateSuppliesChart"></canvas>
                     </div>
                 </div>
 
                 <div class="chart-container">
                     <div class="chart-title">
-                        ⛽ Distribuição por Tipo de Combustível
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33 0 1.38 1.12 2.5 2.5 2.5.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2v-3h1c.55 0 1 .45 1 1v2.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V9c0-.69-.28-1.32-.73-1.77z"/>
+                        </svg>
+                        Distribuição por Tipo de Combustível
                     </div>
-                    <div class="chart-canvas">
+                    <div class="chart-wrapper">
                         <canvas id="fuelTypeChart"></canvas>
                     </div>
                 </div>
             </div>
 
-            <!-- Abas de Combustível -->
-            <div class="tabs">
-                <button class="tab active" onclick="showFuelTab('byPlate')">Abastecimentos por Placa</button>
-                <button class="tab" onclick="showFuelTab('byDriver')">Abastecimentos por Motorista</button>
-                <button class="tab" onclick="showFuelTab('cardBalance')">Saldo Cartão por Motorista</button>
-            </div>
-
-            <!-- Conteúdo das Abas de Combustível -->
-            <div id="byPlate-tab" class="tab-content active">
-                <div class="table-container">
-                    <div class="table-header">
-                        <div class="table-title">Abastecimentos por Placa</div>
-                        <div class="table-actions">
-                            <button class="btn btn-secondary" onclick="exportFuelTab('byPlate', 'excel')">📊 Excel</button>
-                            <button class="btn btn-secondary" onclick="exportFuelTab('byPlate', 'pdf')">📄 PDF</button>
-                        </div>
+            <!-- Tabelas de Combustível -->
+            <div class="table-container">
+                <div class="table-header">
+                    <div class="table-title">Abastecimentos por Placa</div>
+                    <div class="table-actions">
+                        <button class="btn btn-secondary" onclick="exportPlateTableToExcel()">📊 Excel</button>
+                        <button class="btn btn-secondary" onclick="exportPlateTableToPDF()">📄 PDF</button>
                     </div>
-                    <div class="table-wrapper">
-                        <table id="byPlateTable">
-                            <thead>
-                                <tr>
-                                    <th>Placa</th>
-                                    <th>Modelo</th>
-                                    <th>Tipo Combustível</th>
-                                    <th>Litros</th>
-                                    <th>Valor Unitário</th>
-                                    <th>Valor Total</th>
-                                    <th>Odômetro</th>
-                                    <th>Odômetro Anterior</th>
-                                    <th>Centro de Custo</th>
-                                    <th>Estado</th>
-                                    <th>Data</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                    <div class="pagination" id="byPlatePagination"></div>
+                </div>
+                <div class="table-wrapper">
+                    <table id="plateTable">
+                        <thead>
+                            <tr>
+                                <th>Placa</th>
+                                <th>Modelo</th>
+                                <th>Tipo Combustível</th>
+                                <th>Litros</th>
+                                <th>Valor Unitário</th>
+                                <th>Valor Total</th>
+                                <th>Odômetro</th>
+                                <th>Km Anterior</th>
+                                <th>Centro Custo</th>
+                                <th>Estado</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="plateTableBody">
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <div id="byDriver-tab" class="tab-content">
-                <div class="table-container">
-                    <div class="table-header">
-                        <div class="table-title">Abastecimentos por Motorista</div>
-                        <div class="table-actions">
-                            <button class="btn btn-secondary" onclick="exportFuelTab('byDriver', 'excel')">📊 Excel</button>
-                            <button class="btn btn-secondary" onclick="exportFuelTab('byDriver', 'pdf')">📄 PDF</button>
-                        </div>
+            <div class="table-container">
+                <div class="table-header">
+                    <div class="table-title">Abastecimentos por Motorista</div>
+                    <div class="table-actions">
+                        <button class="btn btn-secondary" onclick="exportDriverTableToExcel()">📊 Excel</button>
+                        <button class="btn btn-secondary" onclick="exportDriverTableToPDF()">📄 PDF</button>
                     </div>
-                    <div class="table-wrapper">
-                        <table id="byDriverTable">
-                            <thead>
-                                <tr>
-                                    <th>Motorista</th>
-                                    <th>Modelo Veículo</th>
-                                    <th>Tipo Combustível</th>
-                                    <th>Litros</th>
-                                    <th>Valor Unitário</th>
-                                    <th>Valor Total</th>
-                                    <th>Odômetro</th>
-                                    <th>Odômetro Anterior</th>
-                                    <th>Centro de Custo</th>
-                                    <th>Estado</th>
-                                    <th>Data</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                    <div class="pagination" id="byDriverPagination"></div>
+                </div>
+                <div class="table-wrapper">
+                    <table id="driverTable">
+                        <thead>
+                            <tr>
+                                <th>Motorista</th>
+                                <th>Modelo</th>
+                                <th>Tipo Combustível</th>
+                                <th>Litros</th>
+                                <th>Valor Unitário</th>
+                                <th>Valor Total</th>
+                                <th>Odômetro</th>
+                                <th>Km Anterior</th>
+                                <th>Centro Custo</th>
+                                <th>Estado</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="driverTableBody">
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <div id="cardBalance-tab" class="tab-content">
-                <div class="table-container">
-                    <div class="table-header">
-                        <div class="table-title">Saldo Cartão por Motorista</div>
-                        <div class="table-actions">
-                            <button class="btn btn-secondary" onclick="exportFuelTab('cardBalance', 'excel')">📊 Excel</button>
-                            <button class="btn btn-secondary" onclick="exportFuelTab('cardBalance', 'pdf')">📄 PDF</button>
-                        </div>
+            <div class="table-container">
+                <div class="table-header">
+                    <div class="table-title">Saldo Cartão Combustível por Motorista</div>
+                    <div class="table-actions">
+                        <button class="btn btn-secondary" onclick="exportCardTableToExcel()">📊 Excel</button>
+                        <button class="btn btn-secondary" onclick="exportCardTableToPDF()">📄 PDF</button>
                     </div>
-                    <div class="table-wrapper">
-                        <table id="cardBalanceTable">
-                            <thead>
-                                <tr>
-                                    <th>Motorista</th>
-                                    <th>Cartão</th>
-                                    <th>Saldo Cartão</th>
-                                    <th>Base</th>
-                                    <th>Centro de Custo</th>
-                                    <th>Estado</th>
-                                    <th>Data</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                    <div class="pagination" id="cardBalancePagination"></div>
+                </div>
+                <div class="table-wrapper">
+                    <table id="cardTable">
+                        <thead>
+                            <tr>
+                                <th>Motorista</th>
+                                <th>Cartão</th>
+                                <th>Saldo</th>
+                                <th>Base</th>
+                                <th>Centro Custo</th>
+                                <th>Estado</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cardTableBody">
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <!-- Seção de Filtros para Manutenção -->
+        <!-- Seção Viagens -->
+        <div id="trips-section" class="filters-section">
+            <div class="filters-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                </svg>
+                <h2>Gestão de Viagens</h2>
+            </div>
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Carregando dados de viagens...</p>
+            </div>
+        </div>
+
+        <!-- Seção Manutenção -->
         <div id="maintenance-section" class="filters-section">
             <div class="filters-title">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -1080,6 +964,8 @@
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Dashboard inicializando...');
+            
             // Definir datas padrão (últimos 30 dias)
             const today = new Date();
             const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
@@ -1090,19 +976,34 @@
             document.getElementById('fuelStartDate').value = thirtyDaysAgo.toISOString().split('T')[0];
             document.getElementById('fuelEndDate').value = today.toISOString().split('T')[0];
             
+            // Adicionar event listeners aos cards
+            document.querySelectorAll('.nav-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const collection = this.getAttribute('data-collection');
+                    console.log('Card clicado:', collection);
+                    changeCollection(collection);
+                });
+            });
+            
             // Ativar primeira seção
+            console.log('Ativando seção checklist...');
             changeCollection('checklist');
         });
 
         // Mudança de coleção
         function changeCollection(collection) {
+            console.log('Mudando para coleção:', collection);
+            
             // Remover classe active de todos os cards
             document.querySelectorAll('.nav-card').forEach(card => {
                 card.classList.remove('active');
             });
             
             // Adicionar classe active ao card selecionado
-            document.querySelector(`[data-collection="${collection}"]`).classList.add('active');
+            const selectedCard = document.querySelector(`[data-collection="${collection}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('active');
+            }
             
             // Esconder todas as seções
             document.querySelectorAll('.filters-section').forEach(section => {
@@ -1110,14 +1011,19 @@
             });
             
             // Mostrar seção correspondente
-            document.getElementById(`${collection}-section`).classList.add('active');
+            const section = document.getElementById(`${collection}-section`);
+            if (section) {
+                section.classList.add('active');
+            }
             
             currentCollection = collection;
             
             // Carregar dados específicos
             if (collection === 'checklist') {
+                console.log('Carregando dados do checklist...');
                 loadChecklistData();
             } else if (collection === 'fuel') {
+                console.log('Carregando dados de combustível...');
                 loadFuelData();
             }
         }
@@ -1125,12 +1031,17 @@
         // Carregar dados do checklist
         async function loadChecklistData() {
             try {
+                console.log('Fazendo requisição para checklist...');
                 const response = await fetch(`${API_BASE_URL}/checklist?enterpriseId=${DEFAULT_ENTERPRISE_ID}`);
                 const data = await response.json();
+                
+                console.log('Resposta da API checklist:', data);
                 
                 if (data.data && Array.isArray(data.data)) {
                     currentData = data.data;
                     filteredData = [...currentData];
+                    
+                    console.log('Dados carregados:', currentData.length, 'registros');
                     
                     // Popular filtros
                     populateFilters();
@@ -1144,23 +1055,32 @@
                     console.warn('Dados de checklist não encontrados ou formato inválido');
                     currentData = [];
                     filteredData = [];
+                    updateStatistics();
+                    renderTables();
                 }
             } catch (error) {
                 console.error('Erro ao carregar dados do checklist:', error);
                 currentData = [];
                 filteredData = [];
+                updateStatistics();
+                renderTables();
             }
         }
 
         // Carregar dados de combustível
         async function loadFuelData() {
             try {
+                console.log('Fazendo requisição para combustível...');
                 const response = await fetch(`${API_BASE_URL}/alelo-supply-history?enterpriseId=${DEFAULT_ENTERPRISE_ID}`);
                 const data = await response.json();
+                
+                console.log('Resposta da API combustível:', data);
                 
                 if (data.data && Array.isArray(data.data)) {
                     fuelData = data.data;
                     filteredFuelData = [...fuelData];
+                    
+                    console.log('Dados de combustível carregados:', fuelData.length, 'registros');
                     
                     // Popular filtros de combustível
                     populateFuelFilters();
@@ -1180,11 +1100,17 @@
                     console.warn('Dados de combustível não encontrados ou formato inválido');
                     fuelData = [];
                     filteredFuelData = [];
+                    updateFuelMetrics();
+                    generateFuelInsights();
+                    renderFuelTables();
                 }
             } catch (error) {
                 console.error('Erro ao carregar dados de combustível:', error);
                 fuelData = [];
                 filteredFuelData = [];
+                updateFuelMetrics();
+                generateFuelInsights();
+                renderFuelTables();
             }
         }
 
@@ -1216,163 +1142,35 @@
             populateSelect('fuelCostCenterFilter', costCenters);
         }
 
-        // Popular select
+        // Função auxiliar para popular selects
         function populateSelect(selectId, options) {
             const select = document.getElementById(selectId);
-            const currentValue = select.value;
+            if (!select) return;
             
             // Manter primeira opção (Todos...)
-            const firstOption = select.options[0];
+            const firstOption = select.children[0];
             select.innerHTML = '';
             select.appendChild(firstOption);
             
-            options.sort().forEach(option => {
+            options.forEach(option => {
                 const optionElement = document.createElement('option');
                 optionElement.value = option;
                 optionElement.textContent = option;
                 select.appendChild(optionElement);
             });
-            
-            select.value = currentValue;
-        }
-
-        // Aplicar filtros do checklist
-        function applyFilters() {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            const responsible = document.getElementById('responsibleFilter').value;
-            const plate = document.getElementById('plateFilter').value;
-            const assetType = document.getElementById('assetTypeFilter').value;
-            const driver = document.getElementById('driverFilter').value;
-
-            filteredData = currentData.filter(item => {
-                let matches = true;
-
-                if (startDate && item.registrationDate) {
-                    matches = matches && new Date(item.registrationDate) >= new Date(startDate);
-                }
-
-                if (endDate && item.registrationDate) {
-                    matches = matches && new Date(item.registrationDate) <= new Date(endDate);
-                }
-
-                if (responsible) {
-                    matches = matches && item.userRespForRegistration === responsible;
-                }
-
-                if (plate) {
-                    matches = matches && item.vehiclePlate === plate;
-                }
-
-                if (assetType) {
-                    matches = matches && item.planName === assetType;
-                }
-
-                if (driver) {
-                    matches = matches && item.driverName === driver;
-                }
-
-                return matches;
-            });
-
-            currentPage = 1;
-            updateStatistics();
-            renderTables();
-        }
-
-        // Aplicar filtros de combustível
-        function applyFuelFilters() {
-            const startDate = document.getElementById('fuelStartDate').value;
-            const endDate = document.getElementById('fuelEndDate').value;
-            const plate = document.getElementById('fuelPlateFilter').value;
-            const driver = document.getElementById('fuelDriverFilter').value;
-            const fuelType = document.getElementById('fuelTypeFilter').value;
-            const state = document.getElementById('fuelStateFilter').value;
-            const costCenter = document.getElementById('fuelCostCenterFilter').value;
-
-            filteredFuelData = fuelData.filter(item => {
-                let matches = true;
-
-                if (startDate && item.TransactionDate) {
-                    matches = matches && new Date(item.TransactionDate) >= new Date(startDate);
-                }
-
-                if (endDate && item.TransactionDate) {
-                    matches = matches && new Date(item.TransactionDate) <= new Date(endDate);
-                }
-
-                if (plate) {
-                    matches = matches && item.VehiclePlate === plate;
-                }
-
-                if (driver) {
-                    matches = matches && item.DriverName === driver;
-                }
-
-                if (fuelType) {
-                    matches = matches && item.FuelType === fuelType;
-                }
-
-                if (state) {
-                    matches = matches && item.MerchantState === state;
-                }
-
-                if (costCenter) {
-                    matches = matches && item.CostCenter === costCenter;
-                }
-
-                return matches;
-            });
-
-            updateFuelMetrics();
-            generateFuelInsights();
-            renderFuelCharts();
-            renderFuelTables();
-        }
-
-        // Limpar filtros
-        function clearFilters() {
-            document.getElementById('startDate').value = '';
-            document.getElementById('endDate').value = '';
-            document.getElementById('responsibleFilter').value = '';
-            document.getElementById('plateFilter').value = '';
-            document.getElementById('assetTypeFilter').value = '';
-            document.getElementById('driverFilter').value = '';
-
-            filteredData = [...currentData];
-            currentPage = 1;
-            updateStatistics();
-            renderTables();
-        }
-
-        // Limpar filtros de combustível
-        function clearFuelFilters() {
-            document.getElementById('fuelStartDate').value = '';
-            document.getElementById('fuelEndDate').value = '';
-            document.getElementById('fuelPlateFilter').value = '';
-            document.getElementById('fuelDriverFilter').value = '';
-            document.getElementById('fuelTypeFilter').value = '';
-            document.getElementById('fuelStateFilter').value = '';
-            document.getElementById('fuelCostCenterFilter').value = '';
-
-            filteredFuelData = [...fuelData];
-            updateFuelMetrics();
-            generateFuelInsights();
-            renderFuelCharts();
-            renderFuelTables();
         }
 
         // Atualizar estatísticas do checklist
         function updateStatistics() {
             const total = filteredData.length;
-            const conforme = filteredData.filter(item => item.status === 'Conforme' || item.status === 'CONFORME').length;
-            const nonConforme = total - conforme;
-            const percentage = total > 0 ? ((conforme / total) * 100).toFixed(1) : 0;
+            const compliant = filteredData.filter(item => !item.noCompliant).length;
+            const nonCompliant = total - compliant;
+            const complianceRate = total > 0 ? ((compliant / total) * 100).toFixed(1) : 0;
 
             document.getElementById('totalRecords').textContent = total;
-            document.getElementById('conformeRecords').textContent = conforme;
-            document.getElementById('nonConformeRecords').textContent = nonConforme;
-            document.getElementById('conformePercentage').textContent = `${percentage}%`;
+            document.getElementById('compliantRecords').textContent = compliant;
+            document.getElementById('nonCompliantRecords').textContent = nonCompliant;
+            document.getElementById('complianceRate').textContent = `${complianceRate}%`;
         }
 
         // Atualizar métricas de combustível
@@ -1381,37 +1179,32 @@
             const totalLiters = filteredFuelData.reduce((sum, item) => sum + (parseFloat(item.AmountLiters) || 0), 0);
             const totalCost = filteredFuelData.reduce((sum, item) => sum + (parseFloat(item.StockedValue) || 0), 0);
             
-            // Calcular custo médio por km e consumo médio
+            // Calcular consumo médio e custo por km
             let totalKm = 0;
-            let validConsumptionRecords = 0;
-            let totalConsumption = 0;
-
+            let validRecords = 0;
+            
             filteredFuelData.forEach(item => {
-                const kmTraveled = parseFloat(item.KmTraveled) || 0;
-                if (kmTraveled > 0) {
-                    totalKm += kmTraveled;
-                    const liters = parseFloat(item.AmountLiters) || 0;
-                    if (liters > 0) {
-                        totalConsumption += kmTraveled / liters;
-                        validConsumptionRecords++;
-                    }
+                const km = parseFloat(item.KmTraveled) || 0;
+                if (km > 0) {
+                    totalKm += km;
+                    validRecords++;
                 }
             });
-
-            const avgCostPerKm = totalKm > 0 ? totalCost / totalKm : 0;
-            const avgConsumption = validConsumptionRecords > 0 ? totalConsumption / validConsumptionRecords : 0;
+            
+            const avgCostPerKm = totalKm > 0 ? (totalCost / totalKm) : 0;
+            const avgConsumption = totalLiters > 0 && totalKm > 0 ? (totalKm / totalLiters) : 0;
 
             document.getElementById('totalSupplies').textContent = total;
-            document.getElementById('totalLiters').textContent = totalLiters.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
-            document.getElementById('totalCost').textContent = `R$ ${totalCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-            document.getElementById('avgCostPerKm').textContent = `R$ ${avgCostPerKm.toLocaleString('pt-BR', { minimumFractionDigits: 3 })}`;
-            document.getElementById('avgConsumption').textContent = `${avgConsumption.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} km/L`;
+            document.getElementById('totalLiters').textContent = totalLiters.toFixed(1);
+            document.getElementById('totalCost').textContent = `R$ ${totalCost.toFixed(2).replace('.', ',')}`;
+            document.getElementById('avgCostPerKm').textContent = `R$ ${avgCostPerKm.toFixed(3).replace('.', ',')}`;
+            document.getElementById('avgConsumption').textContent = `${avgConsumption.toFixed(1)} km/L`;
         }
 
-        // Gerar insights de combustível
+        // Gerar insights automáticos
         function generateFuelInsights() {
             const insights = [];
-
+            
             if (filteredFuelData.length === 0) {
                 insights.push('Nenhum dado de combustível disponível para análise.');
             } else {
@@ -1419,33 +1212,33 @@
                 const vehicleEfficiency = {};
                 filteredFuelData.forEach(item => {
                     const plate = item.VehiclePlate;
-                    const kmTraveled = parseFloat(item.KmTraveled) || 0;
+                    const km = parseFloat(item.KmTraveled) || 0;
                     const liters = parseFloat(item.AmountLiters) || 0;
                     
-                    if (plate && kmTraveled > 0 && liters > 0) {
+                    if (km > 0 && liters > 0) {
                         if (!vehicleEfficiency[plate]) {
                             vehicleEfficiency[plate] = { totalKm: 0, totalLiters: 0 };
                         }
-                        vehicleEfficiency[plate].totalKm += kmTraveled;
+                        vehicleEfficiency[plate].totalKm += km;
                         vehicleEfficiency[plate].totalLiters += liters;
                     }
                 });
-
-                let mostEfficientVehicle = null;
+                
+                let mostEfficient = null;
                 let bestEfficiency = 0;
-
+                
                 Object.keys(vehicleEfficiency).forEach(plate => {
                     const efficiency = vehicleEfficiency[plate].totalKm / vehicleEfficiency[plate].totalLiters;
                     if (efficiency > bestEfficiency) {
                         bestEfficiency = efficiency;
-                        mostEfficientVehicle = plate;
+                        mostEfficient = plate;
                     }
                 });
-
-                if (mostEfficientVehicle) {
-                    insights.push(`🏆 O veículo ${mostEfficientVehicle} é o mais eficiente com ${bestEfficiency.toFixed(1)} km/L.`);
+                
+                if (mostEfficient) {
+                    insights.push(`🏆 O veículo ${mostEfficient} é o mais eficiente com ${bestEfficiency.toFixed(1)} km/L.`);
                 }
-
+                
                 // Estado com menor custo por km
                 const stateCosts = {};
                 filteredFuelData.forEach(item => {
@@ -1461,71 +1254,50 @@
                         stateCosts[state].totalKm += km;
                     }
                 });
-
+                
                 let cheapestState = null;
-                let lowestCostPerKm = Infinity;
-
+                let lowestCost = Infinity;
+                
                 Object.keys(stateCosts).forEach(state => {
                     const costPerKm = stateCosts[state].totalCost / stateCosts[state].totalKm;
-                    if (costPerKm < lowestCostPerKm) {
-                        lowestCostPerKm = costPerKm;
+                    if (costPerKm < lowestCost) {
+                        lowestCost = costPerKm;
                         cheapestState = state;
                     }
                 });
-
+                
                 if (cheapestState) {
-                    insights.push(`💰 O estado ${cheapestState} apresenta o menor custo por km: R$ ${lowestCostPerKm.toFixed(2)}.`);
+                    insights.push(`💰 O estado ${cheapestState} apresenta o menor custo por km: R$ ${lowestCost.toFixed(2).replace('.', ',')}.`);
                 }
-
+                
                 // Tipo de combustível mais usado
-                const fuelTypeCounts = {};
+                const fuelTypes = {};
                 filteredFuelData.forEach(item => {
-                    const fuelType = item.FuelType;
-                    if (fuelType) {
-                        fuelTypeCounts[fuelType] = (fuelTypeCounts[fuelType] || 0) + 1;
+                    const type = item.FuelType;
+                    if (type) {
+                        fuelTypes[type] = (fuelTypes[type] || 0) + 1;
                     }
                 });
-
-                let mostUsedFuelType = null;
-                let maxCount = 0;
-
-                Object.keys(fuelTypeCounts).forEach(fuelType => {
-                    if (fuelTypeCounts[fuelType] > maxCount) {
-                        maxCount = fuelTypeCounts[fuelType];
-                        mostUsedFuelType = fuelType;
-                    }
-                });
-
-                if (mostUsedFuelType) {
-                    const percentage = ((maxCount / filteredFuelData.length) * 100).toFixed(1);
-                    insights.push(`⛽ ${mostUsedFuelType} representa ${percentage}% dos abastecimentos realizados.`);
+                
+                const mostUsedType = Object.keys(fuelTypes).reduce((a, b) => fuelTypes[a] > fuelTypes[b] ? a : b, '');
+                if (mostUsedType) {
+                    const percentage = ((fuelTypes[mostUsedType] / filteredFuelData.length) * 100).toFixed(1);
+                    insights.push(`⛽ ${mostUsedType} representa ${percentage}% dos abastecimentos realizados.`);
                 }
-
+                
                 // Motorista com mais abastecimentos
                 const driverCounts = {};
                 filteredFuelData.forEach(item => {
-                    const driver = item.DriverName;
-                    if (driver) {
-                        driverCounts[driver] = (driverCounts[driver] || 0) + 1;
-                    }
+                    const driver = item.DriverName || 'Veículo sem motorista associado';
+                    driverCounts[driver] = (driverCounts[driver] || 0) + 1;
                 });
-
-                let topDriver = null;
-                let maxDriverCount = 0;
-
-                Object.keys(driverCounts).forEach(driver => {
-                    if (driverCounts[driver] > maxDriverCount) {
-                        maxDriverCount = driverCounts[driver];
-                        topDriver = driver;
-                    }
-                });
-
+                
+                const topDriver = Object.keys(driverCounts).reduce((a, b) => driverCounts[a] > driverCounts[b] ? a : b, '');
                 if (topDriver) {
-                    insights.push(`👨‍💼 O motorista ${topDriver} realizou ${maxDriverCount} abastecimentos no período analisado.`);
+                    insights.push(`🚗 O motorista ${topDriver} realizou ${driverCounts[topDriver]} abastecimentos no período analisado.`);
                 }
             }
-
-            // Renderizar insights
+            
             const insightsContainer = document.getElementById('fuelInsights');
             insightsContainer.innerHTML = insights.map(insight => 
                 `<div class="insight-item">${insight}</div>`
@@ -1538,7 +1310,7 @@
             Object.values(fuelCharts).forEach(chart => {
                 if (chart) chart.destroy();
             });
-
+            
             // Gráfico de custo por km ao longo do tempo
             renderCostPerKmChart();
             
@@ -1546,20 +1318,20 @@
             renderDriverEfficiencyChart();
             
             // Gráfico de abastecimentos por estado
-            renderStateSupplyChart();
+            renderStateSuppliesChart();
             
             // Gráfico de distribuição por tipo de combustível
             renderFuelTypeChart();
         }
 
-        // Gráfico de custo por km ao longo do tempo
         function renderCostPerKmChart() {
-            const ctx = document.getElementById('costPerKmChart').getContext('2d');
+            const ctx = document.getElementById('costPerKmChart');
+            if (!ctx) return;
             
             // Agrupar dados por data
             const dailyData = {};
             filteredFuelData.forEach(item => {
-                const date = item.TransactionDate ? item.TransactionDate.split('T')[0] : null;
+                const date = item.TransactionDate ? item.TransactionDate.split('T')[0] : '';
                 const cost = parseFloat(item.StockedValue) || 0;
                 const km = parseFloat(item.KmTraveled) || 0;
                 
@@ -1571,13 +1343,13 @@
                     dailyData[date].totalKm += km;
                 }
             });
-
+            
             const sortedDates = Object.keys(dailyData).sort();
             const costPerKmData = sortedDates.map(date => {
                 const data = dailyData[date];
                 return data.totalKm > 0 ? data.totalCost / data.totalKm : 0;
             });
-
+            
             fuelCharts.costPerKm = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -1595,16 +1367,16 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            labels: { color: '#ffffff' }
+                            labels: { color: '#cbd5e0' }
                         }
                     },
                     scales: {
                         x: {
-                            ticks: { color: '#cbd5e0' },
+                            ticks: { color: '#a0aec0' },
                             grid: { color: '#4a5568' }
                         },
                         y: {
-                            ticks: { color: '#cbd5e0' },
+                            ticks: { color: '#a0aec0' },
                             grid: { color: '#4a5568' }
                         }
                     }
@@ -1612,31 +1384,32 @@
             });
         }
 
-        // Gráfico de eficiência por motorista
         function renderDriverEfficiencyChart() {
-            const ctx = document.getElementById('driverEfficiencyChart').getContext('2d');
+            const ctx = document.getElementById('driverEfficiencyChart');
+            if (!ctx) return;
             
+            // Calcular eficiência por motorista
             const driverEfficiency = {};
             filteredFuelData.forEach(item => {
-                const driver = item.DriverName;
-                const kmTraveled = parseFloat(item.KmTraveled) || 0;
+                const driver = item.DriverName || 'Veículo sem motorista associado';
+                const km = parseFloat(item.KmTraveled) || 0;
                 const liters = parseFloat(item.AmountLiters) || 0;
                 
-                if (driver && kmTraveled > 0 && liters > 0) {
+                if (km > 0 && liters > 0) {
                     if (!driverEfficiency[driver]) {
                         driverEfficiency[driver] = { totalKm: 0, totalLiters: 0 };
                     }
-                    driverEfficiency[driver].totalKm += kmTraveled;
+                    driverEfficiency[driver].totalKm += km;
                     driverEfficiency[driver].totalLiters += liters;
                 }
             });
-
+            
             const drivers = Object.keys(driverEfficiency).slice(0, 10); // Top 10
             const efficiencyData = drivers.map(driver => {
                 const data = driverEfficiency[driver];
                 return data.totalLiters > 0 ? data.totalKm / data.totalLiters : 0;
             });
-
+            
             fuelCharts.driverEfficiency = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1652,16 +1425,16 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            labels: { color: '#ffffff' }
+                            labels: { color: '#cbd5e0' }
                         }
                     },
                     scales: {
                         x: {
-                            ticks: { color: '#cbd5e0' },
+                            ticks: { color: '#a0aec0' },
                             grid: { color: '#4a5568' }
                         },
                         y: {
-                            ticks: { color: '#cbd5e0' },
+                            ticks: { color: '#a0aec0' },
                             grid: { color: '#4a5568' }
                         }
                     }
@@ -1669,10 +1442,11 @@
             });
         }
 
-        // Gráfico de abastecimentos por estado
-        function renderStateSupplyChart() {
-            const ctx = document.getElementById('stateSupplyChart').getContext('2d');
+        function renderStateSuppliesChart() {
+            const ctx = document.getElementById('stateSuppliesChart');
+            if (!ctx) return;
             
+            // Contar abastecimentos por estado
             const stateCounts = {};
             filteredFuelData.forEach(item => {
                 const state = item.MerchantState;
@@ -1680,12 +1454,12 @@
                     stateCounts[state] = (stateCounts[state] || 0) + 1;
                 }
             });
-
+            
             const states = Object.keys(stateCounts);
             const counts = Object.values(stateCounts);
-            const colors = ['#f59e0b', '#10b981', '#8b5cf6', '#ef4444', '#14b8a6', '#f97316'];
-
-            fuelCharts.stateSupply = new Chart(ctx, {
+            const colors = ['#f59e0b', '#14b8a6', '#8b5cf6', '#ef4444', '#10b981', '#f97316'];
+            
+            fuelCharts.stateSupplies = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: states,
@@ -1700,36 +1474,37 @@
                     plugins: {
                         legend: {
                             position: 'bottom',
-                            labels: { color: '#ffffff' }
+                            labels: { color: '#cbd5e0' }
                         }
                     }
                 }
             });
         }
 
-        // Gráfico de distribuição por tipo de combustível
         function renderFuelTypeChart() {
-            const ctx = document.getElementById('fuelTypeChart').getContext('2d');
+            const ctx = document.getElementById('fuelTypeChart');
+            if (!ctx) return;
             
-            const fuelTypeCounts = {};
+            // Contar por tipo de combustível
+            const typeCounts = {};
             filteredFuelData.forEach(item => {
-                const fuelType = item.FuelType;
-                if (fuelType) {
-                    fuelTypeCounts[fuelType] = (fuelTypeCounts[fuelType] || 0) + 1;
+                const type = item.FuelType;
+                if (type) {
+                    typeCounts[type] = (typeCounts[type] || 0) + 1;
                 }
             });
-
-            const fuelTypes = Object.keys(fuelTypeCounts);
-            const counts = Object.values(fuelTypeCounts);
-            const colors = ['#f59e0b', '#10b981', '#8b5cf6', '#ef4444'];
-
+            
+            const types = Object.keys(typeCounts);
+            const counts = Object.values(typeCounts);
+            const colors = ['#f59e0b', '#14b8a6', '#8b5cf6', '#ef4444'];
+            
             fuelCharts.fuelType = new Chart(ctx, {
                 type: 'pie',
                 data: {
-                    labels: fuelTypes,
+                    labels: types,
                     datasets: [{
                         data: counts,
-                        backgroundColor: colors.slice(0, fuelTypes.length)
+                        backgroundColor: colors.slice(0, types.length)
                     }]
                 },
                 options: {
@@ -1738,292 +1513,342 @@
                     plugins: {
                         legend: {
                             position: 'bottom',
-                            labels: { color: '#ffffff' }
+                            labels: { color: '#cbd5e0' }
                         }
                     }
                 }
             });
         }
 
-        // Renderizar tabelas do checklist
-        function renderTables() {
-            renderGeneralTable();
-            renderStatusTable();
-            renderNonConformeTable();
-        }
-
         // Renderizar tabelas de combustível
         function renderFuelTables() {
-            renderByPlateTable();
-            renderByDriverTable();
-            renderCardBalanceTable();
+            renderPlateTable();
+            renderDriverTable();
+            renderCardTable();
         }
 
-        // Renderizar tabela geral
-        function renderGeneralTable() {
-            const tbody = document.querySelector('#generalTable tbody');
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const pageData = filteredData.slice(startIndex, endIndex);
-
-            tbody.innerHTML = pageData.map(item => `
-                <tr>
-                    <td>${formatDate(item.registrationDate)}</td>
-                    <td>${item.userRespForRegistration || '-'}</td>
-                    <td>${item.vehiclePlate || '-'}</td>
-                    <td>${item.planName || '-'}</td>
-                    <td>${item.driverName || '-'}</td>
-                    <td><span class="status ${item.status?.toLowerCase()}">${item.status || '-'}</span></td>
-                    <td>${item.observations || '-'}</td>
-                </tr>
-            `).join('');
-
-            renderPagination('generalPagination', filteredData.length);
-        }
-
-        // Renderizar tabela por status
-        function renderStatusTable() {
-            const statusCounts = {};
-            filteredData.forEach(item => {
-                const status = item.status || 'Não informado';
-                statusCounts[status] = (statusCounts[status] || 0) + 1;
-            });
-
-            const tbody = document.querySelector('#statusTable tbody');
-            const total = filteredData.length;
-
-            tbody.innerHTML = Object.keys(statusCounts).map(status => {
-                const count = statusCounts[status];
-                const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
-                const lastOccurrence = filteredData
-                    .filter(item => item.status === status)
-                    .sort((a, b) => new Date(b.registrationDate) - new Date(a.registrationDate))[0];
-
-                return `
-                    <tr>
-                        <td><span class="status ${status.toLowerCase()}">${status}</span></td>
-                        <td>${count}</td>
-                        <td>${percentage}%</td>
-                        <td>${lastOccurrence ? formatDate(lastOccurrence.registrationDate) : '-'}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        // Renderizar tabela não conforme
-        function renderNonConformeTable() {
-            const nonConformeData = filteredData.filter(item => 
-                item.status !== 'Conforme' && item.status !== 'CONFORME'
-            );
-
-            const tbody = document.querySelector('#nonconformeTable tbody');
-            tbody.innerHTML = nonConformeData.map(item => `
-                <tr>
-                    <td>${formatDate(item.registrationDate)}</td>
-                    <td>${item.userRespForRegistration || '-'}</td>
-                    <td>${item.vehiclePlate || '-'}</td>
-                    <td>${item.planName || '-'}</td>
-                    <td>${item.driverName || '-'}</td>
-                    <td><span class="status ${item.status?.toLowerCase()}">${item.status || '-'}</span></td>
-                    <td>${item.observations || '-'}</td>
-                </tr>
-            `).join('');
-
-            renderPagination('nonconformePagination', nonConformeData.length);
-        }
-
-        // Renderizar tabela por placa
-        function renderByPlateTable() {
-            const tbody = document.querySelector('#byPlateTable tbody');
-            tbody.innerHTML = filteredFuelData.map(item => `
-                <tr>
+        function renderPlateTable() {
+            const tbody = document.getElementById('plateTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            filteredFuelData.forEach(item => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
                     <td>${item.VehiclePlate || '-'}</td>
                     <td>${item.VehicleModel || '-'}</td>
                     <td>${item.FuelType || '-'}</td>
-                    <td>${parseFloat(item.AmountLiters || 0).toFixed(1)}</td>
-                    <td>R$ ${parseFloat(item.UnitValue || 0).toFixed(2)}</td>
-                    <td>R$ ${parseFloat(item.StockedValue || 0).toFixed(2)}</td>
+                    <td>${item.AmountLiters || '-'}</td>
+                    <td>R$ ${(parseFloat(item.UnitValue) || 0).toFixed(2).replace('.', ',')}</td>
+                    <td>R$ ${(parseFloat(item.StockedValue) || 0).toFixed(2).replace('.', ',')}</td>
                     <td>${item.Odometer || '-'}</td>
                     <td>${item.PreviousOdometer || '-'}</td>
                     <td>${item.CostCenter || '-'}</td>
                     <td>${item.MerchantState || '-'}</td>
-                    <td>${formatDate(item.TransactionDate)}</td>
-                </tr>
-            `).join('');
+                    <td>${item.TransactionDate ? new Date(item.TransactionDate).toLocaleDateString('pt-BR') : '-'}</td>
+                `;
+            });
         }
 
-        // Renderizar tabela por motorista
-        function renderByDriverTable() {
-            const tbody = document.querySelector('#byDriverTable tbody');
-            tbody.innerHTML = filteredFuelData.map(item => `
-                <tr>
-                    <td>${item.DriverName || '-'}</td>
+        function renderDriverTable() {
+            const tbody = document.getElementById('driverTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            filteredFuelData.forEach(item => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${item.DriverName || 'Veículo sem motorista associado'}</td>
                     <td>${item.VehicleModel || '-'}</td>
                     <td>${item.FuelType || '-'}</td>
-                    <td>${parseFloat(item.AmountLiters || 0).toFixed(1)}</td>
-                    <td>R$ ${parseFloat(item.UnitValue || 0).toFixed(2)}</td>
-                    <td>R$ ${parseFloat(item.StockedValue || 0).toFixed(2)}</td>
+                    <td>${item.AmountLiters || '-'}</td>
+                    <td>R$ ${(parseFloat(item.UnitValue) || 0).toFixed(2).replace('.', ',')}</td>
+                    <td>R$ ${(parseFloat(item.StockedValue) || 0).toFixed(2).replace('.', ',')}</td>
                     <td>${item.Odometer || '-'}</td>
                     <td>${item.PreviousOdometer || '-'}</td>
                     <td>${item.CostCenter || '-'}</td>
                     <td>${item.MerchantState || '-'}</td>
-                    <td>${formatDate(item.TransactionDate)}</td>
-                </tr>
-            `).join('');
+                    <td>${item.TransactionDate ? new Date(item.TransactionDate).toLocaleDateString('pt-BR') : '-'}</td>
+                `;
+            });
         }
 
-        // Renderizar tabela de saldo do cartão
-        function renderCardBalanceTable() {
-            const tbody = document.querySelector('#cardBalanceTable tbody');
-            tbody.innerHTML = filteredFuelData.map(item => `
-                <tr>
-                    <td>${item.DriverName || '-'}</td>
+        function renderCardTable() {
+            const tbody = document.getElementById('cardTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            // Agrupar por motorista e cartão para mostrar saldo mais recente
+            const cardData = {};
+            filteredFuelData.forEach(item => {
+                const driver = item.DriverName || 'Veículo sem motorista associado';
+                const card = item.Card;
+                const key = `${driver}_${card}`;
+                
+                if (!cardData[key] || new Date(item.TransactionDate) > new Date(cardData[key].TransactionDate)) {
+                    cardData[key] = item;
+                }
+            });
+            
+            Object.values(cardData).forEach(item => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${item.DriverName || 'Veículo sem motorista associado'}</td>
                     <td>${item.Card || '-'}</td>
-                    <td>R$ ${parseFloat(item.CardBalance || 0).toFixed(2)}</td>
+                    <td>R$ ${(parseFloat(item.CardBalance) || 0).toFixed(2).replace('.', ',')}</td>
                     <td>${item.BaseName || '-'}</td>
                     <td>${item.CostCenter || '-'}</td>
                     <td>${item.MerchantState || '-'}</td>
-                    <td>${formatDate(item.TransactionDate)}</td>
-                </tr>
-            `).join('');
+                    <td>${item.TransactionDate ? new Date(item.TransactionDate).toLocaleDateString('pt-BR') : '-'}</td>
+                `;
+            });
+        }
+
+        // Renderizar tabelas do checklist
+        function renderTables() {
+            const tbody = document.getElementById('tableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = filteredData.slice(startIndex, endIndex);
+            
+            pageData.forEach(item => {
+                const row = tbody.insertRow();
+                const date = item.timestamp ? new Date(item.timestamp).toLocaleDateString('pt-BR') : '-';
+                const status = item.noCompliant ? 'Não Conforme' : 'Conforme';
+                
+                row.innerHTML = `
+                    <td>${date}</td>
+                    <td>${item.userRespForRegistration || '-'}</td>
+                    <td>${item.vehiclePlate || '-'}</td>
+                    <td>${item.planName || '-'}</td>
+                    <td>${item.driverName || '-'}</td>
+                    <td>${status}</td>
+                    <td>${item.comments || '-'}</td>
+                `;
+            });
+            
+            renderPagination();
         }
 
         // Renderizar paginação
-        function renderPagination(containerId, totalItems) {
-            const container = document.getElementById(containerId);
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-            if (totalPages <= 1) {
-                container.innerHTML = '';
-                return;
-            }
-
-            let paginationHTML = `
-                <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
-                    Anterior
-                </button>
-            `;
-
-            for (let i = 1; i <= totalPages; i++) {
-                if (i === currentPage) {
-                    paginationHTML += `<button class="current">${i}</button>`;
-                } else if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
-                    paginationHTML += `<button onclick="changePage(${i})">${i}</button>`;
-                } else if (i === currentPage - 3 || i === currentPage + 3) {
-                    paginationHTML += `<span>...</span>`;
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            if (!pagination) return;
+            
+            pagination.innerHTML = '';
+            
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            
+            if (totalPages <= 1) return;
+            
+            // Botão anterior
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = 'Anterior';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTables();
                 }
+            };
+            pagination.appendChild(prevBtn);
+            
+            // Números das páginas
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.textContent = i;
+                pageBtn.className = i === currentPage ? 'active' : '';
+                pageBtn.onclick = () => {
+                    currentPage = i;
+                    renderTables();
+                };
+                pagination.appendChild(pageBtn);
             }
-
-            paginationHTML += `
-                <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
-                    Próximo
-                </button>
-            `;
-
-            container.innerHTML = paginationHTML;
+            
+            // Botão próximo
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = 'Próximo';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTables();
+                }
+            };
+            pagination.appendChild(nextBtn);
         }
 
-        // Mudar página
-        function changePage(page) {
-            currentPage = page;
+        // Aplicar filtros do checklist
+        function applyFilters() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const responsible = document.getElementById('responsibleFilter').value;
+            const plate = document.getElementById('plateFilter').value;
+            const assetType = document.getElementById('assetTypeFilter').value;
+            const driver = document.getElementById('driverFilter').value;
+            
+            filteredData = currentData.filter(item => {
+                // Filtro de data
+                if (startDate || endDate) {
+                    const itemDate = item.timestamp ? new Date(item.timestamp).toISOString().split('T')[0] : '';
+                    if (startDate && itemDate < startDate) return false;
+                    if (endDate && itemDate > endDate) return false;
+                }
+                
+                // Outros filtros
+                if (responsible && item.userRespForRegistration !== responsible) return false;
+                if (plate && item.vehiclePlate !== plate) return false;
+                if (assetType && item.planName !== assetType) return false;
+                if (driver && item.driverName !== driver) return false;
+                
+                return true;
+            });
+            
+            currentPage = 1;
+            updateStatistics();
             renderTables();
         }
 
-        // Mostrar aba
-        function showTab(tabName) {
+        // Aplicar filtros de combustível
+        function applyFuelFilters() {
+            const startDate = document.getElementById('fuelStartDate').value;
+            const endDate = document.getElementById('fuelEndDate').value;
+            const plate = document.getElementById('fuelPlateFilter').value;
+            const driver = document.getElementById('fuelDriverFilter').value;
+            const fuelType = document.getElementById('fuelTypeFilter').value;
+            const state = document.getElementById('fuelStateFilter').value;
+            const costCenter = document.getElementById('fuelCostCenterFilter').value;
+            
+            filteredFuelData = fuelData.filter(item => {
+                // Filtro de data
+                if (startDate || endDate) {
+                    const itemDate = item.TransactionDate ? item.TransactionDate.split('T')[0] : '';
+                    if (startDate && itemDate < startDate) return false;
+                    if (endDate && itemDate > endDate) return false;
+                }
+                
+                // Outros filtros
+                if (plate && item.VehiclePlate !== plate) return false;
+                if (driver && item.DriverName !== driver) return false;
+                if (fuelType && item.FuelType !== fuelType) return false;
+                if (state && item.MerchantState !== state) return false;
+                if (costCenter && item.CostCenter !== costCenter) return false;
+                
+                return true;
+            });
+            
+            updateFuelMetrics();
+            generateFuelInsights();
+            renderFuelCharts();
+            renderFuelTables();
+        }
+
+        // Limpar filtros
+        function clearFilters() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('responsibleFilter').value = '';
+            document.getElementById('plateFilter').value = '';
+            document.getElementById('assetTypeFilter').value = '';
+            document.getElementById('driverFilter').value = '';
+            
+            filteredData = [...currentData];
+            currentPage = 1;
+            updateStatistics();
+            renderTables();
+        }
+
+        function clearFuelFilters() {
+            document.getElementById('fuelStartDate').value = '';
+            document.getElementById('fuelEndDate').value = '';
+            document.getElementById('fuelPlateFilter').value = '';
+            document.getElementById('fuelDriverFilter').value = '';
+            document.getElementById('fuelTypeFilter').value = '';
+            document.getElementById('fuelStateFilter').value = '';
+            document.getElementById('fuelCostCenterFilter').value = '';
+            
+            filteredFuelData = [...fuelData];
+            updateFuelMetrics();
+            generateFuelInsights();
+            renderFuelCharts();
+            renderFuelTables();
+        }
+
+        // Trocar abas
+        function switchTab(tab) {
             // Remover classe active de todas as abas
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-
-            // Adicionar classe active à aba clicada
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            
+            // Adicionar classe active à aba selecionada
             event.target.classList.add('active');
-
-            // Esconder todo conteúdo das abas
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-
-            // Mostrar conteúdo da aba selecionada
-            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Filtrar dados baseado na aba
+            if (tab === 'general') {
+                filteredData = [...currentData];
+                document.getElementById('tableTitle').textContent = 'Todos os Registros';
+            } else if (tab === 'status') {
+                filteredData = currentData.filter(item => !item.noCompliant);
+                document.getElementById('tableTitle').textContent = 'Registros Conformes';
+            } else if (tab === 'non-compliant') {
+                filteredData = currentData.filter(item => item.noCompliant);
+                document.getElementById('tableTitle').textContent = 'Registros Não Conformes';
+            }
+            
+            currentPage = 1;
+            updateStatistics();
+            renderTables();
         }
 
-        // Mostrar aba de combustível
-        function showFuelTab(tabName) {
-            // Remover classe active de todas as abas
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-
-            // Adicionar classe active à aba clicada
-            event.target.classList.add('active');
-
-            // Esconder todo conteúdo das abas
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-
-            // Mostrar conteúdo da aba selecionada
-            document.getElementById(`${tabName}-tab`).classList.add('active');
-        }
-
-        // Formatar data
-        function formatDate(dateString) {
-            if (!dateString) return '-';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('pt-BR');
-        }
-
-        // Exportar para Excel
+        // Funções de exportação (implementação básica)
         function exportToExcel() {
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.json_to_sheet(filteredData);
-            XLSX.utils.book_append_sheet(wb, ws, 'Checklist');
-            XLSX.writeFile(wb, 'checklist_export.xlsx');
+            console.log('Exportando para Excel...');
+            // Implementar exportação Excel
         }
 
-        // Exportar para PDF
         function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            doc.text('Relatório de Checklist', 20, 20);
-            doc.text(`Total de registros: ${filteredData.length}`, 20, 30);
-            
-            doc.save('checklist_export.pdf');
+            console.log('Exportando para PDF...');
+            // Implementar exportação PDF
         }
 
-        // Exportar aba atual
-        function exportCurrentTab(format) {
-            // Implementar exportação específica por aba
-            if (format === 'excel') {
-                exportToExcel();
-            } else {
-                exportToPDF();
-            }
+        function exportFuelToExcel() {
+            console.log('Exportando combustível para Excel...');
+            // Implementar exportação Excel
         }
 
-        // Exportar dados de combustível
-        function exportFuelData(format) {
-            if (format === 'excel') {
-                const wb = XLSX.utils.book_new();
-                const ws = XLSX.utils.json_to_sheet(filteredFuelData);
-                XLSX.utils.book_append_sheet(wb, ws, 'Combustível');
-                XLSX.writeFile(wb, 'combustivel_export.xlsx');
-            } else {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                doc.text('Relatório de Combustível', 20, 20);
-                doc.text(`Total de abastecimentos: ${filteredFuelData.length}`, 20, 30);
-                
-                doc.save('combustivel_export.pdf');
-            }
+        function exportFuelToPDF() {
+            console.log('Exportando combustível para PDF...');
+            // Implementar exportação PDF
         }
 
-        // Exportar aba de combustível
-        function exportFuelTab(tabName, format) {
-            exportFuelData(format);
+        function exportPlateTableToExcel() {
+            console.log('Exportando tabela por placa para Excel...');
+        }
+
+        function exportPlateTableToPDF() {
+            console.log('Exportando tabela por placa para PDF...');
+        }
+
+        function exportDriverTableToExcel() {
+            console.log('Exportando tabela por motorista para Excel...');
+        }
+
+        function exportDriverTableToPDF() {
+            console.log('Exportando tabela por motorista para PDF...');
+        }
+
+        function exportCardTableToExcel() {
+            console.log('Exportando tabela de cartão para Excel...');
+        }
+
+        function exportCardTableToPDF() {
+            console.log('Exportando tabela de cartão para PDF...');
         }
     </script>
 </body>
