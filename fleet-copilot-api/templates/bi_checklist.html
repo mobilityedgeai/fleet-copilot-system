@@ -10,21 +10,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
-            --primary: #14b8a6;
-            --primary-dark: #0f766e;
-            --background: #0a0a0a;
-            --surface: #1a1a1a;
-            --surface-light: #2a3441;
-            --surface-lighter: #374151;
-            --text: #ffffff;
-            --text-secondary: #9ca3af;
-            --text-muted: #6b7280;
-            --border: #374151;
-            --border-light: #4b5563;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --info: #3b82f6;
+            --primary: #14d8b4;           /* Atualizado para o verde água mais brilhante */
+            --primary-dark: #0fb8a0;      /* Versão mais escura do primary */
+            --background: #1a1e23;        /* Atualizado para o fundo mais escuro */
+            --surface: #2a2e33;           /* Atualizado para o cinza dos cards */
+            --surface-light: #3a3e43;     /* Versão mais clara do surface */
+            --surface-lighter: #4a4e53;   /* Versão ainda mais clara do surface */
+            --text: #ffffff;              /* Mantido */
+            --text-secondary: #a0a0a0;    /* Ajustado para o cinza da imagem */
+            --text-muted: #707070;        /* Versão mais escura do text-secondary */
+            --border: #3a3e43;            /* Ajustado para combinar com surface-light */
+            --border-light: #4a4e53;      /* Ajustado para combinar com surface-lighter */
+            --success: #14d8b4;           /* Atualizado para o verde água */
+            --warning: #f0b429;           /* Atualizado para o amarelo da imagem */
+            --error: #e74c3c;             /* Atualizado para o vermelho da imagem */
+            --info: #3b82f6;              /* Mantido */
+            --chart-purple: #8a56e2;      /* Nova variável para o roxo dos gráficos */
         }
 
         * {
@@ -102,7 +103,7 @@
 
         .btn-primary:hover {
             background: var(--primary-dark);
-            box-shadow: 0 0 0 1px var(--primary-dark), 0 0 20px rgba(20, 184, 166, 0.3);
+            box-shadow: 0 0 0 1px var(--primary-dark), 0 0 20px rgba(20, 216, 180, 0.3);
         }
 
         .btn-secondary {
@@ -114,7 +115,7 @@
         .btn-secondary:hover {
             background: var(--surface-lighter);
             border-color: var(--primary);
-            box-shadow: 0 0 20px rgba(20, 184, 166, 0.1);
+            box-shadow: 0 0 20px rgba(20, 216, 180, 0.1);
         }
 
         /* Filters */
@@ -124,7 +125,7 @@
             border-radius: 12px;
             padding: 24px;
             margin-bottom: 30px;
-            box-shadow: 0 0 20px rgba(20, 184, 166, 0.05);
+            box-shadow: 0 0 20px rgba(20, 216, 180, 0.05);
         }
 
         .filters-title {
@@ -180,7 +181,7 @@
         .filter-group select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+            box-shadow: 0 0 0 3px rgba(20, 216, 180, 0.1);
         }
 
         .filters-actions {
@@ -204,13 +205,13 @@
             padding: 24px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 20px rgba(20, 184, 166, 0.05);
+            box-shadow: 0 0 20px rgba(20, 216, 180, 0.05);
             transition: all 0.3s ease;
         }
 
         .metric-card:hover {
             border-color: var(--primary);
-            box-shadow: 0 0 30px rgba(20, 184, 166, 0.1);
+            box-shadow: 0 0 30px rgba(20, 216, 180, 0.1);
         }
 
         .metric-card::before {
@@ -287,7 +288,7 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 24px;
-            box-shadow: 0 0 20px rgba(20, 184, 166, 0.05);
+            box-shadow: 0 0 20px rgba(20, 216, 180, 0.05);
         }
 
         .chart-header {
@@ -315,7 +316,7 @@
             border-radius: 12px;
             padding: 24px;
             margin-bottom: 30px;
-            box-shadow: 0 0 20px rgba(20, 184, 166, 0.05);
+            box-shadow: 0 0 20px rgba(20, 216, 180, 0.05);
         }
 
         .insights-title {
@@ -362,7 +363,7 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 24px;
-            box-shadow: 0 0 20px rgba(20, 184, 166, 0.05);
+            box-shadow: 0 0 20px rgba(20, 216, 180, 0.05);
         }
 
         .tables-header {
@@ -470,21 +471,21 @@
         }
 
         .status-conforme {
-            background: rgba(16, 185, 129, 0.1);
+            background: rgba(20, 216, 180, 0.1);
             color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(20, 216, 180, 0.2);
         }
 
         .status-nao-conforme {
-            background: rgba(239, 68, 68, 0.1);
+            background: rgba(231, 76, 60, 0.1);
             color: var(--error);
-            border: 1px solid rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.2);
         }
 
         .status-pendente {
-            background: rgba(245, 158, 11, 0.1);
+            background: rgba(240, 180, 41, 0.1);
             color: var(--warning);
-            border: 1px solid rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(240, 180, 41, 0.2);
         }
 
         .loading {
@@ -612,29 +613,33 @@
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label for="planName">Plano</label>
-                    <select id="planName">
+                    <label for="plano">Plano de Checklist</label>
+                    <select id="plano">
                         <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="status">Status</label>
+                    <select id="status">
+                        <option value="">Todos</option>
+                        <option value="conforme">Conforme</option>
+                        <option value="nao-conforme">Não Conforme</option>
                     </select>
                 </div>
             </div>
             <div class="filters-actions">
-                <button class="btn btn-primary" onclick="applyFilters()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button class="btn btn-primary" id="applyFilters">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                         <circle cx="11" cy="11" r="8"/>
                         <path d="M21 21l-4.35-4.35"/>
                     </svg>
                     Aplicar Filtros
                 </button>
-                <button class="btn btn-secondary" onclick="clearFilters()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 6h18"/>
-                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                        <line x1="10" y1="11" x2="10" y2="17"/>
-                        <line x1="14" y1="11" x2="14" y2="17"/>
+                <button class="btn btn-secondary" id="clearFilters">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3-3h6m-3 5v8m-4-8v8"/>
                     </svg>
-                    Limpar
+                    Limpar Filtros
                 </button>
             </div>
         </div>
@@ -643,58 +648,66 @@
         <div class="metrics-section">
             <div class="metric-card">
                 <div class="metric-header">
-                    <div class="metric-title">Total de Registros</div>
+                    <div class="metric-title">Total de Checklists</div>
                     <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                        <path d="M9 12l2 2 4-4"/>
+                        <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
+                        <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"/>
+                        <path d="M3 12h6m6 0h6"/>
                     </svg>
                 </div>
-                <div class="metric-value" id="totalRegistros">0</div>
-                <div class="metric-change neutral">
-                    <span>Registros de checklist</span>
-                </div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-header">
-                    <div class="metric-title">Conformes</div>
-                    <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                        <polyline points="22,4 12,14.01 9,11.01"/>
-                    </svg>
-                </div>
-                <div class="metric-value" id="conformes">0</div>
+                <div class="metric-value" id="totalChecklists">0</div>
                 <div class="metric-change positive">
-                    <span>Registros aprovados</span>
-                </div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-header">
-                    <div class="metric-title">Não Conformes</div>
-                    <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="15" y1="9" x2="9" y2="15"/>
-                        <line x1="9" y1="9" x2="15" y2="15"/>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                        <polyline points="18 15 12 9 6 15"/>
                     </svg>
-                </div>
-                <div class="metric-value" id="naoConformes">0</div>
-                <div class="metric-change negative">
-                    <span>Registros com problemas</span>
+                    <span>+5% vs. período anterior</span>
                 </div>
             </div>
-
             <div class="metric-card">
                 <div class="metric-header">
                     <div class="metric-title">Taxa de Conformidade</div>
                     <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <polyline points="12,6 12,12 16,14"/>
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
                     </svg>
                 </div>
                 <div class="metric-value" id="taxaConformidade">0%</div>
+                <div class="metric-change negative">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                    <span>-2% vs. período anterior</span>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">Itens Verificados</div>
+                    <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                </div>
+                <div class="metric-value" id="itensVerificados">0</div>
+                <div class="metric-change positive">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+                        <polyline points="18 15 12 9 6 15"/>
+                    </svg>
+                    <span>+12% vs. período anterior</span>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">Não Conformidades</div>
+                    <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+                <div class="metric-value" id="naoConformidades">0</div>
                 <div class="metric-change neutral">
-                    <span>Percentual de aprovação</span>
+                    <span>Sem alteração vs. período anterior</span>
                 </div>
             </div>
         </div>
@@ -703,37 +716,18 @@
         <div class="charts-section">
             <div class="chart-card">
                 <div class="chart-header">
-                    <h3 class="chart-title">Conformidade ao Longo do Tempo</h3>
+                    <div class="chart-title">Conformidade por Plano de Checklist</div>
                 </div>
                 <div class="chart-container">
-                    <canvas id="conformidadeTempoChart"></canvas>
+                    <canvas id="conformidadePorPlanoChart"></canvas>
                 </div>
             </div>
-
             <div class="chart-card">
                 <div class="chart-header">
-                    <h3 class="chart-title">Ranking por Responsável</h3>
+                    <div class="chart-title">Evolução de Conformidade</div>
                 </div>
                 <div class="chart-container">
-                    <canvas id="responsavelChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title">Distribuição por Status</h3>
-                </div>
-                <div class="chart-container">
-                    <canvas id="statusChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title">Checklist por Plano</h3>
-                </div>
-                <div class="chart-container">
-                    <canvas id="planChart"></canvas>
+                    <canvas id="evolucaoConformidadeChart"></canvas>
                 </div>
             </div>
         </div>
@@ -742,13 +736,11 @@
         <div class="insights-section">
             <div class="insights-title">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 11H5a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h4"/>
-                    <path d="M9 11V9a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                    <path d="M9 11h6"/>
-                    <path d="M15 11v6a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-6"/>
-                    <path d="M12 16h.01"/>
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
                 </svg>
-                <h3>Insights Automáticos</h3>
+                <h3>Insights</h3>
             </div>
             <div class="insights-container" id="insightsContainer">
                 <div class="insight-item">
@@ -757,63 +749,36 @@
             </div>
         </div>
 
-        <!-- Tables Section -->
+        <!-- Tables -->
         <div class="tables-section">
             <div class="tables-header">
                 <div class="tables-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 12l2 2 4-4"/>
-                        <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
-                        <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"/>
-                        <path d="M3 12h6m6 0h6"/>
+                        <path d="M3 3h18v18H3zM3 9h18M9 21V9"/>
                     </svg>
-                    <h2>Dados Detalhados</h2>
-                </div>
-                <div class="filters-actions">
-                    <button class="btn btn-secondary" onclick="exportTableToExcel()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14,2 14,8 20,8"/>
-                            <line x1="16" y1="13" x2="8" y2="21"/>
-                            <line x1="8" y1="13" x2="16" y2="21"/>
-                        </svg>
-                        Excel
-                    </button>
-                    <button class="btn btn-secondary" onclick="exportTableToPDF()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14,2 14,8 20,8"/>
-                            <line x1="16" y1="13" x2="8" y2="21"/>
-                            <line x1="8" y1="13" x2="16" y2="21"/>
-                        </svg>
-                        PDF
-                    </button>
+                    <h2>Detalhamento de Checklists</h2>
                 </div>
             </div>
-            
             <div class="table-tabs">
-                <button class="table-tab active" onclick="showTable('geral')">Visão Geral</button>
-                <button class="table-tab" onclick="showTable('status')">Por Status</button>
-                <button class="table-tab" onclick="showTable('naoConformes')">Não Conformes</button>
+                <button class="table-tab active" data-tab="checklists">Checklists</button>
+                <button class="table-tab" data-tab="itens">Itens</button>
+                <button class="table-tab" data-tab="nao-conformidades">Não Conformidades</button>
             </div>
-            
             <div class="table-container">
-                <table class="data-table" id="checklistTable">
+                <table class="data-table" id="checklistsTable">
                     <thead>
                         <tr>
                             <th>Data</th>
-                            <th>Responsável</th>
+                            <th>Plano</th>
                             <th>Placa</th>
                             <th>Motorista</th>
-                            <th>Plano</th>
-                            <th>Item</th>
+                            <th>Responsável</th>
                             <th>Status</th>
-                            <th>Observações</th>
                         </tr>
                     </thead>
-                    <tbody id="checklistTableBody">
+                    <tbody>
                         <tr>
-                            <td colspan="8" class="loading">Carregando dados...</td>
+                            <td colspan="6" class="loading">Carregando dados...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -822,118 +787,97 @@
     </div>
 
     <script>
-        // Global variables
-        let checklistData = [];
+        // Variáveis globais
+        let allData = [];
         let filteredData = [];
-        let currentTable = 'geral';
         let charts = {};
 
-        // Get enterprise ID from URL
-        function getEnterpriseIdFromURL() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const enterpriseId = urlParams.get('enterpriseId');
-            console.log('🔍 EnterpriseId extraído da URL:', enterpriseId);
-            return enterpriseId || 'qzDVZ1jB6IC60baxtsDU'; // fallback
-        }
-
-        const ENTERPRISE_ID = getEnterpriseIdFromURL();
-        console.log('🎯 EnterpriseId que será usado:', ENTERPRISE_ID);
-
-        // Initialize the dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Inicializando BI Checklist...');
-            initializeDashboard();
-        });
-
-        async function initializeDashboard() {
+        // Função para carregar dados da API
+        async function loadData() {
             try {
-                console.log('📡 Carregando dados do checklist...');
-                await loadChecklistData();
-                console.log('✅ Dados carregados com sucesso');
+                // Obter o enterpriseId da URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const enterpriseId = urlParams.get('enterpriseId') || 'qzDVZ1jB6IC60baxtsDU';
                 
-                populateFilters();
-                updateMetrics();
-                generateInsights();
-                createCharts();
-                renderTable();
+                // URL da API
+                const apiUrl = `https://firebase-bi-api.onrender.com/checklist?enterpriseId=${enterpriseId}`;
                 
-                console.log('🎉 Dashboard inicializado com sucesso!');
-            } catch (error) {
-                console.error('❌ Erro ao inicializar dashboard:', error);
-                showError('Erro ao carregar dados do checklist');
-            }
-        }
-
-        async function loadChecklistData() {
-            try {
-                const apiUrl = `https://firebase-bi-api.onrender.com/checklist?enterpriseId=${ENTERPRISE_ID}`;
-                console.log('🔗 URL da API:', apiUrl);
+                console.log(`🔍 Buscando dados da API: ${apiUrl}`);
                 
+                // Fazer a requisição
                 const response = await fetch(apiUrl);
+                const data = await response.json();
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                if (!data || !Array.isArray(data)) {
+                    throw new Error('Formato de dados inválido');
                 }
                 
-                const result = await response.json();
-                console.log('📊 Resposta da API checklist:', result);
+                console.log(`✅ ${data.length} registros carregados`);
                 
-                if (result && result.data && Array.isArray(result.data)) {
-                    checklistData = result.data;
-                    filteredData = [...checklistData];
-                    console.log(`✅ ${checklistData.length} registros de checklist carregados`);
-                } else {
-                    console.warn('⚠️ Estrutura de dados inesperada:', result);
-                    checklistData = [];
-                    filteredData = [];
-                }
+                // Armazenar os dados
+                allData = data;
+                
+                // Processar os dados
+                processData();
                 
             } catch (error) {
                 console.error('❌ Erro ao carregar dados:', error);
-                checklistData = [];
-                filteredData = [];
-                throw error;
+                document.querySelector('#checklistsTable tbody').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="error">
+                            Erro ao carregar dados. Por favor, tente novamente mais tarde.
+                        </td>
+                    </tr>
+                `;
             }
         }
 
-        function populateFilters() {
-            console.log('🔧 Populando filtros...');
+        // Função para processar os dados
+        function processData() {
+            // Aplicar filtros iniciais (sem filtros)
+            applyFilters();
             
-            if (!checklistData || checklistData.length === 0) {
-                console.log('⚠️ Nenhum dado disponível para popular filtros');
-                return;
-            }
-
-            // Populate responsável filter (userRespForRegistration)
-            const responsaveis = [...new Set(checklistData.map(item => item.userRespForRegistration).filter(Boolean))];
-            populateSelect('responsavel', responsaveis);
-
-            // Populate placa filter (vehiclePlate)
-            const placas = [...new Set(checklistData.map(item => item.vehiclePlate).filter(Boolean))];
-            populateSelect('placa', placas);
-
-            // Populate motorista filter (driverName)
-            const motoristas = [...new Set(checklistData.map(item => item.driverName).filter(Boolean))];
-            populateSelect('motorista', motoristas);
-
-            // Populate plano filter (planName)
-            const planos = [...new Set(checklistData.map(item => item.planName).filter(Boolean))];
-            populateSelect('planName', planos);
-
-            console.log('✅ Filtros populados com sucesso');
+            // Preencher os filtros
+            populateFilters();
+            
+            // Atualizar métricas
+            updateMetrics();
+            
+            // Atualizar gráficos
+            updateCharts();
+            
+            // Atualizar tabelas
+            updateTables();
+            
+            // Gerar insights
+            generateInsights();
         }
 
-        function populateSelect(selectId, options) {
-            const select = document.getElementById(selectId);
+        // Função para preencher os filtros
+        function populateFilters() {
+            // Obter valores únicos para cada filtro
+            const responsaveis = [...new Set(allData.map(item => item.userRespForRegistration))].filter(Boolean).sort();
+            const placas = [...new Set(allData.map(item => item.vehiclePlate))].filter(Boolean).sort();
+            const motoristas = [...new Set(allData.map(item => item.driverName))].filter(Boolean).sort();
+            const planos = [...new Set(allData.map(item => item.planName))].filter(Boolean).sort();
+            
+            // Preencher os selects
+            fillSelect('responsavel', responsaveis);
+            fillSelect('placa', placas);
+            fillSelect('motorista', motoristas);
+            fillSelect('plano', planos);
+        }
+
+        // Função auxiliar para preencher um select
+        function fillSelect(id, options) {
+            const select = document.getElementById(id);
             if (!select) return;
-
-            // Clear existing options except the first one
-            while (select.children.length > 1) {
-                select.removeChild(select.lastChild);
-            }
-
-            // Add new options
-            options.sort().forEach(option => {
+            
+            // Manter a primeira opção (Todos)
+            select.innerHTML = '<option value="">Todos</option>';
+            
+            // Adicionar as opções
+            options.forEach(option => {
                 const optionElement = document.createElement('option');
                 optionElement.value = option;
                 optionElement.textContent = option;
@@ -941,292 +885,156 @@
             });
         }
 
+        // Função para aplicar filtros
+        function applyFilters() {
+            const dataInicial = document.getElementById('dataInicial').value;
+            const dataFinal = document.getElementById('dataFinal').value;
+            const responsavel = document.getElementById('responsavel').value;
+            const placa = document.getElementById('placa').value;
+            const motorista = document.getElementById('motorista').value;
+            const plano = document.getElementById('plano').value;
+            const status = document.getElementById('status').value;
+            
+            // Filtrar os dados
+            filteredData = allData.filter(item => {
+                // Filtro de data
+                if (dataInicial && new Date(item.timestamp) < new Date(dataInicial)) return false;
+                if (dataFinal && new Date(item.timestamp) > new Date(dataFinal + 'T23:59:59')) return false;
+                
+                // Filtros de texto
+                if (responsavel && item.userRespForRegistration !== responsavel) return false;
+                if (placa && item.vehiclePlate !== placa) return false;
+                if (motorista && item.driverName !== motorista) return false;
+                if (plano && item.planName !== plano) return false;
+                
+                // Filtro de status
+                if (status === 'conforme' && !item.compliant) return false;
+                if (status === 'nao-conforme' && item.compliant) return false;
+                
+                return true;
+            });
+            
+            console.log(`🔍 ${filteredData.length} registros após aplicação dos filtros`);
+            
+            // Atualizar a interface
+            updateMetrics();
+            updateCharts();
+            updateTables();
+            generateInsights();
+        }
+
+        // Função para limpar filtros
+        function clearFilters() {
+            document.getElementById('dataInicial').value = '';
+            document.getElementById('dataFinal').value = '';
+            document.getElementById('responsavel').value = '';
+            document.getElementById('placa').value = '';
+            document.getElementById('motorista').value = '';
+            document.getElementById('plano').value = '';
+            document.getElementById('status').value = '';
+            
+            // Aplicar filtros (sem filtros)
+            applyFilters();
+        }
+
+        // Função para atualizar métricas
         function updateMetrics() {
-            console.log('📊 Atualizando métricas...');
+            // Total de checklists
+            const totalChecklists = new Set(filteredData.map(item => item.checklistId)).size;
+            document.getElementById('totalChecklists').textContent = totalChecklists.toLocaleString('pt-BR');
             
-            const total = filteredData.length;
-            const conformes = filteredData.filter(item => item.compliant === true).length;
-            const naoConformes = filteredData.filter(item => item.compliant === false).length;
-            const taxaConformidade = total > 0 ? ((conformes / total) * 100).toFixed(1) + '%' : '0.0%';
-
-            document.getElementById('totalRegistros').textContent = total.toLocaleString('pt-BR');
-            document.getElementById('conformes').textContent = conformes.toLocaleString('pt-BR');
-            document.getElementById('naoConformes').textContent = naoConformes.toLocaleString('pt-BR');
-            document.getElementById('taxaConformidade').textContent = taxaConformidade;
-
-            console.log('✅ Métricas atualizadas:', { total, conformes, naoConformes, taxaConformidade });
+            // Taxa de conformidade
+            const conformes = filteredData.filter(item => item.compliant).length;
+            const taxaConformidade = filteredData.length > 0 ? (conformes / filteredData.length * 100).toFixed(1) : 0;
+            document.getElementById('taxaConformidade').textContent = `${taxaConformidade}%`;
+            
+            // Itens verificados
+            const itensVerificados = filteredData.length;
+            document.getElementById('itensVerificados').textContent = itensVerificados.toLocaleString('pt-BR');
+            
+            // Não conformidades
+            const naoConformidades = filteredData.filter(item => !item.compliant).length;
+            document.getElementById('naoConformidades').textContent = naoConformidades.toLocaleString('pt-BR');
         }
 
-        function generateInsights() {
-            console.log('🧠 Gerando insights automáticos...');
+        // Função para atualizar gráficos
+        function updateCharts() {
+            // Destruir gráficos existentes
+            Object.values(charts).forEach(chart => chart.destroy());
+            charts = {};
             
-            const insights = [];
+            // Gráfico de conformidade por plano
+            updateConformidadePorPlanoChart();
             
-            if (filteredData.length === 0) {
-                insights.push('Nenhum dado disponível para análise no período selecionado.');
-            } else {
-                // Insight sobre conformidade
-                const conformes = filteredData.filter(item => item.compliant === true).length;
-                const taxaConformidade = ((conformes / filteredData.length) * 100).toFixed(1);
-                
-                if (taxaConformidade >= 90) {
-                    insights.push(`Excelente taxa de conformidade de ${taxaConformidade}% indica alta qualidade nos processos de checklist.`);
-                } else if (taxaConformidade >= 70) {
-                    insights.push(`Taxa de conformidade de ${taxaConformidade}% está dentro do aceitável, mas há espaço para melhorias.`);
-                } else {
-                    insights.push(`Taxa de conformidade de ${taxaConformidade}% está abaixo do ideal e requer atenção imediata.`);
-                }
-
-                // Insight sobre responsável mais ativo
-                const responsavelCount = {};
-                filteredData.forEach(item => {
-                    if (item.userRespForRegistration) {
-                        responsavelCount[item.userRespForRegistration] = (responsavelCount[item.userRespForRegistration] || 0) + 1;
-                    }
-                });
-                
-                if (Object.keys(responsavelCount).length > 0) {
-                    const topResponsavel = Object.entries(responsavelCount)
-                        .sort(([,a], [,b]) => b - a)[0];
-                    insights.push(`O responsável ${topResponsavel[0]} realizou ${topResponsavel[1]} checklists no período analisado.`);
-                }
-
-                // Insight sobre plano mais verificado
-                const planoCount = {};
-                filteredData.forEach(item => {
-                    if (item.planName) {
-                        planoCount[item.planName] = (planoCount[item.planName] || 0) + 1;
-                    }
-                });
-                
-                if (Object.keys(planoCount).length > 0) {
-                    const topPlano = Object.entries(planoCount)
-                        .sort(([,a], [,b]) => b - a)[0];
-                    insights.push(`${topPlano[0]} é o plano mais verificado com ${topPlano[1]} checklists realizados.`);
-                }
-
-                // Insight sobre não conformidades
-                const naoConformes = filteredData.filter(item => item.compliant === false).length;
-                
-                if (naoConformes > 0) {
-                    insights.push(`${naoConformes} registros não conformes identificados requerem ação corretiva imediata.`);
-                }
-
-                // Insight sobre item mais verificado
-                const itemCount = {};
-                filteredData.forEach(item => {
-                    if (item.itemName) {
-                        itemCount[item.itemName] = (itemCount[item.itemName] || 0) + 1;
-                    }
-                });
-                
-                if (Object.keys(itemCount).length > 0) {
-                    const topItem = Object.entries(itemCount)
-                        .sort(([,a], [,b]) => b - a)[0];
-                    insights.push(`"${topItem[0]}" é o item mais verificado com ${topItem[1]} registros.`);
-                }
-            }
-
-            // Render insights
-            const container = document.getElementById('insightsContainer');
-            container.innerHTML = insights.map(insight => `
-                <div class="insight-item">
-                    <p>${insight}</p>
-                </div>
-            `).join('');
-
-            console.log('✅ Insights gerados:', insights.length);
+            // Gráfico de evolução de conformidade
+            updateEvolucaoConformidadeChart();
         }
 
-        function createCharts() {
-            console.log('📈 Criando gráficos...');
+        // Função para atualizar o gráfico de conformidade por plano
+        function updateConformidadePorPlanoChart() {
+            const ctx = document.getElementById('conformidadePorPlanoChart').getContext('2d');
             
-            createConformidadeTempoChart();
-            createResponsavelChart();
-            createStatusChart();
-            createPlanChart();
-            
-            console.log('✅ Gráficos criados com sucesso');
-        }
-
-        function createConformidadeTempoChart() {
-            const ctx = document.getElementById('conformidadeTempoChart');
-            if (!ctx) return;
-
-            // Group data by date
-            const dateGroups = {};
+            // Agrupar por plano
+            const planos = {};
             filteredData.forEach(item => {
-                const date = item.timestamp ? new Date(item.timestamp).toISOString().split('T')[0] : 'Sem data';
-                if (!dateGroups[date]) {
-                    dateGroups[date] = { total: 0, conformes: 0 };
+                const plano = item.planName || 'Sem plano';
+                if (!planos[plano]) {
+                    planos[plano] = { total: 0, conformes: 0 };
                 }
-                dateGroups[date].total++;
-                if (item.compliant === true) {
-                    dateGroups[date].conformes++;
+                planos[plano].total++;
+                if (item.compliant) {
+                    planos[plano].conformes++;
                 }
-            });
-
-            const sortedDates = Object.keys(dateGroups).sort();
-            const labels = sortedDates.map(date => {
-                if (date === 'Sem data') return date;
-                const d = new Date(date);
-                return d.toLocaleDateString('pt-BR');
             });
             
-            const conformidadeData = sortedDates.map(date => {
-                const group = dateGroups[date];
-                return group.total > 0 ? ((group.conformes / group.total) * 100).toFixed(1) : 0;
+            // Preparar dados para o gráfico
+            const labels = Object.keys(planos);
+            const data = labels.map(plano => {
+                const taxa = planos[plano].total > 0 ? 
+                    (planos[plano].conformes / planos[plano].total * 100).toFixed(1) : 0;
+                return parseFloat(taxa);
             });
-
-            if (charts.conformidadeTempo) {
-                charts.conformidadeTempo.destroy();
-            }
-
-            charts.conformidadeTempo = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Taxa de Conformidade (%)',
-                        data: conformidadeData,
-                        borderColor: '#14b8a6',
-                        backgroundColor: 'rgba(20, 184, 166, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#ffffff'
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            ticks: {
-                                color: '#9ca3af'
-                            },
-                            grid: {
-                                color: '#374151'
-                            }
-                        },
-                        y: {
-                            ticks: {
-                                color: '#9ca3af'
-                            },
-                            grid: {
-                                color: '#374151'
-                            },
-                            min: 0,
-                            max: 100
-                        }
-                    }
-                }
-            });
-        }
-
-        function createResponsavelChart() {
-            const ctx = document.getElementById('responsavelChart');
-            if (!ctx) return;
-
-            // Count by responsible
-            const responsavelCount = {};
-            filteredData.forEach(item => {
-                if (item.userRespForRegistration) {
-                    responsavelCount[item.userRespForRegistration] = (responsavelCount[item.userRespForRegistration] || 0) + 1;
-                }
-            });
-
-            const sortedResponsaveis = Object.entries(responsavelCount)
-                .sort(([,a], [,b]) => b - a)
-                .slice(0, 10); // Top 10
-
-            const labels = sortedResponsaveis.map(([name]) => name.length > 20 ? name.substring(0, 20) + '...' : name);
-            const data = sortedResponsaveis.map(([,count]) => count);
-
-            if (charts.responsavel) {
-                charts.responsavel.destroy();
-            }
-
-            charts.responsavel = new Chart(ctx, {
+            
+            // Criar o gráfico
+            charts.conformidadePorPlano = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Checklists Realizados',
+                        label: 'Taxa de Conformidade (%)',
                         data: data,
-                        backgroundColor: '#14b8a6',
-                        borderColor: '#0f766e',
+                        backgroundColor: 'rgba(20, 216, 180, 0.7)',
+                        borderColor: 'rgba(20, 216, 180, 1)',
                         borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#ffffff'
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
                             }
                         }
                     },
-                    scales: {
-                        x: {
-                            ticks: {
-                                color: '#9ca3af'
-                            },
-                            grid: {
-                                color: '#374151'
-                            }
-                        },
-                        y: {
-                            ticks: {
-                                color: '#9ca3af'
-                            },
-                            grid: {
-                                color: '#374151'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function createStatusChart() {
-            const ctx = document.getElementById('statusChart');
-            if (!ctx) return;
-
-            const conformes = filteredData.filter(item => item.compliant === true).length;
-            const naoConformes = filteredData.filter(item => item.compliant === false).length;
-
-            if (charts.status) {
-                charts.status.destroy();
-            }
-
-            charts.status = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: ['Conformes', 'Não Conformes'],
-                    datasets: [{
-                        data: [conformes, naoConformes],
-                        backgroundColor: ['#10b981', '#ef4444'],
-                        borderColor: ['#059669', '#dc2626'],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             labels: {
-                                color: '#ffffff'
+                                color: 'rgba(255, 255, 255, 0.7)'
                             }
                         }
                     }
@@ -1234,47 +1042,78 @@
             });
         }
 
-        function createPlanChart() {
-            const ctx = document.getElementById('planChart');
-            if (!ctx) return;
-
-            // Count by plan
-            const planCount = {};
+        // Função para atualizar o gráfico de evolução de conformidade
+        function updateEvolucaoConformidadeChart() {
+            const ctx = document.getElementById('evolucaoConformidadeChart').getContext('2d');
+            
+            // Agrupar por data
+            const datas = {};
             filteredData.forEach(item => {
-                if (item.planName) {
-                    planCount[item.planName] = (planCount[item.planName] || 0) + 1;
+                const data = new Date(item.timestamp).toISOString().split('T')[0];
+                if (!datas[data]) {
+                    datas[data] = { total: 0, conformes: 0 };
+                }
+                datas[data].total++;
+                if (item.compliant) {
+                    datas[data].conformes++;
                 }
             });
-
-            const sortedPlans = Object.entries(planCount)
-                .sort(([,a], [,b]) => b - a);
-
-            const labels = sortedPlans.map(([name]) => name);
-            const data = sortedPlans.map(([,count]) => count);
-            const colors = ['#14b8a6', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#10b981'];
-
-            if (charts.plan) {
-                charts.plan.destroy();
-            }
-
-            charts.plan = new Chart(ctx, {
-                type: 'doughnut',
+            
+            // Ordenar datas
+            const datasOrdenadas = Object.keys(datas).sort();
+            
+            // Preparar dados para o gráfico
+            const labels = datasOrdenadas;
+            const data = labels.map(data => {
+                const taxa = datas[data].total > 0 ? 
+                    (datas[data].conformes / datas[data].total * 100).toFixed(1) : 0;
+                return parseFloat(taxa);
+            });
+            
+            // Criar o gráfico
+            charts.evolucaoConformidade = new Chart(ctx, {
+                type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
+                        label: 'Taxa de Conformidade (%)',
                         data: data,
-                        backgroundColor: colors.slice(0, data.length),
-                        borderColor: colors.slice(0, data.length).map(color => color + '80'),
-                        borderWidth: 2
+                        backgroundColor: 'rgba(138, 86, 226, 0.2)',
+                        borderColor: 'rgba(138, 86, 226, 1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: 'rgba(138, 86, 226, 1)',
+                        pointRadius: 4
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        }
+                    },
                     plugins: {
                         legend: {
                             labels: {
-                                color: '#ffffff'
+                                color: 'rgba(255, 255, 255, 0.7)'
                             }
                         }
                     }
@@ -1282,201 +1121,179 @@
             });
         }
 
-        function renderTable() {
-            console.log('📋 Renderizando tabela...');
-            
-            const tbody = document.getElementById('checklistTableBody');
-            if (!tbody) return;
+        // Função para atualizar tabelas
+        function updateTables() {
+            // Tabela de checklists
+            updateChecklistsTable();
+        }
 
-            let dataToShow = [];
+        // Função para atualizar a tabela de checklists
+        function updateChecklistsTable() {
+            const tbody = document.querySelector('#checklistsTable tbody');
             
-            switch (currentTable) {
-                case 'geral':
-                    dataToShow = filteredData;
-                    break;
-                case 'status':
-                    dataToShow = filteredData.sort((a, b) => {
-                        if (a.compliant === b.compliant) return 0;
-                        return a.compliant ? -1 : 1;
-                    });
-                    break;
-                case 'naoConformes':
-                    dataToShow = filteredData.filter(item => item.compliant === false);
-                    break;
-            }
-
-            if (dataToShow.length === 0) {
+            if (filteredData.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="8" class="loading">Nenhum registro encontrado para os filtros aplicados.</td>
+                        <td colspan="6" class="loading">
+                            Nenhum dado encontrado para os filtros selecionados.
+                        </td>
                     </tr>
                 `;
                 return;
             }
-
-            // Limit to 50 records for performance
-            const limitedData = dataToShow.slice(0, 50);
             
-            tbody.innerHTML = limitedData.map(item => {
-                const date = item.timestamp ? new Date(item.timestamp).toLocaleDateString('pt-BR') : 'N/A';
-                const status = item.compliant === true ? 'Conforme' : (item.compliant === false ? 'Não Conforme' : 'N/A');
-                const statusClass = item.compliant === true ? 'status-conforme' : (item.compliant === false ? 'status-nao-conforme' : 'status-pendente');
+            // Agrupar por checklist
+            const checklists = {};
+            filteredData.forEach(item => {
+                const id = item.checklistId;
+                if (!checklists[id]) {
+                    checklists[id] = {
+                        data: new Date(item.timestamp),
+                        plano: item.planName,
+                        placa: item.vehiclePlate,
+                        motorista: item.driverName,
+                        responsavel: item.userRespForRegistration,
+                        itens: [],
+                        conformes: 0,
+                        total: 0
+                    };
+                }
+                checklists[id].itens.push(item);
+                checklists[id].total++;
+                if (item.compliant) {
+                    checklists[id].conformes++;
+                }
+            });
+            
+            // Ordenar por data (mais recente primeiro)
+            const checklistsOrdenados = Object.values(checklists).sort((a, b) => b.data - a.data);
+            
+            // Limitar a 100 registros para performance
+            const checklistsLimitados = checklistsOrdenados.slice(0, 100);
+            
+            // Preencher a tabela
+            tbody.innerHTML = checklistsLimitados.map(checklist => {
+                const status = checklist.conformes === checklist.total ? 'conforme' : 'nao-conforme';
+                const statusText = status === 'conforme' ? 'Conforme' : 'Não Conforme';
                 
                 return `
                     <tr>
-                        <td>${date}</td>
-                        <td>${item.userRespForRegistration || 'N/A'}</td>
-                        <td>${item.vehiclePlate || 'N/A'}</td>
-                        <td>${item.driverName || 'N/A'}</td>
-                        <td>${item.planName || 'N/A'}</td>
-                        <td>${item.itemName || 'N/A'}</td>
-                        <td><span class="status-badge ${statusClass}">${status}</span></td>
-                        <td>${item.comments || 'N/A'}</td>
+                        <td>${checklist.data.toLocaleDateString('pt-BR')}</td>
+                        <td>${checklist.plano || '-'}</td>
+                        <td>${checklist.placa || '-'}</td>
+                        <td>${checklist.motorista || '-'}</td>
+                        <td>${checklist.responsavel || '-'}</td>
+                        <td><span class="status-badge status-${status}">${statusText}</span></td>
                     </tr>
                 `;
             }).join('');
-
-            console.log(`✅ Tabela renderizada com ${limitedData.length} registros`);
         }
 
-        function showTable(tableType) {
-            currentTable = tableType;
+        // Função para gerar insights
+        function generateInsights() {
+            const container = document.getElementById('insightsContainer');
             
-            // Update active tab
-            document.querySelectorAll('.table-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            renderTable();
-        }
-
-        function applyFilters() {
-            console.log('🔍 Aplicando filtros...');
-            
-            const dataInicial = document.getElementById('dataInicial').value;
-            const dataFinal = document.getElementById('dataFinal').value;
-            const responsavel = document.getElementById('responsavel').value;
-            const placa = document.getElementById('placa').value;
-            const motorista = document.getElementById('motorista').value;
-            const planName = document.getElementById('planName').value;
-
-            filteredData = checklistData.filter(item => {
-                // Date filter
-                if (dataInicial || dataFinal) {
-                    const itemDate = item.timestamp ? new Date(item.timestamp) : null;
-                    if (itemDate) {
-                        if (dataInicial && itemDate < new Date(dataInicial)) return false;
-                        if (dataFinal && itemDate > new Date(dataFinal + 'T23:59:59')) return false;
-                    }
-                }
-
-                // Other filters
-                if (responsavel && item.userRespForRegistration !== responsavel) return false;
-                if (placa && item.vehiclePlate !== placa) return false;
-                if (motorista && item.driverName !== motorista) return false;
-                if (planName && item.planName !== planName) return false;
-
-                return true;
-            });
-
-            updateMetrics();
-            generateInsights();
-            createCharts();
-            renderTable();
-            
-            console.log(`✅ Filtros aplicados. ${filteredData.length} registros encontrados.`);
-        }
-
-        function clearFilters() {
-            console.log('🧹 Limpando filtros...');
-            
-            document.getElementById('dataInicial').value = '';
-            document.getElementById('dataFinal').value = '';
-            document.getElementById('responsavel').value = '';
-            document.getElementById('placa').value = '';
-            document.getElementById('motorista').value = '';
-            document.getElementById('planName').value = '';
-
-            filteredData = [...checklistData];
-            
-            updateMetrics();
-            generateInsights();
-            createCharts();
-            renderTable();
-            
-            console.log('✅ Filtros limpos');
-        }
-
-        function exportTableToExcel() {
-            console.log('📊 Exportando para Excel...');
-            
-            const data = filteredData.map(item => ({
-                'Data': item.timestamp ? new Date(item.timestamp).toLocaleDateString('pt-BR') : 'N/A',
-                'Responsável': item.userRespForRegistration || 'N/A',
-                'Placa': item.vehiclePlate || 'N/A',
-                'Motorista': item.driverName || 'N/A',
-                'Plano': item.planName || 'N/A',
-                'Item': item.itemName || 'N/A',
-                'Status': item.compliant === true ? 'Conforme' : (item.compliant === false ? 'Não Conforme' : 'N/A'),
-                'Observações': item.comments || 'N/A'
-            }));
-
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Checklist');
-            
-            const fileName = `checklist_${new Date().toISOString().split('T')[0]}.xlsx`;
-            XLSX.writeFile(wb, fileName);
-            
-            console.log('✅ Arquivo Excel exportado:', fileName);
-        }
-
-        function exportTableToPDF() {
-            console.log('📄 Exportando para PDF...');
-            
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            doc.setFontSize(16);
-            doc.text('Relatório de Checklist', 20, 20);
-            
-            doc.setFontSize(12);
-            doc.text(`Data de geração: ${new Date().toLocaleDateString('pt-BR')}`, 20, 30);
-            doc.text(`Total de registros: ${filteredData.length}`, 20, 40);
-            
-            let yPosition = 60;
-            const pageHeight = doc.internal.pageSize.height;
-            
-            filteredData.slice(0, 20).forEach((item, index) => {
-                if (yPosition > pageHeight - 30) {
-                    doc.addPage();
-                    yPosition = 20;
-                }
-                
-                const date = item.timestamp ? new Date(item.timestamp).toLocaleDateString('pt-BR') : 'N/A';
-                const status = item.compliant === true ? 'Conforme' : (item.compliant === false ? 'Não Conforme' : 'N/A');
-                
-                doc.text(`${index + 1}. ${date} - ${item.userRespForRegistration || 'N/A'} - ${item.vehiclePlate || 'N/A'} - ${status}`, 20, yPosition);
-                yPosition += 10;
-            });
-            
-            const fileName = `checklist_${new Date().toISOString().split('T')[0]}.pdf`;
-            doc.save(fileName);
-            
-            console.log('✅ Arquivo PDF exportado:', fileName);
-        }
-
-        function showError(message) {
-            const tbody = document.getElementById('checklistTableBody');
-            if (tbody) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="error">${message}</td>
-                    </tr>
+            if (filteredData.length === 0) {
+                container.innerHTML = `
+                    <div class="insight-item">
+                        <p>Nenhum dado encontrado para os filtros selecionados.</p>
+                    </div>
                 `;
+                return;
             }
+            
+            // Calcular métricas para insights
+            const totalChecklists = new Set(filteredData.map(item => item.checklistId)).size;
+            const conformes = filteredData.filter(item => item.compliant).length;
+            const naoConformes = filteredData.filter(item => !item.compliant).length;
+            const taxaConformidade = filteredData.length > 0 ? (conformes / filteredData.length * 100).toFixed(1) : 0;
+            
+            // Agrupar por plano para encontrar o melhor e o pior
+            const planos = {};
+            filteredData.forEach(item => {
+                const plano = item.planName || 'Sem plano';
+                if (!planos[plano]) {
+                    planos[plano] = { total: 0, conformes: 0 };
+                }
+                planos[plano].total++;
+                if (item.compliant) {
+                    planos[plano].conformes++;
+                }
+            });
+            
+            // Calcular taxa de conformidade por plano
+            Object.keys(planos).forEach(plano => {
+                planos[plano].taxa = planos[plano].total > 0 ? 
+                    (planos[plano].conformes / planos[plano].total * 100) : 0;
+            });
+            
+            // Encontrar o melhor e o pior plano (com pelo menos 5 itens)
+            const planosRelevantes = Object.entries(planos)
+                .filter(([_, dados]) => dados.total >= 5);
+            
+            let melhorPlano = { nome: '-', taxa: 0 };
+            let piorPlano = { nome: '-', taxa: 100 };
+            
+            planosRelevantes.forEach(([plano, dados]) => {
+                if (dados.taxa > melhorPlano.taxa) {
+                    melhorPlano = { nome: plano, taxa: dados.taxa };
+                }
+                if (dados.taxa < piorPlano.taxa) {
+                    piorPlano = { nome: plano, taxa: dados.taxa };
+                }
+            });
+            
+            // Gerar insights
+            const insights = [];
+            
+            // Insight sobre o volume
+            insights.push(`No período analisado, foram realizados <strong>${totalChecklists}</strong> checklists, totalizando <strong>${filteredData.length}</strong> itens verificados.`);
+            
+            // Insight sobre a conformidade
+            insights.push(`A taxa geral de conformidade é de <strong>${taxaConformidade}%</strong>, com <strong>${conformes}</strong> itens conformes e <strong>${naoConformes}</strong> não conformes.`);
+            
+            // Insight sobre o melhor plano
+            if (melhorPlano.nome !== '-') {
+                insights.push(`O plano de checklist com melhor desempenho é <strong>${melhorPlano.nome}</strong>, com taxa de conformidade de <strong>${melhorPlano.taxa.toFixed(1)}%</strong>.`);
+            }
+            
+            // Insight sobre o pior plano
+            if (piorPlano.nome !== '-' && piorPlano.nome !== melhorPlano.nome) {
+                insights.push(`O plano de checklist que requer mais atenção é <strong>${piorPlano.nome}</strong>, com taxa de conformidade de apenas <strong>${piorPlano.taxa.toFixed(1)}%</strong>.`);
+            }
+            
+            // Preencher o container
+            container.innerHTML = insights.map(insight => `
+                <div class="insight-item">
+                    <p>${insight}</p>
+                </div>
+            `).join('');
         }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Carregar dados
+            loadData();
+            
+            // Event listener para o botão de aplicar filtros
+            document.getElementById('applyFilters').addEventListener('click', applyFilters);
+            
+            // Event listener para o botão de limpar filtros
+            document.getElementById('clearFilters').addEventListener('click', clearFilters);
+            
+            // Event listeners para as abas da tabela
+            document.querySelectorAll('.table-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remover classe active de todas as abas
+                    document.querySelectorAll('.table-tab').forEach(t => t.classList.remove('active'));
+                    
+                    // Adicionar classe active à aba clicada
+                    tab.classList.add('active');
+                    
+                    // TODO: Implementar troca de tabelas
+                });
+            });
+        });
     </script>
 </body>
 </html>
