@@ -1,0 +1,2216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BI Frotas Agregadas/Spot - Fleet Copilot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: #14b8a6;
+            --primary-dark: #0f766e;
+            --background: #0a0a0a;
+            --surface: #1a1a1a;
+            --surface-light: #2a2a2a;
+            --surface-lighter: #333333;
+            --text: #ffffff;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --border: #333333;
+            --border-light: #444444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-title svg {
+            width: 32px;
+            height: 32px;
+            color: var(--primary);
+        }
+
+        .header-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            background: var(--surface);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-button:hover {
+            background: var(--surface-light);
+            color: var(--text);
+        }
+
+        .tab-button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(20, 184, 166, 0.3);
+        }
+
+        /* Filtros */
+        .filters {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.05);
+        }
+
+        .filters-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .filters-title svg {
+            width: 20px;
+            height: 20px;
+            color: var(--primary);
+        }
+
+        .filters-title h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--text);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(20, 184, 166, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(20, 184, 166, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-light);
+            border-color: var(--border-light);
+        }
+
+        /* Painéis */
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .panel h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        /* Métricas */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(20, 184, 166, 0.1);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary);
+            opacity: 0.8;
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .metric-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--primary);
+            opacity: 0.8;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        /* Gráficos */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.05);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Tabelas */
+        .tables-section {
+            margin-bottom: 30px;
+        }
+
+        .table-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.05);
+            overflow-x: auto;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .table-header h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 600px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--surface);
+            color: var(--text);
+            font-weight: 600;
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        tr:hover {
+            background: var(--surface-light);
+        }
+
+        /* Loading */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 10, 10, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(20, 184, 166, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading p {
+            color: var(--text);
+            font-size: 1.1rem;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header-title h1 {
+                font-size: 1.5rem;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab-button {
+                flex: 1 1 auto;
+                text-align: center;
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-wrapper {
+                height: 250px;
+            }
+
+            .metric-value {
+                font-size: 2rem;
+            }
+
+            .btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <!-- Ícone SVG para Frotas Agregadas -->
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <h1>BI Frotas Agregadas/Spot</h1>
+            </div>
+        </div>
+
+        <!-- Navegação por Abas -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="showPanel(\'performance\')">Performance Operacional</button>
+            <button class="tab-button" onclick="showPanel(\'timing\')">Tempo e Roteirização</button>
+            <button class="tab-button" onclick="showPanel(\'audit\')">Auditoria de Entrega</button>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters">
+            <div class="filters-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"/>
+                </svg>
+                <h3>Filtros</h3>
+            </div>
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="startDate">Data Inicial</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="filter-group">
+                    <label for="endDate">Data Final</label>
+                    <input type="date" id="endDate">
+                </div>
+                <div class="filter-group">
+                    <label for="carrierFilter">Transportadora</label>
+                    <select id="carrierFilter">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="driverFilter">Motorista</label>
+                    <select id="driverFilter">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="routeFilter">Rota</label>
+                    <select id="routeFilter">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="cityFilter">Cidade/Região</label>
+                    <select id="cityFilter">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="deliveryTypeFilter">Tipo de Entrega</label>
+                    <select id="deliveryTypeFilter">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary" onclick="applyFilters()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    Aplicar Filtros
+                </button>
+                <button class="btn btn-secondary" onclick="clearFilters()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18"/>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                        <line x1="10" y1="11" x2="10" y2="17"/>
+                        <line x1="14" y1="11" x2="14" y2="17"/>
+                    </svg>
+                    Limpar
+                </button>
+            </div>
+        </div>
+
+        <!-- Conteúdo dos Painéis -->
+        <!-- Painel 1: Performance Operacional -->
+        <div id="panel-performance" class="panel active">
+            <h2>Performance Operacional</h2>
+            
+            <!-- Métricas Principais -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">SLA de Entrega</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="slaEntrega">0%</div>
+                    <div class="metric-label">Entregas no prazo</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Cumprimento de Rotas</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7"/>
+                            <path d="M14 14l5-3-5-3-5 3 5 3z"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="cumprimentoRotas">0%</div>
+                    <div class="metric-label">Rotas cumpridas</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Custo por Entrega</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="1" x2="12" y2="23"/>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="custoEntrega">R$ 0,00</div>
+                    <div class="metric-label">Custo médio por entrega</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Custo por KM</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                            <line x1="9" y1="9" x2="9.01" y2="9"/>
+                            <line x1="15" y1="9" x2="15.01" y2="9"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="custoKm">R$ 0,00</div>
+                    <div class="metric-label">Custo médio por quilômetro</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Taxa de Reentrega</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                            <path d="M3 3v5h5"/>
+                            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                            <path d="M16 16h5v5"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="taxaReentrega">0%</div>
+                    <div class="metric-label">Entregas com reentrega</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Total de Entregas</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="3" y1="9" x2="21" y2="9"/>
+                            <line x1="9" y1="21" x2="9" y2="9"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="totalEntregas">0</div>
+                    <div class="metric-label">Entregas realizadas</div>
+                </div>
+            </div>
+            
+            <!-- Gráficos -->
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <path d="M7 16V8"/>
+                                <path d="M12 16V11"/>
+                                <path d="M17 16V14"/>
+                            </svg>
+                            Eficiência por Transportadora
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="carrierEfficiencyChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                            </svg>
+                            Evolução do SLA ao Longo do Tempo
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="slaEvolutionChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                                <path d="M2 12h20"/>
+                            </svg>
+                            Distribuição de Entregas por Tipo
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="deliveryTypeChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            Entregas por Cidade/Região
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="cityRegionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabelas -->
+            <div class="tables-section">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h4>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                            </svg>
+                            Performance por Transportadora
+                        </h4>
+                        <div class="table-actions">
+                            <button class="btn btn-secondary" onclick="exportToExcel('carrier')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <polyline points="8 16 12 12 16 16"/>
+                                    <line x1="12" y1="12" x2="12" y2="21"/>
+                                </svg>
+                                Exportar Excel
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportToPDF('carrier')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10 9 9 9 8 9"/>
+                                </svg>
+                                Exportar PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="carrierTable">
+                            <thead>
+                                <tr>
+                                    <th>Transportadora</th>
+                                    <th>Total Entregas</th>
+                                    <th>SLA (%)</th>
+                                    <th>Rotas Cumpridas (%)</th>
+                                    <th>Custo Médio (R$)</th>
+                                    <th>Custo/KM (R$)</th>
+                                    <th>Taxa Reentrega (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dados serão inseridos aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <div class="table-header">
+                        <h4>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 3v18h18"/>
+                                <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
+                            </svg>
+                            Custos por Rota
+                        </h4>
+                        <div class="table-actions">
+                            <button class="btn btn-secondary" onclick="exportToExcel('route')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <polyline points="8 16 12 12 16 16"/>
+                                    <line x1="12" y1="12" x2="12" y2="21"/>
+                                </svg>
+                                Exportar Excel
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportToPDF('route')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10 9 9 9 8 9"/>
+                                </svg>
+                                Exportar PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="routeTable">
+                            <thead>
+                                <tr>
+                                    <th>Rota</th>
+                                    <th>Total Entregas</th>
+                                    <th>Distância Total (KM)</th>
+                                    <th>Custo Total (R$)</th>
+                                    <th>Custo/KM (R$)</th>
+                                    <th>Custo/Entrega (R$)</th>
+                                    <th>Transportadora Principal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dados serão inseridos aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-timing" class="panel">
+            <h2>Tempo e Roteirização</h2>
+            
+            <!-- Métricas Principais -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Tempo Médio nos CDs</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="tempoMedioCd">0 min</div>
+                    <div class="metric-label">Tempo médio de permanência</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Tempo Médio de Viagem</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="tempoMedioViagem">0h 0min</div>
+                    <div class="metric-label">Tempo médio total de viagem</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Percentual de Atrasos</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="percentualAtrasos">0%</div>
+                    <div class="metric-label">Entregas com atraso</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Desvios de Rota</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7"/>
+                            <path d="M14 14l5-3-5-3-5 3 5 3z"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="desviosRota">0%</div>
+                    <div class="metric-label">Entregas com desvio de rota</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Tempo Médio Ocioso</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="tempoMedioOcioso">0 min</div>
+                    <div class="metric-label">Tempo médio parado</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Entregas Antecipadas</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="entregasAntecipadas">0%</div>
+                    <div class="metric-label">Entregas antes do prazo</div>
+                </div>
+            </div>
+            
+            <!-- Gráficos -->
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <path d="M7 16V8"/>
+                                <path d="M12 16V11"/>
+                                <path d="M17 16V14"/>
+                            </svg>
+                            Tempo Médio por Etapa da Entrega
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="deliveryStepsChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                            </svg>
+                            Evolução dos Tempos de Viagem
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="travelTimeEvolutionChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                                <path d="M2 12h20"/>
+                            </svg>
+                            Distribuição de Atrasos por Faixa
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="delayDistributionChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            Concentração de Desvios de Rota
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="routeDeviationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabelas -->
+            <div class="tables-section">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h4>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            Tempos por Motorista
+                        </h4>
+                        <div class="table-actions">
+                            <button class="btn btn-secondary" onclick="exportToExcel('driverTime')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <polyline points="8 16 12 12 16 16"/>
+                                    <line x1="12" y1="12" x2="12" y2="21"/>
+                                </svg>
+                                Exportar Excel
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportToPDF('driverTime')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10 9 9 9 8 9"/>
+                                </svg>
+                                Exportar PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="driverTimeTable">
+                            <thead>
+                                <tr>
+                                    <th>Motorista</th>
+                                    <th>Transportadora</th>
+                                    <th>Tempo Médio CD</th>
+                                    <th>Tempo Médio Viagem</th>
+                                    <th>Tempo Médio Ocioso</th>
+                                    <th>% Atrasos</th>
+                                    <th>% Desvios</th>
+                                    <th>% Antecipações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dados serão inseridos aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <div class="table-header">
+                        <h4>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            Atrasos por Rota
+                        </h4>
+                        <div class="table-actions">
+                            <button class="btn btn-secondary" onclick="exportToExcel('routeDelay')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <polyline points="8 16 12 12 16 16"/>
+                                    <line x1="12" y1="12" x2="12" y2="21"/>
+                                </svg>
+                                Exportar Excel
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportToPDF('routeDelay')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10 9 9 9 8 9"/>
+                                </svg>
+                                Exportar PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="routeDelayTable">
+                            <thead>
+                                <tr>
+                                    <th>Rota</th>
+                                    <th>Total Entregas</th>
+                                    <th>Entregas Atrasadas</th>
+                                    <th>% Atrasos</th>
+                                    <th>Atraso Médio</th>
+                                    <th>Atraso Máximo</th>
+                                    <th>Transportadora Principal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dados serão inseridos aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-audit" class="panel">
+            <h2>Auditoria de Entrega</h2>
+            
+            <!-- Métricas Principais -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Entregas com POD</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4"/>
+                            <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="entregasComPod">0%</div>
+                    <div class="metric-label">Entregas com prova de entrega</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Falhas no Registro</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="falhasRegistro">0%</div>
+                    <div class="metric-label">Falhas no registro de POD</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Divergências de Geo</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="divergenciasGeo">0%</div>
+                    <div class="metric-label">Divergências de geolocalização</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Tentativas Frustradas</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="tentativasFrustradas">0%</div>
+                    <div class="metric-label">Tentativas sem sucesso</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Rejeições/Devoluções</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                            <path d="M3 3v5h5"/>
+                            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                            <path d="M16 16h5v5"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="rejeicoesDevol">0%</div>
+                    <div class="metric-label">Entregas rejeitadas/devolvidas</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Tempo Médio Evidência</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="tempoMedioEvidencia">0 min</div>
+                    <div class="metric-label">Entre entrega e envio de evidência</div>
+                </div>
+            </div>
+            
+            <!-- Gráficos -->
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <path d="M7 16V8"/>
+                                <path d="M12 16V11"/>
+                                <path d="M17 16V14"/>
+                            </svg>
+                            Compliance de POD por Transportadora
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="podComplianceChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                            </svg>
+                            Evolução das Falhas de Registro
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="failureEvolutionChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                                <path d="M2 12h20"/>
+                            </svg>
+                            Motivos de Rejeição/Devolução
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="rejectionReasonsChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <circle cx="12" cy="12" r="4"/>
+                                <line x1="21.17" y1="8" x2="12" y2="8"/>
+                                <line x1="3.95" y1="6.06" x2="8.54" y2="14"/>
+                                <line x1="10.88" y1="21.94" x2="15.46" y2="14"/>
+                            </svg>
+                            Relação Tempo de Entrega vs. Registro POD
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="timeVsPodChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabelas -->
+            <div class="tables-section">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h4>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            Falhas por Motorista
+                        </h4>
+                        <div class="table-actions">
+                            <button class="btn btn-secondary" onclick="exportToExcel('driverFailure')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <polyline points="8 16 12 12 16 16"/>
+                                    <line x1="12" y1="12" x2="12" y2="21"/>
+                                </svg>
+                                Exportar Excel
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportToPDF('driverFailure')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10 9 9 9 8 9"/>
+                                </svg>
+                                Exportar PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="driverFailureTable">
+                            <thead>
+                                <tr>
+                                    <th>Motorista</th>
+                                    <th>Transportadora</th>
+                                    <th>Total Entregas</th>
+                                    <th>% com POD</th>
+                                    <th>% Falhas Registro</th>
+                                    <th>% Divergências Geo</th>
+                                    <th>% Tentativas Frustradas</th>
+                                    <th>% Rejeições</th>
+                                    <th>Tempo Médio Evidência</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dados serão inseridos aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <div class="table-header">
+                        <h4>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            Divergências de Geolocalização
+                        </h4>
+                        <div class="table-actions">
+                            <button class="btn btn-secondary" onclick="exportToExcel('geoFailure')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <polyline points="8 16 12 12 16 16"/>
+                                    <line x1="12" y1="12" x2="12" y2="21"/>
+                                </svg>
+                                Exportar Excel
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportToPDF('geoFailure')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10 9 9 9 8 9"/>
+                                </svg>
+                                Exportar PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="geoFailureTable">
+                            <thead>
+                                <tr>
+                                    <th>ID Entrega</th>
+                                    <th>Data/Hora</th>
+                                    <th>Motorista</th>
+                                    <th>Transportadora</th>
+                                    <th>Cidade</th>
+                                    <th>Distância da Divergência (m)</th>
+                                    <th>Coordenadas Planejadas</th>
+                                    <th>Coordenadas Reais</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dados serão inseridos aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Carregando dados...</p>
+    </div>
+
+    <script src="bi_frotas_mockdata_completo.js"></script>
+    <script>
+        // Variáveis globais
+        let allData = [];
+        let filteredData = [];
+        let currentPanel = 'performance';
+
+        // Variáveis para os gráficos
+        let charts = {};
+
+        // Função para mostrar um painel específico
+        function showPanel(panelId) {
+            // Ocultar todos os painéis
+            document.querySelectorAll('.panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            
+            // Desativar todos os botões de abas
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Mostrar o painel selecionado
+            document.getElementById('panel-' + panelId).classList.add('active');
+            
+            // Ativar o botão da aba selecionada
+            document.querySelector(`.tab-button[onclick="showPanel('${panelId}')"]`).classList.add('active');
+            
+            // Atualizar o painel atual
+            currentPanel = panelId;
+            
+            // Atualizar os gráficos do painel atual
+            updatePanelCharts(panelId);
+        }
+
+        // Função para mostrar o overlay de carregamento
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        // Função para ocultar o overlay de carregamento
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        // Função para carregar os dados
+        async function loadData() {
+            showLoading();
+            
+            try {
+                // Em produção, isso seria substituído pela chamada à API Firebase
+                // const apiUrl = `https://firebase-bi-api.onrender.com/deliveries?enterpriseId=${getEnterpriseIdFromURL()}`;
+                // const response = await fetch(apiUrl);
+                // const result = await response.json();
+                // allData = result.data;
+                
+                // Por enquanto, vamos carregar os dados mockados
+                // Normalmente carregaríamos de um arquivo externo, mas para simplificar, vamos incluir diretamente
+                allData = MOCK_DATA.data;
+                
+                console.log(`✅ ${allData.length} registros carregados com sucesso`);
+                
+                // Preencher os filtros
+                populateFilters();
+                
+                // Aplicar filtros iniciais (sem filtros)
+                applyFilters();
+                
+                hideLoading();
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados:', error);
+                hideLoading();
+                
+                // Mostrar mensagem de erro
+                alert('Erro ao carregar dados. Por favor, tente novamente.');
+            }
+        }
+
+        // Função para preencher os filtros com base nos dados
+        function populateFilters() {
+            // Extrair valores únicos para os filtros
+            const transportadoras = [...new Set(allData.map(item => item.transportadora).filter(Boolean))].sort();
+            const motoristas = [...new Set(allData.map(item => item.motorista).filter(Boolean))].sort();
+            const rotas = [...new Set(allData.map(item => item.rota).filter(Boolean))].sort();
+            const cidades = [...new Set(allData.map(item => item.cidade).filter(Boolean))].sort();
+            const tiposEntrega = [...new Set(allData.map(item => item.tipoEntrega).filter(Boolean))].sort();
+            
+            // Preencher os selects
+            fillSelectOptions('carrierFilter', transportadoras);
+            fillSelectOptions('driverFilter', motoristas);
+            fillSelectOptions('routeFilter', rotas);
+            fillSelectOptions('cityFilter', cidades);
+            fillSelectOptions('deliveryTypeFilter', tiposEntrega);
+        }
+
+        // Função para preencher um select com opções
+        function fillSelectOptions(selectId, options) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            
+            // Manter a primeira opção (todas)
+            const firstOption = select.querySelector('option');
+            select.innerHTML = '';
+            select.appendChild(firstOption);
+            
+            // Adicionar as opções
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                select.appendChild(optionElement);
+            });
+        }
+
+        // Função para aplicar filtros
+        function applyFilters() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const transportadora = document.getElementById('carrierFilter').value;
+            const motorista = document.getElementById('driverFilter').value;
+            const rota = document.getElementById('routeFilter').value;
+            const cidade = document.getElementById('cityFilter').value;
+            const tipoEntrega = document.getElementById('deliveryTypeFilter').value;
+
+            filteredData = allData.filter(item => {
+                // Filtro de data
+                if (startDate) {
+                    const itemDate = new Date(item.dataEntregaRealizada);
+                    const filterDate = new Date(startDate);
+                    if (itemDate < filterDate) return false;
+                }
+                
+                if (endDate) {
+                    const itemDate = new Date(item.dataEntregaRealizada);
+                    const filterDate = new Date(endDate);
+                    filterDate.setHours(23, 59, 59);
+                    if (itemDate > filterDate) return false;
+                }
+                
+                // Outros filtros
+                if (transportadora && item.transportadora !== transportadora) return false;
+                if (motorista && item.motorista !== motorista) return false;
+                if (rota && item.rota !== rota) return false;
+                if (cidade && item.cidade !== cidade) return false;
+                if (tipoEntrega && item.tipoEntrega !== tipoEntrega) return false;
+                
+                return true;
+            });
+
+            console.log(`🔍 Filtros aplicados: ${filteredData.length} de ${allData.length} registros`);
+            
+            // Atualizar os painéis com os dados filtrados
+            updateAllPanels();
+        }
+
+        // Função para limpar filtros
+        function clearFilters() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('carrierFilter').value = '';
+            document.getElementById('driverFilter').value = '';
+            document.getElementById('routeFilter').value = '';
+            document.getElementById('cityFilter').value = '';
+            document.getElementById('deliveryTypeFilter').value = '';
+            
+            applyFilters();
+        }
+
+        // Função para atualizar todos os painéis
+        function updateAllPanels() {
+            updatePerformancePanel();
+            updateTimingPanel();
+            updateAuditPanel();
+            
+            // Atualizar os gráficos do painel atual
+            updatePanelCharts(currentPanel);
+        }
+
+        // Função para atualizar os gráficos do painel atual
+        function updatePanelCharts(panelId) {
+            switch (panelId) {
+                case 'performance':
+                    updatePerformanceCharts();
+                    break;
+                case 'timing':
+                    updateTimingCharts();
+                    break;
+                case 'audit':
+                    updateAuditCharts();
+                    break;
+            }
+        }
+
+        // Função para atualizar o painel de Performance Operacional
+        function updatePerformancePanel() {
+            if (!filteredData || filteredData.length === 0) {
+                console.warn('Sem dados para atualizar o painel de Performance Operacional');
+                return;
+            }
+            
+            // Calcular métricas
+            const totalEntregas = filteredData.length;
+            const entregasRealizadas = filteredData.filter(item => item.entregaRealizada).length;
+            
+            // SLA de Entrega (% no prazo)
+            const entregasNoPrazo = filteredData.filter(item => 
+                item.entregaRealizada && (!item.atraso || item.atraso <= 0)
+            ).length;
+            const slaEntrega = entregasRealizadas > 0 ? entregasNoPrazo / entregasRealizadas : 0;
+            
+            // Cumprimento de Rotas (% sem desvio)
+            const rotasCumpridas = filteredData.filter(item => 
+                item.entregaRealizada && !item.desvioRota
+            ).length;
+            const cumprimentoRotas = entregasRealizadas > 0 ? rotasCumpridas / entregasRealizadas : 0;
+            
+            // Custo por Entrega
+            const custoTotal = filteredData.reduce((sum, item) => sum + (item.custo || 0), 0);
+            const custoEntrega = entregasRealizadas > 0 ? custoTotal / entregasRealizadas : 0;
+            
+            // Custo por KM
+            const distanciaTotal = filteredData.reduce((sum, item) => sum + (item.distanciaKm || 0), 0);
+            const custoKm = distanciaTotal > 0 ? custoTotal / distanciaTotal : 0;
+            
+            // Taxa de Reentrega
+            const reentregas = filteredData.filter(item => item.tentativaFrustrada).length;
+            const taxaReentrega = totalEntregas > 0 ? reentregas / totalEntregas : 0;
+            
+            // Atualizar os valores nos cards
+            document.getElementById('slaEntrega').textContent = formatPercent(slaEntrega);
+            document.getElementById('cumprimentoRotas').textContent = formatPercent(cumprimentoRotas);
+            document.getElementById('custoEntrega').textContent = formatCurrency(custoEntrega);
+            document.getElementById('custoKm').textContent = formatCurrency(custoKm);
+            document.getElementById('taxaReentrega').textContent = formatPercent(taxaReentrega);
+            document.getElementById('totalEntregas').textContent = formatNumber(totalEntregas);
+            
+            // Preencher tabelas
+            updateCarrierTable();
+            updateRouteTable();
+        }
+        
+        // Função para atualizar a tabela de transportadoras
+        function updateCarrierTable() {
+            const tableBody = document.querySelector('#carrierTable tbody');
+            tableBody.innerHTML = '';
+            
+            // Agrupar por transportadora
+            const transportadoraData = {};
+            
+            filteredData.forEach(item => {
+                if (!transportadoraData[item.transportadora]) {
+                    transportadoraData[item.transportadora] = {
+                        totalEntregas: 0,
+                        entregasNoPrazo: 0,
+                        rotasCumpridas: 0,
+                        custoTotal: 0,
+                        distanciaTotal: 0,
+                        reentregas: 0,
+                        entregasRealizadas: 0
+                    };
+                }
+                
+                const data = transportadoraData[item.transportadora];
+                data.totalEntregas++;
+                
+                if (item.entregaRealizada) {
+                    data.entregasRealizadas++;
+                    
+                    if (!item.atraso || item.atraso <= 0) {
+                        data.entregasNoPrazo++;
+                    }
+                    
+                    if (!item.desvioRota) {
+                        data.rotasCumpridas++;
+                    }
+                    
+                    data.custoTotal += item.custo || 0;
+                    data.distanciaTotal += item.distanciaKm || 0;
+                }
+                
+                if (item.tentativaFrustrada) {
+                    data.reentregas++;
+                }
+            });
+            
+            // Criar linhas da tabela
+            Object.entries(transportadoraData).forEach(([transportadora, data]) => {
+                const sla = data.entregasRealizadas > 0 ? data.entregasNoPrazo / data.entregasRealizadas : 0;
+                const rotasCumpridas = data.entregasRealizadas > 0 ? data.rotasCumpridas / data.entregasRealizadas : 0;
+                const custoMedio = data.entregasRealizadas > 0 ? data.custoTotal / data.entregasRealizadas : 0;
+                const custoKm = data.distanciaTotal > 0 ? data.custoTotal / data.distanciaTotal : 0;
+                const taxaReentrega = data.totalEntregas > 0 ? data.reentregas / data.totalEntregas : 0;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${transportadora}</td>
+                    <td>${formatNumber(data.totalEntregas)}</td>
+                    <td>${formatPercent(sla)}</td>
+                    <td>${formatPercent(rotasCumpridas)}</td>
+                    <td>${formatCurrency(custoMedio)}</td>
+                    <td>${formatCurrency(custoKm)}</td>
+                    <td>${formatPercent(taxaReentrega)}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Função para atualizar a tabela de rotas
+        function updateRouteTable() {
+            const tableBody = document.querySelector('#routeTable tbody');
+            tableBody.innerHTML = '';
+            
+            // Agrupar por rota
+            const rotaData = {};
+            
+            filteredData.forEach(item => {
+                if (!rotaData[item.rota]) {
+                    rotaData[item.rota] = {
+                        totalEntregas: 0,
+                        distanciaTotal: 0,
+                        custoTotal: 0,
+                        transportadoras: {}
+                    };
+                }
+                
+                const data = rotaData[item.rota];
+                data.totalEntregas++;
+                data.distanciaTotal += item.distanciaKm || 0;
+                data.custoTotal += item.custo || 0;
+                
+                // Contar transportadoras por rota
+                if (!data.transportadoras[item.transportadora]) {
+                    data.transportadoras[item.transportadora] = 0;
+                }
+                data.transportadoras[item.transportadora]++;
+            });
+            
+            // Criar linhas da tabela
+            Object.entries(rotaData).forEach(([rota, data]) => {
+                const custoKm = data.distanciaTotal > 0 ? data.custoTotal / data.distanciaTotal : 0;
+                const custoEntrega = data.totalEntregas > 0 ? data.custoTotal / data.totalEntregas : 0;
+                
+                // Encontrar a transportadora principal (com mais entregas)
+                let transportadoraPrincipal = '';
+                let maxEntregas = 0;
+                
+                Object.entries(data.transportadoras).forEach(([transportadora, count]) => {
+                    if (count > maxEntregas) {
+                        maxEntregas = count;
+                        transportadoraPrincipal = transportadora;
+                    }
+                });
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${rota}</td>
+                    <td>${formatNumber(data.totalEntregas)}</td>
+                    <td>${formatNumber(data.distanciaTotal)} km</td>
+                    <td>${formatCurrency(data.custoTotal)}</td>
+                    <td>${formatCurrency(custoKm)}</td>
+                    <td>${formatCurrency(custoEntrega)}</td>
+                    <td>${transportadoraPrincipal}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Função para atualizar o painel de Tempo e Roteirização
+        function updateTimingPanel() {
+            if (!filteredData || filteredData.length === 0) {
+                console.warn('Sem dados para atualizar o painel de Tempo e Roteirização');
+                return;
+            }
+            
+            // Filtrar apenas entregas realizadas
+            const entregasRealizadas = filteredData.filter(item => item.entregaRealizada);
+            
+            if (entregasRealizadas.length === 0) {
+                console.warn('Sem entregas realizadas para atualizar o painel de Tempo e Roteirização');
+                return;
+            }
+            
+            // Calcular métricas
+            // Tempo Médio nos CDs
+            const tempoTotalCD = entregasRealizadas.reduce((sum, item) => sum + (item.tempoCD || 0), 0);
+            const tempoMedioCd = entregasRealizadas.length > 0 ? tempoTotalCD / entregasRealizadas.length : 0;
+            
+            // Tempo Médio de Viagem
+            const tempoTotalViagem = entregasRealizadas.reduce((sum, item) => sum + (item.tempoViagem || 0), 0);
+            const tempoMedioViagem = entregasRealizadas.length > 0 ? tempoTotalViagem / entregasRealizadas.length : 0;
+            
+            // Percentual de Atrasos
+            const entregasAtrasadas = entregasRealizadas.filter(item => item.atraso && item.atraso > 0).length;
+            const percentualAtrasos = entregasRealizadas.length > 0 ? entregasAtrasadas / entregasRealizadas.length : 0;
+            
+            // Desvios de Rota
+            const entregasComDesvio = entregasRealizadas.filter(item => item.desvioRota).length;
+            const desviosRota = entregasRealizadas.length > 0 ? entregasComDesvio / entregasRealizadas.length : 0;
+            
+            // Tempo Médio Ocioso
+            const tempoTotalOcioso = entregasRealizadas.reduce((sum, item) => sum + (item.tempoOcioso || 0), 0);
+            const tempoMedioOcioso = entregasRealizadas.length > 0 ? tempoTotalOcioso / entregasRealizadas.length : 0;
+            
+            // Entregas Antecipadas
+            const entregasAntecipadas = entregasRealizadas.filter(item => item.antecipada).length;
+            const percentualAntecipadas = entregasRealizadas.length > 0 ? entregasAntecipadas / entregasRealizadas.length : 0;
+            
+            // Atualizar os valores nos cards
+            document.getElementById('tempoMedioCd').textContent = formatTime(tempoMedioCd);
+            document.getElementById('tempoMedioViagem').textContent = formatTime(tempoMedioViagem);
+            document.getElementById('percentualAtrasos').textContent = formatPercent(percentualAtrasos);
+            document.getElementById('desviosRota').textContent = formatPercent(desviosRota);
+            document.getElementById('tempoMedioOcioso').textContent = formatTime(tempoMedioOcioso);
+            document.getElementById('entregasAntecipadas').textContent = formatPercent(percentualAntecipadas);
+            
+            // Preencher tabelas
+            updateDriverTimeTable();
+            updateRouteDelayTable();
+        }
+        
+        // Função para atualizar a tabela de tempos por motorista
+        function updateDriverTimeTable() {
+            const tableBody = document.querySelector('#driverTimeTable tbody');
+            tableBody.innerHTML = '';
+            
+            // Agrupar por motorista
+            const motoristaData = {};
+            
+            filteredData.forEach(item => {
+                if (!item.entregaRealizada) return;
+                
+                if (!motoristaData[item.motorista]) {
+                    motoristaData[item.motorista] = {
+                        transportadora: item.transportadora,
+                        totalEntregas: 0,
+                        tempoTotalCD: 0,
+                        tempoTotalViagem: 0,
+                        tempoTotalOcioso: 0,
+                        entregasAtrasadas: 0,
+                        entregasComDesvio: 0,
+                        entregasAntecipadas: 0
+                    };
+                }
+                
+                const data = motoristaData[item.motorista];
+                data.totalEntregas++;
+                data.tempoTotalCD += item.tempoCD || 0;
+                data.tempoTotalViagem += item.tempoViagem || 0;
+                data.tempoTotalOcioso += item.tempoOcioso || 0;
+                
+                if (item.atraso && item.atraso > 0) {
+                    data.entregasAtrasadas++;
+                }
+                
+                if (item.desvioRota) {
+                    data.entregasComDesvio++;
+                }
+                
+                if (item.antecipada) {
+                    data.entregasAntecipadas++;
+                }
+            });
+            
+            // Criar linhas da tabela
+            Object.entries(motoristaData).forEach(([motorista, data]) => {
+                const tempoMedioCd = data.totalEntregas > 0 ? data.tempoTotalCD / data.totalEntregas : 0;
+                const tempoMedioViagem = data.totalEntregas > 0 ? data.tempoTotalViagem / data.totalEntregas : 0;
+                const tempoMedioOcioso = data.totalEntregas > 0 ? data.tempoTotalOcioso / data.totalEntregas : 0;
+                const percentualAtrasos = data.totalEntregas > 0 ? data.entregasAtrasadas / data.totalEntregas : 0;
+                const percentualDesvios = data.totalEntregas > 0 ? data.entregasComDesvio / data.totalEntregas : 0;
+                const percentualAntecipadas = data.totalEntregas > 0 ? data.entregasAntecipadas / data.totalEntregas : 0;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${motorista}</td>
+                    <td>${data.transportadora}</td>
+                    <td>${formatTime(tempoMedioCd)}</td>
+                    <td>${formatTime(tempoMedioViagem)}</td>
+                    <td>${formatTime(tempoMedioOcioso)}</td>
+                    <td>${formatPercent(percentualAtrasos)}</td>
+                    <td>${formatPercent(percentualDesvios)}</td>
+                    <td>${formatPercent(percentualAntecipadas)}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Função para atualizar a tabela de atrasos por rota
+        function updateRouteDelayTable() {
+            const tableBody = document.querySelector('#routeDelayTable tbody');
+            tableBody.innerHTML = '';
+            
+            // Agrupar por rota
+            const rotaData = {};
+            
+            filteredData.forEach(item => {
+                if (!item.entregaRealizada) return;
+                
+                if (!rotaData[item.rota]) {
+                    rotaData[item.rota] = {
+                        totalEntregas: 0,
+                        entregasAtrasadas: 0,
+                        atrasoTotal: 0,
+                        atrasoMaximo: 0,
+                        transportadoras: {}
+                    };
+                }
+                
+                const data = rotaData[item.rota];
+                data.totalEntregas++;
+                
+                if (item.atraso && item.atraso > 0) {
+                    data.entregasAtrasadas++;
+                    data.atrasoTotal += item.atraso;
+                    
+                    if (item.atraso > data.atrasoMaximo) {
+                        data.atrasoMaximo = item.atraso;
+                    }
+                }
+                
+                // Contar transportadoras por rota
+                if (!data.transportadoras[item.transportadora]) {
+                    data.transportadoras[item.transportadora] = 0;
+                }
+                data.transportadoras[item.transportadora]++;
+            });
+            
+            // Criar linhas da tabela
+            Object.entries(rotaData).forEach(([rota, data]) => {
+                const percentualAtrasos = data.totalEntregas > 0 ? data.entregasAtrasadas / data.totalEntregas : 0;
+                const atrasoMedio = data.entregasAtrasadas > 0 ? data.atrasoTotal / data.entregasAtrasadas : 0;
+                
+                // Encontrar a transportadora principal (com mais entregas)
+                let transportadoraPrincipal = '';
+                let maxEntregas = 0;
+                
+                Object.entries(data.transportadoras).forEach(([transportadora, count]) => {
+                    if (count > maxEntregas) {
+                        maxEntregas = count;
+                        transportadoraPrincipal = transportadora;
+                    }
+                });
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${rota}</td>
+                    <td>${formatNumber(data.totalEntregas)}</td>
+                    <td>${formatNumber(data.entregasAtrasadas)}</td>
+                    <td>${formatPercent(percentualAtrasos)}</td>
+                    <td>${formatTime(atrasoMedio)}</td>
+                    <td>${formatTime(data.atrasoMaximo)}</td>
+                    <td>${transportadoraPrincipal}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Função para atualizar o painel de Auditoria de Entrega
+        function updateAuditPanel() {
+            if (!filteredData || filteredData.length === 0) {
+                console.warn('Sem dados para atualizar o painel de Auditoria de Entrega');
+                return;
+            }
+            
+            // Filtrar apenas entregas realizadas
+            const entregasRealizadas = filteredData.filter(item => item.entregaRealizada);
+            
+            if (entregasRealizadas.length === 0) {
+                console.warn('Sem entregas realizadas para atualizar o painel de Auditoria de Entrega');
+                return;
+            }
+            
+            // Calcular métricas
+            // Entregas com POD
+            const entregasComPod = entregasRealizadas.filter(item => item.comPOD).length;
+            const percentualComPod = entregasRealizadas.length > 0 ? entregasComPod / entregasRealizadas.length : 0;
+            
+            // Falhas no Registro
+            const entregasComFalha = entregasRealizadas.filter(item => item.falhaRegistro).length;
+            const percentualFalhas = entregasRealizadas.length > 0 ? entregasComFalha / entregasRealizadas.length : 0;
+            
+            // Divergências de Geo
+            const entregasComDivergencia = entregasRealizadas.filter(item => item.divergenciaGeo).length;
+            const percentualDivergencias = entregasRealizadas.length > 0 ? entregasComDivergencia / entregasRealizadas.length : 0;
+            
+            // Tentativas Frustradas
+            const tentativasFrustradas = filteredData.filter(item => item.tentativaFrustrada).length;
+            const percentualFrustradas = filteredData.length > 0 ? tentativasFrustradas / filteredData.length : 0;
+            
+            // Rejeições/Devoluções
+            const entregasRejeitadas = entregasRealizadas.filter(item => item.rejeicao).length;
+            const percentualRejeicoes = entregasRealizadas.length > 0 ? entregasRejeitadas / entregasRealizadas.length : 0;
+            
+            // Tempo Médio Evidência
+            const tempoTotalEvidencia = entregasRealizadas
+                .filter(item => item.comPOD && item.tempoEvidencia)
+                .reduce((sum, item) => sum + (item.tempoEvidencia || 0), 0);
+            
+            const entregasComEvidencia = entregasRealizadas.filter(item => item.comPOD && item.tempoEvidencia).length;
+            const tempoMedioEvidencia = entregasComEvidencia > 0 ? tempoTotalEvidencia / entregasComEvidencia : 0;
+            
+            // Atualizar os valores nos cards
+            document.getElementById('entregasComPod').textContent = formatPercent(percentualComPod);
+            document.getElementById('falhasRegistro').textContent = formatPercent(percentualFalhas);
+            document.getElementById('divergenciasGeo').textContent = formatPercent(percentualDivergencias);
+            document.getElementById('tentativasFrustradas').textContent = formatPercent(percentualFrustradas);
+            document.getElementById('rejeicoesDevol').textContent = formatPercent(percentualRejeicoes);
+            document.getElementById('tempoMedioEvidencia').textContent = formatTime(tempoMedioEvidencia);
+            
+            // Preencher tabelas
+            updateDriverFailureTable();
+            updateGeoFailureTable();
+        }
+        
+        // Função para atualizar a tabela de falhas por motorista
+        function updateDriverFailureTable() {
+            const tableBody = document.querySelector('#driverFailureTable tbody');
+            tableBody.innerHTML = '';
+            
+            // Agrupar por motorista
+            const motoristaData = {};
+            
+            filteredData.forEach(item => {
+                if (!motoristaData[item.motorista]) {
+                    motoristaData[item.motorista] = {
+                        transportadora: item.transportadora,
+                        totalEntregas: 0,
+                        entregasRealizadas: 0,
+                        entregasComPod: 0,
+                        entregasComFalha: 0,
+                        entregasComDivergencia: 0,
+                        tentativasFrustradas: 0,
+                        entregasRejeitadas: 0,
+                        tempoTotalEvidencia: 0,
+                        entregasComEvidencia: 0
+                    };
+                }
+                
+                const data = motoristaData[item.motorista];
+                data.totalEntregas++;
+                
+                if (item.entregaRealizada) {
+                    data.entregasRealizadas++;
+                    
+                    if (item.comPOD) {
+                        data.entregasComPod++;
+                    }
+                    
+                    if (item.falhaRegistro) {
+                        data.entregasComFalha++;
+                    }
+                    
+                    if (item.divergenciaGeo) {
+                        data.entregasComDivergencia++;
+                    }
+                    
+                    if (item.rejeicao) {
+                        data.entregasRejeitadas++;
+                    }
+                    
+                    if (item.comPOD && item.tempoEvidencia) {
+                        data.tempoTotalEvidencia += item.tempoEvidencia;
+                        data.entregasComEvidencia++;
+                    }
+                }
+                
+                if (item.tentativaFrustrada) {
+                    data.tentativasFrustradas++;
+                }
+            });
+            
+            // Criar linhas da tabela
+            Object.entries(motoristaData).forEach(([motorista, data]) => {
+                const percentualComPod = data.entregasRealizadas > 0 ? data.entregasComPod / data.entregasRealizadas : 0;
+                const percentualFalhas = data.entregasRealizadas > 0 ? data.entregasComFalha / data.entregasRealizadas : 0;
+                const percentualDivergencias = data.entregasRealizadas > 0 ? data.entregasComDivergencia / data.entregasRealizadas : 0;
+                const percentualFrustradas = data.totalEntregas > 0 ? data.tentativasFrustradas / data.totalEntregas : 0;
+                const percentualRejeicoes = data.entregasRealizadas > 0 ? data.entregasRejeitadas / data.entregasRealizadas : 0;
+                const tempoMedioEvidencia = data.entregasComEvidencia > 0 ? data.tempoTotalEvidencia / data.entregasComEvidencia : 0;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${motorista}</td>
+                    <td>${data.transportadora}</td>
+                    <td>${formatNumber(data.totalEntregas)}</td>
+                    <td>${formatPercent(percentualComPod)}</td>
+                    <td>${formatPercent(percentualFalhas)}</td>
+                    <td>${formatPercent(percentualDivergencias)}</td>
+                    <td>${formatPercent(percentualFrustradas)}</td>
+                    <td>${formatPercent(percentualRejeicoes)}</td>
+                    <td>${formatTime(tempoMedioEvidencia)}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Função para atualizar a tabela de divergências de geolocalização
+        function updateGeoFailureTable() {
+            const tableBody = document.querySelector('#geoFailureTable tbody');
+            tableBody.innerHTML = '';
+            
+            // Filtrar entregas com divergência de geolocalização
+            const entregasComDivergencia = filteredData.filter(item => 
+                item.entregaRealizada && 
+                item.divergenciaGeo && 
+                item.coordenadasPlanejadas && 
+                item.coordenadasReais
+            );
+            
+            // Ordenar por distância (maior para menor)
+            entregasComDivergencia.sort((a, b) => (b.distancia || 0) - (a.distancia || 0));
+            
+            // Limitar a 20 registros para não sobrecarregar a tabela
+            const limitedData = entregasComDivergencia.slice(0, 20);
+            
+            // Criar linhas da tabela
+            limitedData.forEach(item => {
+                const dataHora = new Date(item.dataEntregaRealizada);
+                const coordPlanejadas = `${item.coordenadasPlanejadas.lat.toFixed(6)}, ${item.coordenadasPlanejadas.lng.toFixed(6)}`;
+                const coordReais = `${item.coordenadasReais.lat.toFixed(6)}, ${item.coordenadasReais.lng.toFixed(6)}`;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.id}</td>
+                    <td>${formatDate(dataHora)} ${dataHora.toLocaleTimeString('pt-BR')}</td>
+                    <td>${item.motorista}</td>
+                    <td>${item.transportadora}</td>
+                    <td>${item.cidade}</td>
+                    <td>${formatNumber(item.distancia)} m</td>
+                    <td>${coordPlanejadas}</td>
+                    <td>${coordReais}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Função para atualizar os gráficos do painel de Performance Operacional
+        function updatePerformanceCharts() {
+            console.log('Atualizando gráficos do painel de Performance Operacional');
+            // Implementação completa dos gráficos será adicionada na próxima fase
+        }
+
+        // Função para atualizar os gráficos do painel de Tempo e Roteirização
+        function updateTimingCharts() {
+            console.log('Atualizando gráficos do painel de Tempo e Roteirização');
+            // Implementação completa dos gráficos será adicionada na próxima fase
+        }
+
+        // Função para atualizar os gráficos do painel de Auditoria de Entrega
+        function updateAuditCharts() {
+            console.log('Atualizando gráficos do painel de Auditoria de Entrega');
+            // Implementação completa dos gráficos será adicionada na próxima fase
+        }
+
+        // Função para formatar números
+        function formatNumber(value, decimals = 2) {
+            return new Intl.NumberFormat('pt-BR', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: decimals
+            }).format(value || 0);
+        }
+
+        // Função para formatar valores monetários
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value || 0);
+        }
+
+        // Função para formatar porcentagens
+        function formatPercent(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'percent',
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            }).format(value || 0);
+        }
+
+        // Função para formatar datas
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        // Função para formatar tempo em minutos para horas e minutos
+        function formatTime(minutes) {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            
+            if (hours > 0) {
+                return `${hours}h ${mins}min`;
+            } else {
+                return `${mins}min`;
+            }
+        }
+
+        // Função para obter o enterpriseId da URL
+        function getEnterpriseIdFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const enterpriseId = urlParams.get('enterpriseId');
+            return enterpriseId || 'qzDVZ1jB6IC60baxtsDU'; // ID padrão
+        }
+
+        // Inicializar quando o DOM estiver carregado
+        document.addEventListener('DOMContentLoaded', function() {
+            // Carregar os dados mockados
+            loadData();
+            
+            // Mostrar o painel inicial (Performance Operacional)
+            showPanel('performance');
+        });
+
+        // Dados mockados (temporário)
+        // const MOCK_DATA = {
+        //     enterpriseId: "qzDVZ1jB6IC60baxtsDU",
+        //     count: 500,
+        //     timestamp: new Date().toISOString(),
+        //     data: []
+        // };
+
+        // Função para gerar dados mockados (temporário)
+        // Esta função será substituída pelo arquivo de dados mockados real
+        // function generateMockData() {
+        //     // Implementação será substituída pelo arquivo de dados mockados
+        // }
+    </script>
+</body>
+</html>
+
+
+    <script>
+        // Função para exportar para Excel
+        function exportToExcel(tableId) {
+            console.log(`Exportando tabela ${tableId} para Excel`);
+            alert('Funcionalidade de exportação para Excel será implementada na próxima fase');
+            // Implementação completa será adicionada na próxima fase
+        }
+
+        // Função para exportar para PDF
+        function exportToPDF(tableId) {
+            console.log(`Exportando tabela ${tableId} para PDF`);
+            alert('Funcionalidade de exportação para PDF será implementada na próxima fase');
+            // Implementação completa será adicionada na próxima fase
+        }
+    </script>
+
