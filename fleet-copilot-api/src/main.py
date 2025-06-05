@@ -66,7 +66,7 @@ def bi_viagens():
 # BI Manutenção
 @app.route('/api/copilot/bi-manutencao')
 def bi_manutencao():
-    """BI de Manutenção"""
+    """BI de Manutenção (Preventiva e Corretiva)"""
     enterprise_id = request.args.get('enterpriseId', 'qzDVZ1jB6IC60baxtsDU')
     return render_template('bi_manutencao.html', enterprise_id=enterprise_id)
 
@@ -120,8 +120,8 @@ def list_bis():
         {
             'id': 'manutencao',
             'name': 'Manutenção',
-            'description': 'Serviços e reparos da frota',
-            'status': 'coming_soon',
+            'description': 'Gestão de manutenção preventiva e corretiva',
+            'status': 'available',
             'url': '/api/copilot/bi-manutencao'
         },
         {
