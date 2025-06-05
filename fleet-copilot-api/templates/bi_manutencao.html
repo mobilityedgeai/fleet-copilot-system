@@ -3,110 +3,2192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BI Manutenção - Fleet Copilot</title>
+    <title>BI Manutenção (Simplificado)</title>
+    <!-- Importar Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <!-- Importar SheetJS para exportação Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- Importar jsPDF e AutoTable para exportação PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #14b8a6;
-            --background: #0f172a;
-            --surface: #1e293b;
-            --text: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --border: #334155;
+            /* Cores principais */
+            --background: #1a1e23;
+            --card-bg: #2a2e33;
+            --primary: #14d8b4;
+            --primary-dark: #0fb8a0;
+            --secondary: #8a56e2;
+            --text: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.7);
+            --border: rgba(255, 255, 255, 0.1);
+            
+            /* Cores de status */
+            --success: #14d8b4;
+            --warning: #f0b429;
+            --error: #e74c3c;
+            
+            /* Cores de gráficos */
+            --chart-purple: #8a56e2;
         }
-
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--background);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
             color: var(--text);
             line-height: 1.6;
-            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .header-title {
             display: flex;
             align-items: center;
-            justify-content: center;
         }
-
-        .container {
-            max-width: 600px;
-            padding: 40px;
-            text-align: center;
+        
+        .header-title svg {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            stroke: var(--primary);
         }
-
-        .header {
-            background: var(--surface);
+        
+        .header-title h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        /* Filtros */
+        .filters {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .filters-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .filters-title svg {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            stroke: var(--primary);
+        }
+        
+        .filters-title h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: var(--text-muted);
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            padding: 8px 12px;
+            border-radius: 4px;
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 60px 40px;
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            font-size: 0.9rem;
         }
-
-        .icon {
-            font-size: 5rem;
-            margin-bottom: 30px;
-            display: block;
+        
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--primary);
         }
-
-        h1 {
+        
+        .filter-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        /* Botões */
+        .btn {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 4px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn svg {
+            margin-right: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: #000;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+        
+        /* Métricas */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .metric-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: var(--primary);
+        }
+        
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .metric-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        
+        .metric-icon {
+            width: 20px;
+            height: 20px;
+            stroke: var(--primary);
+        }
+        
+        .metric-value {
             font-size: 2.5rem;
             font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--text);
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        
+        /* Alertas */
+        .alerts-section {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
             margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .alerts-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .alerts-title svg {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            stroke: var(--warning);
+        }
+        
+        .alerts-title h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .alerts-table-wrapper {
+            overflow-x: auto;
+        }
+        
+        /* Gráficos */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .chart-container {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .chart-title {
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .chart-title svg {
+            margin-right: 8px;
+            stroke: var(--primary);
+        }
+        
+        .chart-wrapper {
+            height: 300px;
+            position: relative;
+        }
+        
+        /* Tabelas */
+        .tables-section {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+        
+        .tab-button {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .tab-button.active {
             color: var(--primary);
         }
-
-        p {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
-            margin-bottom: 40px;
+        
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary);
         }
-
-        .status {
-            display: inline-block;
-            padding: 12px 24px;
-            background: rgba(245, 158, 11, 0.1);
-            color: #f59e0b;
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            border-radius: 12px;
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .table-container {
+            margin-bottom: 20px;
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .table-header h4 {
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
             font-weight: 600;
-            margin-bottom: 30px;
         }
-
-        .btn {
-            display: inline-block;
-            padding: 16px 32px;
-            background: var(--primary);
-            color: white;
-            text-decoration: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
+        
+        .table-header h4 svg {
+            margin-right: 8px;
+            stroke: var(--primary);
+        }
+        
+        .table-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        table th {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 12px 15px;
+            text-align: left;
             font-weight: 600;
-            transition: all 0.3s ease;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
         }
+        
+        table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+        
+        table tr:hover td {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+        
+        /* Status badges */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background-color: rgba(20, 216, 180, 0.15);
+            color: var(--success);
+        }
+        
+        .status-warning {
+            background-color: rgba(240, 180, 41, 0.15);
+            color: var(--warning);
+        }
+        
+        .status-error {
+            background-color: rgba(231, 76, 60, 0.15);
+            color: var(--error);
+        }
+        
+        /* Loading overlay */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(26, 30, 35, 0.9);
+            display: none; /* Escondido por padrão */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(20, 184, 166, 0.4);
+            .header-title h1 {
+                font-size: 1.5rem;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-wrapper {
+                height: 250px;
+            }
+
+            .metric-value {
+                font-size: 2rem;
+            }
+
+            .btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Header -->
         <div class="header">
-            <span class="icon">🔧</span>
-            <h1>BI Manutenção</h1>
-            <p>Gestão de manutenção preventiva e corretiva</p>
-            <div class="status">
-                🚧 Em desenvolvimento
+            <div class="header-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                </svg>
+                <h1>BI Manutenção (Simplificado)</h1>
             </div>
-            <br>
-            <a href="/api/copilot/dashboard?enterpriseId={{ enterprise_id }}" class="btn">
-                ← Voltar ao Menu
-            </a>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters">
+            <div class="filters-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"/>
+                </svg>
+                <h3>Filtros</h3>
+            </div>
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="startDate">Data Inicial</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="filter-group">
+                    <label for="endDate">Data Final</label>
+                    <input type="date" id="endDate">
+                </div>
+                <div class="filter-group">
+                    <label for="serviceTypeFilter">Tipo de Serviço</label>
+                    <select id="serviceTypeFilter">
+                        <option value="">Todos os tipos</option>
+                        <option value="Preventiva">Preventiva</option>
+                        <option value="Corretiva">Corretiva</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="assetTypeFilter">Tipo de Ativo</label>
+                    <select id="assetTypeFilter">
+                        <option value="">Todos os tipos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="plateFilter">Placa</label>
+                    <select id="plateFilter">
+                        <option value="">Todas as placas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="garageFilter">Garagem</label>
+                    <select id="garageFilter">
+                        <option value="">Todas as garagens</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="branchFilter">Filial</label>
+                    <select id="branchFilter">
+                        <option value="">Todas as filiais</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="costCenterFilter">Centro de Custo</label>
+                    <select id="costCenterFilter">
+                        <option value="">Todos os centros</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary" onclick="applyFilters()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    Aplicar Filtros
+                </button>
+                <button class="btn btn-secondary" onclick="clearFilters()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18"/>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                        <line x1="10" y1="11" x2="10" y2="17"/>
+                        <line x1="14" y1="11" x2="14" y2="17"/>
+                    </svg>
+                    Limpar
+                </button>
+            </div>
+        </div>
+
+        <!-- Métricas Principais -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">Score de Manutenção</div>
+                    <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                    </svg>
+                </div>
+                <div class="metric-value" id="maintenanceScore">0</div>
+                <div class="metric-label">Pontuação</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">Total de Serviços</div>
+                    <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                    </svg>
+                </div>
+                <div class="metric-value" id="totalServices">0</div>
+                <div class="metric-label">Serviços</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">Preventivas vs Corretivas</div>
+                    <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                    </svg>
+                </div>
+                <div class="metric-value" id="preventivePercentage">0%</div>
+                <div class="metric-label">Preventivas</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">Serviços Pendentes</div>
+                    <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                    </svg>
+                </div>
+                <div class="metric-value" id="pendingServices">0</div>
+                <div class="metric-label">Pendentes</div>
+            </div>
+        </div>
+
+        <!-- Alertas de Preventiva por Quilometragem -->
+        <div class="alerts-section">
+            <div class="alerts-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <h3>Alertas de Preventiva por Quilometragem</h3>
+            </div>
+            <div class="alerts-table-wrapper">
+                <table id="alertsTable">
+                    <thead>
+                        <tr>
+                            <th>Placa</th>
+                            <th>Modelo</th>
+                            <th>Km Atual</th>
+                            <th>Última Preventiva (Km)</th>
+                            <th>Próxima Preventiva (Km)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dados serão preenchidos pelo JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="charts-grid">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        </svg>
+                        Score de Manutenção por Mês
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="scoreByMonthChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        </svg>
+                        Serviços Executados por Mês
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="servicesByMonthChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        </svg>
+                        Corretivas por Grupo de Serviço
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="correctivesByGroupChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        </svg>
+                        Preventivas por Tipo de Serviço
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="preventivesByTypeChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        </svg>
+                        Serviços por Origem
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="servicesBySourceChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        </svg>
+                        Pendências por Prioridade
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="pendingByPriorityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabelas -->
+        <div class="tables-section">
+            <div class="tabs">
+                <button class="tab-button active" data-tab="correctivesPending">Corretivas Pendentes</button>
+                <button class="tab-button" data-tab="preventivesPending">Preventivas Pendentes</button>
+                <button class="tab-button" data-tab="completedServices">Serviços Executados</button>
+            </div>
+            
+            <div id="correctivesPending" class="tab-content active">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h4>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 3h18v18H3zM3 9h18M9 21V9"/>
+                            </svg>
+                            Corretivas Pendentes
+                        </h4>
+                        <div class="table-actions">
+                            <button class="btn btn-secondary" onclick="exportToExcel('correctivesPendingTable')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10 9 9 9 8 9"/>
+                                </svg>
+                                Exportar Excel
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportToPDF('correctivesPendingTable')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10 9 9 9 8 9"/>
+                                </svg>
+                                Exportar PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="correctivesPendingTable">
+                            <thead>
+                                <tr>
+                                    <th>OS</th>
+                                    <th>Placa</th>
+                                    <th>Tipo de Ativo</th>
+                                    <th>Grupo de Serviço</th>
+                                    <th>Origem</th>
+                                    <th>Data de Abertura</th>
+                                    <th>Data Estimada</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dados serão preenchidos pelo JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="preventivesPending" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h4>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 3h18v18H3zM3 9h18M9 21V9"/>
+                            </svg>
+                            Preventivas Pendentes
+                        </h4>
+                        <div class="table-actions">
+                            <button class="btn btn-secondary" onclick="exportToExcel('preventivesPendingTable')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10 9 9 9 8 9"/>
+                                </svg>
+                                Exportar Excel
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportToPDF('preventivesPendingTable')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10 9 9 9 8 9"/>
+                                </svg>
+                                Exportar PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="preventivesPendingTable">
+                            <thead>
+                                <tr>
+                                    <th>OS</th>
+                                    <th>Placa</th>
+                                    <th>Plano</th>
+                                    <th>Grupo de Serviço</th>
+                                    <th>Km Atual</th>
+                                    <th>Intervalo (Km)</th>
+                                    <th>Data Estimada</th>
+                                    <th>Próxima Preventiva (Km)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dados serão preenchidos pelo JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="completedServices" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h4>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 3h18v18H3zM3 9h18M9 21V9"/>
+                            </svg>
+                            Serviços Executados
+                        </h4>
+                        <div class="table-actions">
+                            <button class="btn btn-secondary" onclick="exportToExcel('completedServicesTable')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10 9 9 9 8 9"/>
+                                </svg>
+                                Exportar Excel
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportToPDF('completedServicesTable')">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10 9 9 9 8 9"/>
+                                </svg>
+                                Exportar PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="completedServicesTable">
+                            <thead>
+                                <tr>
+                                    <th>OS</th>
+                                    <th>Tipo</th>
+                                    <th>Placa</th>
+                                    <th>Grupo de Serviço</th>
+                                    <th>Data de Início</th>
+                                    <th>Data de Conclusão</th>
+                                    <th>Responsável</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Dados serão preenchidos pelo JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Loading Overlay (inicialmente escondido) -->
+    <div class="loading" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Carregando dados...</p>
+    </div>
+
+    <!-- Script para o BI de Manutenção -->
+    <script>
+        // Variáveis globais
+        let allData = []; // Dados da coleção checklist
+        let vehiclesData = []; // Dados da coleção vehicles
+        let filteredData = [];
+        let charts = {};
+
+        // Dados mockados embutidos
+        const MOCK_CHECKLIST_DATA = [
+            {
+                osNumber: 'OS001',
+                osType: 'Preventiva',
+                vehiclePlate: 'ABC1234',
+                assetTypePreventive: 'Caminhão',
+                serviceGroup: 'Troca de Óleo',
+                osOpenDate: '2025-05-01T10:00:00',
+                estimatedCompletionDate: '2025-05-03T10:00:00',
+                actualStartDate: '2025-05-01T14:00:00',
+                actualCompletionDate: '2025-05-02T16:00:00',
+                openOS: false,
+                assignedTo: 'João Silva',
+                priority: 'Alta',
+                IssueSource: 'Programada',
+                planName: 'Preventiva 10.000 km',
+                ItemsPreventive: [
+                    { serviceItem: 'Troca de Óleo' },
+                    { serviceItem: 'Filtro de Ar' }
+                ],
+                comments: 'Serviço realizado conforme planejado'
+            },
+            {
+                osNumber: 'OS002',
+                osType: 'Corretiva',
+                vehiclePlate: 'DEF5678',
+                assetTypePreventive: 'Van',
+                serviceGroup: 'Sistema Elétrico',
+                osOpenDate: '2025-05-02T09:00:00',
+                estimatedCompletionDate: '2025-05-04T18:00:00',
+                actualStartDate: null,
+                actualCompletionDate: null,
+                openOS: true,
+                assignedTo: 'Maria Oliveira',
+                priority: 'Urgente',
+                IssueSource: 'Falha',
+                planName: null,
+                ItemsPreventive: [],
+                comments: 'Problema no alternador'
+            },
+            {
+                osNumber: 'OS003',
+                osType: 'Preventiva',
+                vehiclePlate: 'GHI9012',
+                assetTypePreventive: 'Caminhão',
+                serviceGroup: 'Freios',
+                osOpenDate: '2025-05-03T08:00:00',
+                estimatedCompletionDate: '2025-05-05T18:00:00',
+                actualStartDate: null,
+                actualCompletionDate: null,
+                openOS: true,
+                assignedTo: 'Pedro Santos',
+                priority: 'Média',
+                IssueSource: 'Programada',
+                planName: 'Preventiva 20.000 km',
+                ItemsPreventive: [
+                    { serviceItem: 'Pastilhas de Freio' },
+                    { serviceItem: 'Fluido de Freio' }
+                ],
+                comments: 'Manutenção programada'
+            },
+            {
+                osNumber: 'OS004',
+                osType: 'Corretiva',
+                vehiclePlate: 'JKL3456',
+                assetTypePreventive: 'Utilitário',
+                serviceGroup: 'Motor',
+                osOpenDate: '2025-05-01T14:00:00',
+                estimatedCompletionDate: '2025-05-02T18:00:00',
+                actualStartDate: '2025-05-01T15:00:00',
+                actualCompletionDate: '2025-05-02T12:00:00',
+                openOS: false,
+                assignedTo: 'Ana Souza',
+                priority: 'Alta',
+                IssueSource: 'Inspeção',
+                planName: null,
+                ItemsPreventive: [],
+                comments: 'Reparo na bomba d\'água'
+            },
+            {
+                osNumber: 'OS005',
+                osType: 'Preventiva',
+                vehiclePlate: 'MNO7890',
+                assetTypePreventive: 'Caminhão',
+                serviceGroup: 'Suspensão',
+                osOpenDate: '2025-05-04T09:00:00',
+                estimatedCompletionDate: '2025-05-06T18:00:00',
+                actualStartDate: null,
+                actualCompletionDate: null,
+                openOS: true,
+                assignedTo: 'Carlos Ferreira',
+                priority: 'Baixa',
+                IssueSource: 'Programada',
+                planName: 'Preventiva 30.000 km',
+                ItemsPreventive: [
+                    { serviceItem: 'Amortecedores' },
+                    { serviceItem: 'Buchas' }
+                ],
+                comments: 'Manutenção programada'
+            }
+        ];
+
+        const MOCK_VEHICLES_DATA = [
+            {
+                vehiclePlate: 'ABC1234',
+                vehicleModel: 'Volvo FH 460',
+                currentMileage: 9800,
+                lastPreventiveMaintenanceMileage: 0,
+                maximumMileageAllowance: 10000,
+                garage: 'Garagem A',
+                branch: 'Filial SP',
+                costCenter: 'Operações'
+            },
+            {
+                vehiclePlate: 'DEF5678',
+                vehicleModel: 'Mercedes Sprinter',
+                currentMileage: 15200,
+                lastPreventiveMaintenanceMileage: 10000,
+                maximumMileageAllowance: 5000,
+                garage: 'Garagem B',
+                branch: 'Filial RJ',
+                costCenter: 'Logística'
+            },
+            {
+                vehiclePlate: 'GHI9012',
+                vehicleModel: 'Scania R450',
+                currentMileage: 19500,
+                lastPreventiveMaintenanceMileage: 0,
+                maximumMileageAllowance: 20000,
+                garage: 'Garagem A',
+                branch: 'Filial SP',
+                costCenter: 'Operações'
+            },
+            {
+                vehiclePlate: 'JKL3456',
+                vehicleModel: 'Fiat Fiorino',
+                currentMileage: 8000,
+                lastPreventiveMaintenanceMileage: 5000,
+                maximumMileageAllowance: 5000,
+                garage: 'Garagem C',
+                branch: 'Filial MG',
+                costCenter: 'Vendas'
+            },
+            {
+                vehiclePlate: 'MNO7890',
+                vehicleModel: 'Ford Cargo 2429',
+                currentMileage: 29700,
+                lastPreventiveMaintenanceMileage: 0,
+                maximumMileageAllowance: 30000,
+                garage: 'Garagem B',
+                branch: 'Filial RJ',
+                costCenter: 'Logística'
+            }
+        ];
+
+        // Função para formatar moeda
+        const formatCurrency = (value) => {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        };
+
+        // Função para formatar número
+        const formatNumber = (value, decimals = 2) => {
+            return value.toLocaleString('pt-BR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        };
+
+        // Função para formatar data
+        const formatDate = (date) => {
+            if (!date) return 'N/A';
+            const d = new Date(date);
+            if (isNaN(d.getTime())) return 'Data inválida';
+            return d.toLocaleDateString('pt-BR');
+        };
+
+        // Função para calcular diferença em dias entre duas datas
+        const daysBetween = (date1, date2) => {
+            const d1 = new Date(date1);
+            const d2 = new Date(date2);
+            const diffTime = Math.abs(d2 - d1);
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        };
+
+        // Função para carregar dados (agora usa mock embutido)
+        function loadData() {
+            console.log('Carregando dados mockados embutidos...');
+            allData = MOCK_CHECKLIST_DATA;
+            vehiclesData = MOCK_VEHICLES_DATA;
+            processData();
+            console.log('Dados mockados carregados.');
+        }
+
+        // Função para processar os dados
+        function processData() {
+            // Aplicar filtros iniciais (sem filtros)
+            applyFilters();
+            
+            // Preencher os filtros
+            populateFilters();
+            
+            // Atualizar métricas
+            updateMetrics();
+            
+            // Atualizar alertas de preventiva
+            updatePreventiveAlerts();
+            
+            // Atualizar gráficos
+            updateCharts();
+            
+            // Atualizar tabelas
+            updateTables();
+        }
+
+        // Função para popular filtros
+        function populateFilters() {
+            // Obter valores únicos para cada filtro
+            const serviceTypes = [...new Set(allData.map(item => item.osType))].filter(Boolean).sort();
+            const assetTypes = [...new Set(allData.map(item => item.assetTypePreventive))].filter(Boolean).sort();
+            const plates = [...new Set(allData.map(item => item.vehiclePlate))].filter(Boolean).sort();
+            
+            // Obter valores de garagem, filial e centro de custo dos veículos
+            const garages = [...new Set(vehiclesData.map(item => item.garage))].filter(Boolean).sort();
+            const branches = [...new Set(vehiclesData.map(item => item.branch))].filter(Boolean).sort();
+            const costCenters = [...new Set(vehiclesData.map(item => item.costCenter))].filter(Boolean).sort();
+            
+            // Preencher os selects
+            fillSelect('serviceTypeFilter', serviceTypes);
+            fillSelect('assetTypeFilter', assetTypes);
+            fillSelect('plateFilter', plates);
+            fillSelect('garageFilter', garages);
+            fillSelect('branchFilter', branches);
+            fillSelect('costCenterFilter', costCenters);
+            
+            console.log('Filtros populados.');
+        }
+
+        // Função auxiliar para preencher select
+        function fillSelect(id, options) {
+            const select = document.getElementById(id);
+            if (!select) return;
+            
+            // Manter a primeira opção
+            const firstOption = select.options[0].text;
+            select.innerHTML = `<option value="">${firstOption}</option>`;
+            
+            // Adicionar as opções
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                select.appendChild(optionElement);
+            });
+        }
+
+        // Função para aplicar filtros
+        function applyFilters() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const serviceType = document.getElementById('serviceTypeFilter').value;
+            const assetType = document.getElementById('assetTypeFilter').value;
+            const plate = document.getElementById('plateFilter').value;
+            const garage = document.getElementById('garageFilter').value;
+            const branch = document.getElementById('branchFilter').value;
+            const costCenter = document.getElementById('costCenterFilter').value;
+            
+            // Filtrar os dados
+            filteredData = allData.filter(item => {
+                // Filtro de data
+                if (startDate && new Date(item.osOpenDate) < new Date(startDate)) return false;
+                if (endDate && new Date(item.osOpenDate) > new Date(endDate + 'T23:59:59')) return false;
+                
+                // Filtros de texto
+                if (serviceType && item.osType !== serviceType) return false;
+                if (assetType && item.assetTypePreventive !== assetType) return false;
+                if (plate && item.vehiclePlate !== plate) return false;
+                
+                // Filtros baseados em dados de veículos
+                if (garage || branch || costCenter) {
+                    const vehicle = vehiclesData.find(v => v.vehiclePlate === item.vehiclePlate);
+                    if (!vehicle) return false;
+                    
+                    if (garage && vehicle.garage !== garage) return false;
+                    if (branch && vehicle.branch !== branch) return false;
+                    if (costCenter && vehicle.costCenter !== costCenter) return false;
+                }
+                
+                return true;
+            });
+            
+            console.log(`Filtros aplicados. ${filteredData.length} registros encontrados.`);
+            
+            // Atualizar a interface
+            updateMetrics();
+            updatePreventiveAlerts();
+            updateCharts();
+            updateTables();
+        }
+
+        // Função para limpar filtros
+        function clearFilters() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('serviceTypeFilter').value = '';
+            document.getElementById('assetTypeFilter').value = '';
+            document.getElementById('plateFilter').value = '';
+            document.getElementById('garageFilter').value = '';
+            document.getElementById('branchFilter').value = '';
+            document.getElementById('costCenterFilter').value = '';
+            
+            // Aplicar filtros (sem filtros)
+            applyFilters();
+            console.log('Filtros limpos.');
+        }
+
+        // Função para atualizar métricas
+        function updateMetrics() {
+            // Score de Manutenção
+            const score = calculateMaintenanceScore();
+            document.getElementById('maintenanceScore').textContent = score;
+            
+            // Total de Serviços
+            const totalServices = filteredData.length;
+            document.getElementById('totalServices').textContent = totalServices;
+            
+            // % Preventivas vs Corretivas
+            const preventiveCount = filteredData.filter(item => item.osType === 'Preventiva').length;
+            const preventivePercentage = totalServices > 0 ? (preventiveCount / totalServices * 100).toFixed(1) : 0;
+            document.getElementById('preventivePercentage').textContent = `${preventivePercentage}%`;
+            
+            // Total de Serviços Pendentes
+            const pendingServices = filteredData.filter(item => item.openOS).length;
+            document.getElementById('pendingServices').textContent = pendingServices;
+            
+            console.log('Métricas atualizadas.');
+        }
+
+        // Função para calcular o score de manutenção
+        function calculateMaintenanceScore() {
+            // Componentes do score:
+            // 1. Taxa de execução de preventivas (peso 40%)
+            // 2. Taxa de atraso em serviços (peso 30%)
+            // 3. Taxa de pendências (peso 30%)
+            
+            // 1. Taxa de execução de preventivas
+            const totalPreventivas = filteredData.filter(item => item.osType === 'Preventiva').length;
+            const preventivasExecutadas = filteredData.filter(item => 
+                item.osType === 'Preventiva' && !item.openOS
+            ).length;
+            const taxaExecucao = totalPreventivas > 0 ? preventivasExecutadas / totalPreventivas : 1;
+            
+            // 2. Taxa de atraso em serviços
+            const servicosFinalizados = filteredData.filter(item => !item.openOS);
+            let servicosAtrasados = 0;
+            
+            servicosFinalizados.forEach(item => {
+                if (item.actualCompletionDate && item.estimatedCompletionDate) {
+                    const dataFinal = new Date(item.actualCompletionDate);
+                    const dataEstimada = new Date(item.estimatedCompletionDate);
+                    if (dataFinal > dataEstimada) {
+                        servicosAtrasados++;
+                    }
+                }
+            });
+            
+            const taxaAtraso = servicosFinalizados.length > 0 ? 
+                1 - (servicosAtrasados / servicosFinalizados.length) : 1;
+            
+            // 3. Taxa de pendências
+            const totalServicos = filteredData.length;
+            const servicosPendentes = filteredData.filter(item => item.openOS).length;
+            const taxaPendencia = totalServicos > 0 ? 1 - (servicosPendentes / totalServicos) : 1;
+            
+            // Cálculo do score final (0-100)
+            const score = (taxaExecucao * 0.4 + taxaAtraso * 0.3 + taxaPendencia * 0.3) * 100;
+            
+            return score.toFixed(1);
+        }
+
+        // Função para atualizar alertas de preventiva
+        function updatePreventiveAlerts() {
+            const alertsTable = document.getElementById('alertsTable');
+            const tbody = alertsTable.querySelector('tbody');
+            
+            // Limpar tabela
+            tbody.innerHTML = '';
+            
+            // Margem para alerta (500 km)
+            const alertMargin = 500;
+            
+            // Filtrar veículos com alerta de preventiva
+            const vehiclesWithAlerts = vehiclesData.filter(vehicle => {
+                const nextPreventiveKm = (vehicle.lastPreventiveMaintenanceMileage || 0) + (vehicle.maximumMileageAllowance || 0);
+                return (vehicle.currentMileage || 0) >= (nextPreventiveKm - alertMargin);
+            });
+            
+            // Se não houver alertas
+            if (vehiclesWithAlerts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--text-muted);">Nenhum alerta de preventiva encontrado.</td></tr>`;
+                return;
+            }
+            
+            // Preencher tabela com alertas
+            vehiclesWithAlerts.forEach(vehicle => {
+                const nextPreventiveKm = (vehicle.lastPreventiveMaintenanceMileage || 0) + (vehicle.maximumMileageAllowance || 0);
+                const kmToPreventive = nextPreventiveKm - (vehicle.currentMileage || 0);
+                
+                let statusClass = 'status-success';
+                if (kmToPreventive <= 0) {
+                    statusClass = 'status-error';
+                } else if (kmToPreventive <= alertMargin) {
+                    statusClass = 'status-warning';
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${vehicle.vehiclePlate}</td>
+                    <td>${vehicle.vehicleModel}</td>
+                    <td>${formatNumber(vehicle.currentMileage || 0, 0)} km</td>
+                    <td>${formatNumber(vehicle.lastPreventiveMaintenanceMileage || 0, 0)} km</td>
+                    <td>${formatNumber(nextPreventiveKm, 0)} km</td>
+                    <td>
+                        <span class="status-badge ${statusClass}">
+                            ${kmToPreventive <= 0 ? 'VENCIDA' : `${formatNumber(kmToPreventive, 0)} km restantes`}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            console.log('Alertas de preventiva atualizados.');
+        }
+
+        // Função para atualizar gráficos
+        function updateCharts() {
+            try {
+                // Destruir gráficos existentes
+                Object.values(charts).forEach(chart => {
+                    if (chart && typeof chart.destroy === 'function') {
+                        chart.destroy();
+                    }
+                });
+                charts = {};
+                
+                // Atualizar cada gráfico
+                updateScoreByMonthChart();
+                updateServicesByMonthChart();
+                updateCorrectivesByGroupChart();
+                updatePreventivesByTypeChart();
+                updateServicesBySourceChart();
+                updatePendingByPriorityChart();
+                
+                console.log('Gráficos atualizados.');
+            } catch (error) {
+                console.error('Erro ao atualizar gráficos:', error);
+            }
+        }
+
+        // Função para atualizar o gráfico de score por mês
+        function updateScoreByMonthChart() {
+            try {
+                const ctx = document.getElementById('scoreByMonthChart').getContext('2d');
+                if (!ctx) return;
+                
+                // Agrupar dados por mês
+                const monthlyData = {};
+                
+                filteredData.forEach(item => {
+                    const date = new Date(item.osOpenDate);
+                    const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    
+                    if (!monthlyData[monthYear]) {
+                        monthlyData[monthYear] = {
+                            totalPreventivas: 0,
+                            preventivasExecutadas: 0,
+                            servicosFinalizados: 0,
+                            servicosAtrasados: 0,
+                            totalServicos: 0,
+                            servicosPendentes: 0
+                        };
+                    }
+                    
+                    // Incrementar contadores
+                    if (item.osType === 'Preventiva') {
+                        monthlyData[monthYear].totalPreventivas++;
+                        if (!item.openOS) {
+                            monthlyData[monthYear].preventivasExecutadas++;
+                        }
+                    }
+                    
+                    if (!item.openOS) {
+                        monthlyData[monthYear].servicosFinalizados++;
+                        
+                        if (item.actualCompletionDate && item.estimatedCompletionDate) {
+                            const dataFinal = new Date(item.actualCompletionDate);
+                            const dataEstimada = new Date(item.estimatedCompletionDate);
+                            if (dataFinal > dataEstimada) {
+                                monthlyData[monthYear].servicosAtrasados++;
+                            }
+                        }
+                    }
+                    
+                    monthlyData[monthYear].totalServicos++;
+                    if (item.openOS) {
+                        monthlyData[monthYear].servicosPendentes++;
+                    }
+                });
+                
+                // Calcular score para cada mês
+                const months = Object.keys(monthlyData).sort();
+                const scores = months.map(month => {
+                    const data = monthlyData[month];
+                    
+                    // 1. Taxa de execução de preventivas
+                    const taxaExecucao = data.totalPreventivas > 0 ? 
+                        data.preventivasExecutadas / data.totalPreventivas : 1;
+                    
+                    // 2. Taxa de atraso em serviços
+                    const taxaAtraso = data.servicosFinalizados > 0 ? 
+                        1 - (data.servicosAtrasados / data.servicosFinalizados) : 1;
+                    
+                    // 3. Taxa de pendências
+                    const taxaPendencia = data.totalServicos > 0 ? 
+                        1 - (data.servicosPendentes / data.totalServicos) : 1;
+                    
+                    // Cálculo do score final (0-100)
+                    return (taxaExecucao * 0.4 + taxaAtraso * 0.3 + taxaPendencia * 0.3) * 100;
+                });
+                
+                // Formatar labels para exibição (mês/ano)
+                const labels = months.map(month => {
+                    const [year, monthNum] = month.split('-');
+                    return `${monthNum}/${year.slice(2)}`;
+                });
+                
+                // Criar o gráfico
+                charts.scoreByMonth = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Score de Manutenção',
+                            data: scores,
+                            borderColor: '#14d8b4',
+                            backgroundColor: 'rgba(20, 216, 180, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true,
+                            pointBackgroundColor: '#14d8b4',
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(42, 46, 51, 0.9)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: '#14d8b4',
+                                borderWidth: 1,
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Score: ${context.parsed.y.toFixed(1)}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Erro ao atualizar gráfico de score por mês:', error);
+            }
+        }
+
+        // Função para atualizar o gráfico de serviços por mês
+        function updateServicesByMonthChart() {
+            try {
+                const ctx = document.getElementById('servicesByMonthChart').getContext('2d');
+                if (!ctx) return;
+                
+                // Agrupar dados por mês
+                const monthlyData = {};
+                
+                filteredData.forEach(item => {
+                    const date = new Date(item.osOpenDate);
+                    const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    
+                    if (!monthlyData[monthYear]) {
+                        monthlyData[monthYear] = {
+                            preventivas: 0,
+                            corretivas: 0
+                        };
+                    }
+                    
+                    if (item.osType === 'Preventiva') {
+                        monthlyData[monthYear].preventivas++;
+                    } else if (item.osType === 'Corretiva') {
+                        monthlyData[monthYear].corretivas++;
+                    }
+                });
+                
+                // Preparar dados para o gráfico
+                const months = Object.keys(monthlyData).sort();
+                const preventivas = months.map(month => monthlyData[month].preventivas);
+                const corretivas = months.map(month => monthlyData[month].corretivas);
+                
+                // Formatar labels para exibição (mês/ano)
+                const labels = months.map(month => {
+                    const [year, monthNum] = month.split('-');
+                    return `${monthNum}/${year.slice(2)}`;
+                });
+                
+                // Criar o gráfico
+                charts.servicesByMonth = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Preventivas',
+                                data: preventivas,
+                                backgroundColor: '#14d8b4',
+                                borderColor: '#0fb8a0',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Corretivas',
+                                data: corretivas,
+                                backgroundColor: '#8a56e2',
+                                borderColor: '#7a46d2',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                stacked: true,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)'
+                                }
+                            },
+                            x: {
+                                stacked: true,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    boxWidth: 12,
+                                    padding: 15
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(42, 46, 51, 0.9)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: '#14d8b4',
+                                borderWidth: 1
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Erro ao atualizar gráfico de serviços por mês:', error);
+            }
+        }
+
+        // Função para atualizar o gráfico de corretivas por grupo de serviço
+        function updateCorrectivesByGroupChart() {
+            try {
+                const ctx = document.getElementById('correctivesByGroupChart').getContext('2d');
+                if (!ctx) return;
+                
+                // Filtrar apenas corretivas
+                const corretivas = filteredData.filter(item => item.osType === 'Corretiva');
+                
+                // Agrupar por grupo de serviço
+                const serviceGroups = {};
+                
+                corretivas.forEach(item => {
+                    const group = item.serviceGroup || 'Não especificado';
+                    if (!serviceGroups[group]) {
+                        serviceGroups[group] = 0;
+                    }
+                    serviceGroups[group]++;
+                });
+                
+                // Preparar dados para o gráfico
+                const labels = Object.keys(serviceGroups);
+                const data = labels.map(group => serviceGroups[group]);
+                
+                // Gerar cores para cada grupo
+                const backgroundColors = [
+                    '#14d8b4', '#8a56e2', '#f0b429', '#e74c3c', '#3b82f6',
+                    '#0fb8a0', '#7a46d2', '#e0a419', '#d73c2c', '#2b72e6'
+                ];
+                
+                // Criar o gráfico
+                charts.correctivesByGroup = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: backgroundColors.slice(0, labels.length),
+                            borderColor: 'rgba(42, 46, 51, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    boxWidth: 12,
+                                    padding: 15
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(42, 46, 51, 0.9)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: '#14d8b4',
+                                borderWidth: 1
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Erro ao atualizar gráfico de corretivas por grupo:', error);
+            }
+        }
+
+        // Função para atualizar o gráfico de preventivas por tipo de serviço
+        function updatePreventivesByTypeChart() {
+            try {
+                const ctx = document.getElementById('preventivesByTypeChart').getContext('2d');
+                if (!ctx) return;
+                
+                // Filtrar apenas preventivas
+                const preventivas = filteredData.filter(item => item.osType === 'Preventiva');
+                
+                // Agrupar por tipo de serviço
+                const serviceTypes = {};
+                
+                preventivas.forEach(item => {
+                    if (item.ItemsPreventive && Array.isArray(item.ItemsPreventive)) {
+                        item.ItemsPreventive.forEach(service => {
+                            const type = service.serviceItem || 'Não especificado';
+                            if (!serviceTypes[type]) {
+                                serviceTypes[type] = 0;
+                            }
+                            serviceTypes[type]++;
+                        });
+                    } else {
+                        const type = 'Não especificado';
+                        if (!serviceTypes[type]) {
+                            serviceTypes[type] = 0;
+                        }
+                        serviceTypes[type]++;
+                    }
+                });
+                
+                // Preparar dados para o gráfico
+                const labels = Object.keys(serviceTypes);
+                const data = labels.map(type => serviceTypes[type]);
+                
+                // Gerar cores para cada tipo
+                const backgroundColors = [
+                    '#14d8b4', '#8a56e2', '#f0b429', '#e74c3c', '#3b82f6',
+                    '#0fb8a0', '#7a46d2', '#e0a419', '#d73c2c', '#2b72e6'
+                ];
+                
+                // Criar o gráfico
+                charts.preventivesByType = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: backgroundColors.slice(0, labels.length),
+                            borderColor: 'rgba(42, 46, 51, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    boxWidth: 12,
+                                    padding: 15
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(42, 46, 51, 0.9)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: '#14d8b4',
+                                borderWidth: 1
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Erro ao atualizar gráfico de preventivas por tipo:', error);
+            }
+        }
+
+        // Função para atualizar o gráfico de serviços por origem
+        function updateServicesBySourceChart() {
+            try {
+                const ctx = document.getElementById('servicesBySourceChart').getContext('2d');
+                if (!ctx) return;
+                
+                // Agrupar por origem
+                const sources = {};
+                
+                filteredData.forEach(item => {
+                    const source = item.IssueSource || 'Não especificado';
+                    if (!sources[source]) {
+                        sources[source] = 0;
+                    }
+                    sources[source]++;
+                });
+                
+                // Preparar dados para o gráfico
+                const labels = Object.keys(sources);
+                const data = labels.map(source => sources[source]);
+                
+                // Criar o gráfico
+                charts.servicesBySource = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Serviços',
+                            data: data,
+                            backgroundColor: '#8a56e2',
+                            borderColor: '#7a46d2',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)'
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(42, 46, 51, 0.9)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: '#14d8b4',
+                                borderWidth: 1
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Erro ao atualizar gráfico de serviços por origem:', error);
+            }
+        }
+
+        // Função para atualizar o gráfico de pendências por prioridade
+        function updatePendingByPriorityChart() {
+            try {
+                const ctx = document.getElementById('pendingByPriorityChart').getContext('2d');
+                if (!ctx) return;
+                
+                // Filtrar apenas serviços pendentes
+                const pendingServices = filteredData.filter(item => item.openOS);
+                
+                // Agrupar por prioridade
+                const priorities = {};
+                
+                pendingServices.forEach(item => {
+                    const priority = item.priority || 'Não especificado';
+                    if (!priorities[priority]) {
+                        priorities[priority] = 0;
+                    }
+                    priorities[priority]++;
+                });
+                
+                // Preparar dados para o gráfico
+                const labels = Object.keys(priorities);
+                const data = labels.map(priority => priorities[priority]);
+                
+                // Definir cores por prioridade
+                const backgroundColors = labels.map(priority => {
+                    switch(priority.toLowerCase()) {
+                        case 'alta':
+                        case 'urgente':
+                            return '#e74c3c';
+                        case 'média':
+                            return '#f0b429';
+                        case 'baixa':
+                            return '#14d8b4';
+                        default:
+                            return '#8a56e2';
+                    }
+                });
+                
+                // Criar o gráfico
+                charts.pendingByPriority = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Pendências',
+                            data: data,
+                            backgroundColor: backgroundColors,
+                            borderColor: backgroundColors.map(color => color),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'rgba(255, 255, 255, 0.7)'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(42, 46, 51, 0.9)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: '#14d8b4',
+                                borderWidth: 1
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Erro ao atualizar gráfico de pendências por prioridade:', error);
+            }
+        }
+
+        // Função para atualizar tabelas
+        function updateTables() {
+            try {
+                // Atualizar tabela de corretivas pendentes
+                updateCorrectivesPendingTable();
+                
+                // Atualizar tabela de preventivas pendentes
+                updatePreventivesPendingTable();
+                
+                // Atualizar tabela de serviços executados
+                updateCompletedServicesTable();
+                
+                console.log('Tabelas atualizadas.');
+            } catch (error) {
+                console.error('Erro ao atualizar tabelas:', error);
+            }
+        }
+
+        // Função para atualizar a tabela de corretivas pendentes
+        function updateCorrectivesPendingTable() {
+            try {
+                const table = document.getElementById('correctivesPendingTable');
+                if (!table) return;
+                
+                const tbody = table.querySelector('tbody');
+                
+                // Limpar tabela
+                tbody.innerHTML = '';
+                
+                // Filtrar corretivas pendentes
+                const correctivesPending = filteredData.filter(item => 
+                    item.osType === 'Corretiva' && item.openOS
+                );
+                
+                // Se não houver corretivas pendentes
+                if (correctivesPending.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px; color: var(--text-muted);">Nenhuma corretiva pendente encontrada.</td></tr>`;
+                    return;
+                }
+                
+                // Preencher tabela
+                correctivesPending.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.osNumber}</td>
+                        <td>${item.vehiclePlate}</td>
+                        <td>${item.assetTypePreventive || 'N/A'}</td>
+                        <td>${item.serviceGroup || 'N/A'}</td>
+                        <td>${item.IssueSource || 'N/A'}</td>
+                        <td>${formatDate(item.osOpenDate)}</td>
+                        <td>${formatDate(item.estimatedCompletionDate)}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Erro ao atualizar tabela de corretivas pendentes:', error);
+            }
+        }
+
+        // Função para atualizar a tabela de preventivas pendentes
+        function updatePreventivesPendingTable() {
+            try {
+                const table = document.getElementById('preventivesPendingTable');
+                if (!table) return;
+                
+                const tbody = table.querySelector('tbody');
+                
+                // Limpar tabela
+                tbody.innerHTML = '';
+                
+                // Filtrar preventivas pendentes
+                const preventivesPending = filteredData.filter(item => 
+                    item.osType === 'Preventiva' && item.openOS
+                );
+                
+                // Se não houver preventivas pendentes
+                if (preventivesPending.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 20px; color: var(--text-muted);">Nenhuma preventiva pendente encontrada.</td></tr>`;
+                    return;
+                }
+                
+                // Preencher tabela
+                preventivesPending.forEach(item => {
+                    // Buscar informações do veículo
+                    const vehicle = vehiclesData.find(v => v.vehiclePlate === item.vehiclePlate) || {};
+                    const nextPreventiveKm = (vehicle.lastPreventiveMaintenanceMileage || 0) + (vehicle.maximumMileageAllowance || 0);
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.osNumber}</td>
+                        <td>${item.vehiclePlate}</td>
+                        <td>${item.planName || 'N/A'}</td>
+                        <td>${item.serviceGroup || 'N/A'}</td>
+                        <td>${formatNumber(vehicle.currentMileage || 0, 0)} km</td>
+                        <td>${formatNumber(vehicle.maximumMileageAllowance || 0, 0)} km</td>
+                        <td>${formatDate(item.estimatedCompletionDate)}</td>
+                        <td>${formatNumber(nextPreventiveKm, 0)} km</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Erro ao atualizar tabela de preventivas pendentes:', error);
+            }
+        }
+
+        // Função para atualizar a tabela de serviços executados
+        function updateCompletedServicesTable() {
+            try {
+                const table = document.getElementById('completedServicesTable');
+                if (!table) return;
+                
+                const tbody = table.querySelector('tbody');
+                
+                // Limpar tabela
+                tbody.innerHTML = '';
+                
+                // Filtrar serviços executados
+                const completedServices = filteredData.filter(item => !item.openOS);
+                
+                // Se não houver serviços executados
+                if (completedServices.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 20px; color: var(--text-muted);">Nenhum serviço executado encontrado.</td></tr>`;
+                    return;
+                }
+                
+                // Preencher tabela
+                completedServices.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.osNumber}</td>
+                        <td>${item.osType}</td>
+                        <td>${item.vehiclePlate}</td>
+                        <td>${item.serviceGroup || 'N/A'}</td>
+                        <td>${formatDate(item.actualStartDate)}</td>
+                        <td>${formatDate(item.actualCompletionDate)}</td>
+                        <td>${item.assignedTo || 'N/A'}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Erro ao atualizar tabela de serviços executados:', error);
+            }
+        }
+
+        // Função para exportar tabela para Excel
+        function exportToExcel(tableId) {
+            try {
+                const table = document.getElementById(tableId);
+                if (!table) return;
+                
+                // Criar uma tabela temporária para exportação
+                const tempTable = table.cloneNode(true);
+                
+                // Converter a tabela para uma planilha
+                const wb = XLSX.utils.table_to_book(tempTable, { sheet: "Sheet1" });
+                
+                // Exportar para arquivo Excel
+                XLSX.writeFile(wb, `${tableId}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+            } catch (error) {
+                console.error('Erro ao exportar para Excel:', error);
+                alert('Erro ao exportar para Excel. Verifique o console para mais detalhes.');
+            }
+        }
+
+        // Função para exportar tabela para PDF
+        function exportToPDF(tableId) {
+            try {
+                const table = document.getElementById(tableId);
+                if (!table) return;
+                
+                // Configurar jsPDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('l', 'pt', 'a4');
+                
+                // Adicionar título
+                doc.setFontSize(18);
+                doc.text(tableId, 40, 40);
+                
+                // Exportar tabela
+                doc.autoTable({
+                    html: `#${tableId}`,
+                    startY: 60,
+                    theme: 'grid',
+                    headStyles: {
+                        fillColor: [20, 216, 180],
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold'
+                    },
+                    alternateRowStyles: {
+                        fillColor: [240, 240, 240]
+                    }
+                });
+                
+                // Salvar o PDF
+                doc.save(`${tableId}_${new Date().toISOString().slice(0, 10)}.pdf`);
+            } catch (error) {
+                console.error('Erro ao exportar para PDF:', error);
+                alert('Erro ao exportar para PDF. Verifique o console para mais detalhes.');
+            }
+        }
+
+        // Função para alternar entre as abas de tabelas
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const tabButtons = document.querySelectorAll('.tab-button');
+                
+                tabButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        // Remover classe active de todos os botões e conteúdos
+                        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                        
+                        // Adicionar classe active ao botão clicado
+                        this.classList.add('active');
+                        
+                        // Mostrar o conteúdo correspondente
+                        const tabId = this.getAttribute('data-tab');
+                        document.getElementById(tabId).classList.add('active');
+                    });
+                });
+                
+                // Inicializar carregamento de dados (agora usa mock)
+                loadData();
+                
+                console.log('Inicialização concluída.');
+            } catch (error) {
+                console.error('Erro na inicialização:', error);
+            }
+        });
+    </script>
 </body>
 </html>
 
