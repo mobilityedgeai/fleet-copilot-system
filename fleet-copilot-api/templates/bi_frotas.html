@@ -10,21 +10,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
-            --primary: #14b8a6;
-            --primary-dark: #0f766e;
-            --background: #0a0a0a;
-            --surface: #1a1a1a;
-            --surface-light: #2a2a2a;
-            --surface-lighter: #333333;
-            --text: #ffffff;
-            --text-secondary: #9ca3af;
-            --text-muted: #6b7280;
-            --border: #333333;
-            --border-light: #444444;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --info: #3b82f6;
+            --primary: #14d8b4;           /* Atualizado para o verde água mais brilhante */
+            --primary-dark: #0fb8a0;      /* Versão mais escura do primary */
+            --background: #1a1e23;        /* Atualizado para o fundo mais escuro */
+            --surface: #2a2e33;           /* Atualizado para o cinza dos cards */
+            --surface-light: #3a3e43;     /* Versão mais clara do surface */
+            --surface-lighter: #4a4e53;   /* Versão ainda mais clara do surface */
+            --text: #ffffff;              /* Mantido */
+            --text-secondary: #a0a0a0;    /* Ajustado para o cinza da imagem */
+            --text-muted: #707070;        /* Versão mais escura do text-secondary */
+            --border: #3a3e43;            /* Ajustado para combinar com surface-light */
+            --border-light: #4a4e53;      /* Ajustado para combinar com surface-lighter */
+            --success: #14d8b4;           /* Atualizado para o verde água */
+            --warning: #f0b429;           /* Atualizado para o amarelo da imagem */
+            --error: #e74c3c;             /* Atualizado para o vermelho da imagem */
+            --info: #3b82f6;              /* Mantido */
+            --chart-purple: #8a56e2;      /* Nova variável para o roxo dos gráficos */
         }
 
         * {
@@ -97,7 +98,7 @@
             background: var(--primary);
             color: white;
             border-color: var(--primary);
-            box-shadow: 0 0 10px rgba(20, 184, 166, 0.3);
+            box-shadow: 0 0 10px rgba(20, 216, 180, 0.3);
         }
 
         .panel {
@@ -134,13 +135,13 @@
             padding: 20px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 0 20px rgba(20, 184, 166, 0.05);
+            box-shadow: 0 0 20px rgba(20, 216, 180, 0.05);
             transition: all 0.3s ease;
         }
 
         .metric-card:hover {
             border-color: var(--primary);
-            box-shadow: 0 0 30px rgba(20, 184, 166, 0.1);
+            box-shadow: 0 0 30px rgba(20, 216, 180, 0.1);
         }
 
         .metric-card::before {
@@ -197,7 +198,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(10, 10, 10, 0.9);
+            background: rgba(26, 30, 35, 0.9);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -208,7 +209,7 @@
         .spinner {
             width: 50px;
             height: 50px;
-            border: 4px solid rgba(20, 184, 166, 0.1);
+            border: 4px solid rgba(20, 216, 180, 0.1);
             border-left-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -496,49 +497,49 @@
                 },
                 {
                     id: "ENT-000004",
-                    transportadora: "TransMaster",
-                    motorista: "Motorista 1 - TransMaster",
-                    cidade: "Curitiba",
-                    regiao: "Sul",
-                    tipoEntrega: "Next Day",
-                    rota: "Rota-004",
-                    dataEntregaPlanejada: "2025-05-04T11:00:00.000Z",
-                    entregaRealizada: false,
-                    dataEntregaRealizada: null,
-                    tempoCD: null,
-                    tempoViagem: null,
-                    tempoOcioso: null,
-                    atraso: null,
-                    desvioRota: null,
-                    antecipada: null,
-                    comPOD: null,
-                    falhaRegistro: null,
-                    divergenciaGeo: null,
-                    tentativaFrustrada: true,
-                    rejeicao: null,
-                    motivoRejeicao: "Cliente ausente",
-                    tempoEvidencia: null,
-                    distanciaKm: null,
-                    custoKm: null,
-                    custo: null
-                },
-                {
-                    id: "ENT-000005",
                     transportadora: "LogExpress",
                     motorista: "Motorista 2 - LogExpress",
                     cidade: "São Paulo",
                     regiao: "Sudeste",
                     tipoEntrega: "Same Day",
-                    rota: "Rota-001",
-                    dataEntregaPlanejada: "2025-05-05T16:00:00.000Z",
-                    entregaRealizada: true,
-                    dataEntregaRealizada: "2025-05-05T16:10:00.000Z",
+                    rota: "Rota-004",
+                    dataEntregaPlanejada: "2025-05-04T12:00:00.000Z",
+                    entregaRealizada: false,
+                    dataEntregaRealizada: null,
                     tempoCD: 40,
-                    tempoViagem: 110,
-                    tempoOcioso: 10,
-                    atraso: 10,
+                    tempoViagem: 100,
+                    tempoOcioso: 20,
+                    atraso: null,
                     desvioRota: false,
                     antecipada: false,
+                    comPOD: false,
+                    falhaRegistro: false,
+                    divergenciaGeo: false,
+                    tentativaFrustrada: true,
+                    rejeicao: true,
+                    motivoRejeicao: "Endereço não encontrado",
+                    tempoEvidencia: null,
+                    distanciaKm: 18,
+                    custoKm: 3.5,
+                    custo: 63.0
+                },
+                {
+                    id: "ENT-000005",
+                    transportadora: "FastTruck",
+                    motorista: "Motorista 2 - FastTruck",
+                    cidade: "Campinas",
+                    regiao: "Sudeste",
+                    tipoEntrega: "Standard",
+                    rota: "Rota-005",
+                    dataEntregaPlanejada: "2025-05-05T14:00:00.000Z",
+                    entregaRealizada: true,
+                    dataEntregaRealizada: "2025-05-05T13:45:00.000Z",
+                    tempoCD: 35,
+                    tempoViagem: 110,
+                    tempoOcioso: 10,
+                    atraso: -15,
+                    desvioRota: false,
+                    antecipada: true,
                     comPOD: true,
                     falhaRegistro: false,
                     divergenciaGeo: false,
@@ -546,427 +547,245 @@
                     rejeicao: false,
                     motivoRejeicao: null,
                     tempoEvidencia: 8,
-                    distanciaKm: 14,
-                    custoKm: 3.5,
-                    custo: 49.0
+                    distanciaKm: 22,
+                    custoKm: 4.0,
+                    custo: 88.0
                 }
             ]
         };
 
-        // Variáveis globais
-        let allData = [];
-        let filteredData = [];
-        let currentPanel = 'performance';
-
-        // Função para mostrar um painel específico
+        // Função para mostrar o painel selecionado
         function showPanel(panelId) {
-            // Ocultar todos os painéis
+            // Esconder todos os painéis
             document.querySelectorAll('.panel').forEach(panel => {
                 panel.classList.remove('active');
             });
             
-            // Desativar todos os botões de abas
+            // Remover classe active de todos os botões
             document.querySelectorAll('.tab-button').forEach(button => {
                 button.classList.remove('active');
             });
             
             // Mostrar o painel selecionado
-            document.getElementById('panel-' + panelId).classList.add('active');
+            document.getElementById(`panel-${panelId}`).classList.add('active');
             
-            // Ativar o botão da aba selecionada
+            // Adicionar classe active ao botão selecionado
             document.querySelector(`.tab-button[onclick="showPanel('${panelId}')"]`).classList.add('active');
             
-            // Atualizar o painel atual
-            currentPanel = panelId;
+            // Atualizar dados do painel selecionado
+            updatePanelData(panelId);
+        }
+
+        // Função para atualizar os dados do painel
+        function updatePanelData(panelId) {
+            const data = MOCK_DATA.data;
             
-            // Atualizar o painel selecionado
-            updatePanel(panelId);
-        }
-
-        // Função para mostrar o overlay de carregamento
-        function showLoading() {
-            document.getElementById('loadingOverlay').style.display = 'flex';
-        }
-
-        // Função para ocultar o overlay de carregamento
-        function hideLoading() {
-            document.getElementById('loadingOverlay').style.display = 'none';
-        }
-
-        // Função para carregar os dados
-        function loadData() {
-            showLoading();
-            
-            try {
-                // Em produção, isso seria substituído pela chamada à API Firebase
-                // const enterpriseId = getEnterpriseIdFromURL();
-                // const apiUrl = `/api/frotas?enterpriseId=${enterpriseId}`;
-                // const response = await fetch(apiUrl);
-                // const result = await response.json();
-                // allData = result.data;
-                
-                // Por enquanto, vamos carregar os dados mockados
-                allData = MOCK_DATA.data;
-                filteredData = allData;
-                
-                console.log(`✅ ${allData.length} registros carregados com sucesso`);
-                
-                // Atualizar todos os painéis
-                updateAllPanels();
-                
-                hideLoading();
-            } catch (error) {
-                console.error('❌ Erro ao carregar dados:', error);
-                hideLoading();
-                
-                // Mostrar mensagem de erro
-                alert('Erro ao carregar dados. Por favor, tente novamente.');
-            }
-        }
-
-        // Função para atualizar todos os painéis
-        function updateAllPanels() {
-            updatePerformancePanel();
-            updateTimingPanel();
-            updateAuditPanel();
-        }
-
-        // Função para atualizar um painel específico
-        function updatePanel(panelId) {
-            switch (panelId) {
+            switch(panelId) {
                 case 'performance':
-                    updatePerformancePanel();
+                    updatePerformancePanel(data);
                     break;
                 case 'timing':
-                    updateTimingPanel();
+                    updateTimingPanel(data);
                     break;
                 case 'audit':
-                    updateAuditPanel();
+                    updateAuditPanel(data);
                     break;
             }
         }
 
         // Função para atualizar o painel de Performance Operacional
-        function updatePerformancePanel() {
-            if (!filteredData || filteredData.length === 0) {
-                console.warn('Sem dados para atualizar o painel de Performance Operacional');
-                return;
-            }
-            
+        function updatePerformancePanel(data) {
             // Calcular métricas
-            const totalEntregas = filteredData.length;
-            const entregasRealizadas = filteredData.filter(item => item.entregaRealizada).length;
+            const totalEntregas = data.length;
+            const entregasRealizadas = data.filter(item => item.entregaRealizada).length;
+            const slaEntrega = (entregasRealizadas / totalEntregas * 100).toFixed(1);
             
-            // SLA de Entrega (% no prazo)
-            const entregasNoPrazo = filteredData.filter(item => 
-                item.entregaRealizada && (!item.atraso || item.atraso <= 0)
-            ).length;
-            const slaEntrega = entregasRealizadas > 0 ? entregasNoPrazo / entregasRealizadas : 0;
+            const rotasSemDesvio = data.filter(item => !item.desvioRota).length;
+            const cumprimentoRotas = (rotasSemDesvio / totalEntregas * 100).toFixed(1);
             
-            // Cumprimento de Rotas (% sem desvio)
-            const rotasCumpridas = filteredData.filter(item => 
-                item.entregaRealizada && !item.desvioRota
-            ).length;
-            const cumprimentoRotas = entregasRealizadas > 0 ? rotasCumpridas / entregasRealizadas : 0;
+            const custoTotal = data.reduce((sum, item) => sum + item.custo, 0);
+            const custoMedio = (custoTotal / totalEntregas).toFixed(2);
             
-            // Custo por Entrega
-            const custoTotal = filteredData.reduce((sum, item) => sum + (item.custo || 0), 0);
-            const custoEntrega = entregasRealizadas > 0 ? custoTotal / entregasRealizadas : 0;
-            
-            // Atualizar os valores nos cards
-            document.getElementById('slaEntrega').textContent = formatPercent(slaEntrega);
-            document.getElementById('cumprimentoRotas').textContent = formatPercent(cumprimentoRotas);
-            document.getElementById('custoEntrega').textContent = formatCurrency(custoEntrega);
-            document.getElementById('totalEntregas').textContent = formatNumber(totalEntregas);
-            
-            // Preencher tabela de transportadoras
-            updateCarrierTable();
-        }
-        
-        // Função para atualizar a tabela de transportadoras
-        function updateCarrierTable() {
-            const tableBody = document.querySelector('#carrierTable tbody');
-            tableBody.innerHTML = '';
+            // Atualizar valores na interface
+            document.getElementById('slaEntrega').textContent = `${slaEntrega}%`;
+            document.getElementById('cumprimentoRotas').textContent = `${cumprimentoRotas}%`;
+            document.getElementById('custoEntrega').textContent = `R$ ${custoMedio}`;
+            document.getElementById('totalEntregas').textContent = totalEntregas;
             
             // Agrupar por transportadora
-            const transportadoraData = {};
-            
-            filteredData.forEach(item => {
-                if (!transportadoraData[item.transportadora]) {
-                    transportadoraData[item.transportadora] = {
-                        totalEntregas: 0,
-                        entregasNoPrazo: 0,
-                        custoTotal: 0,
-                        entregasRealizadas: 0
+            const transportadoras = {};
+            data.forEach(item => {
+                if (!transportadoras[item.transportadora]) {
+                    transportadoras[item.transportadora] = {
+                        total: 0,
+                        realizadas: 0,
+                        custoTotal: 0
                     };
                 }
                 
-                const data = transportadoraData[item.transportadora];
-                data.totalEntregas++;
-                
+                transportadoras[item.transportadora].total++;
                 if (item.entregaRealizada) {
-                    data.entregasRealizadas++;
-                    
-                    if (!item.atraso || item.atraso <= 0) {
-                        data.entregasNoPrazo++;
-                    }
-                    
-                    data.custoTotal += item.custo || 0;
+                    transportadoras[item.transportadora].realizadas++;
                 }
+                transportadoras[item.transportadora].custoTotal += item.custo;
             });
             
-            // Criar linhas da tabela
-            Object.entries(transportadoraData).forEach(([transportadora, data]) => {
-                const sla = data.entregasRealizadas > 0 ? data.entregasNoPrazo / data.entregasRealizadas : 0;
-                const custoMedio = data.entregasRealizadas > 0 ? data.custoTotal / data.entregasRealizadas : 0;
+            // Preencher tabela de transportadoras
+            const tbody = document.querySelector('#carrierTable tbody');
+            tbody.innerHTML = '';
+            
+            Object.entries(transportadoras).forEach(([nome, dados]) => {
+                const sla = (dados.realizadas / dados.total * 100).toFixed(1);
+                const custoMedio = (dados.custoTotal / dados.total).toFixed(2);
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${transportadora}</td>
-                    <td>${formatNumber(data.totalEntregas)}</td>
-                    <td>${formatPercent(sla)}</td>
-                    <td>${formatCurrency(custoMedio)}</td>
+                    <td>${nome}</td>
+                    <td>${dados.total}</td>
+                    <td>${sla}%</td>
+                    <td>R$ ${custoMedio}</td>
                 `;
-                
-                tableBody.appendChild(row);
+                tbody.appendChild(row);
             });
         }
 
         // Função para atualizar o painel de Tempo e Roteirização
-        function updateTimingPanel() {
-            if (!filteredData || filteredData.length === 0) {
-                console.warn('Sem dados para atualizar o painel de Tempo e Roteirização');
-                return;
-            }
-            
-            // Filtrar apenas entregas realizadas
-            const entregasRealizadas = filteredData.filter(item => item.entregaRealizada);
-            
-            if (entregasRealizadas.length === 0) {
-                console.warn('Sem entregas realizadas para atualizar o painel de Tempo e Roteirização');
-                return;
-            }
-            
+        function updateTimingPanel(data) {
             // Calcular métricas
-            // Tempo Médio nos CDs
-            const tempoTotalCD = entregasRealizadas.reduce((sum, item) => sum + (item.tempoCD || 0), 0);
-            const tempoMedioCd = entregasRealizadas.length > 0 ? tempoTotalCD / entregasRealizadas.length : 0;
+            const tempoTotalCD = data.reduce((sum, item) => sum + item.tempoCD, 0);
+            const tempoMedioCd = (tempoTotalCD / data.length).toFixed(0);
             
-            // Tempo Médio de Viagem
-            const tempoTotalViagem = entregasRealizadas.reduce((sum, item) => sum + (item.tempoViagem || 0), 0);
-            const tempoMedioViagem = entregasRealizadas.length > 0 ? tempoTotalViagem / entregasRealizadas.length : 0;
+            const tempoTotalViagem = data.reduce((sum, item) => sum + item.tempoViagem, 0);
+            const tempoMedioViagem = (tempoTotalViagem / data.length).toFixed(0);
             
-            // Percentual de Atrasos
-            const entregasAtrasadas = entregasRealizadas.filter(item => item.atraso && item.atraso > 0).length;
-            const percentualAtrasos = entregasRealizadas.length > 0 ? entregasAtrasadas / entregasRealizadas.length : 0;
+            const entregasComAtraso = data.filter(item => item.atraso && item.atraso > 0).length;
+            const percentualAtrasos = (entregasComAtraso / data.length * 100).toFixed(1);
             
-            // Desvios de Rota
-            const entregasComDesvio = entregasRealizadas.filter(item => item.desvioRota).length;
-            const desviosRota = entregasRealizadas.length > 0 ? entregasComDesvio / entregasRealizadas.length : 0;
+            const entregasComDesvio = data.filter(item => item.desvioRota).length;
+            const percentualDesvios = (entregasComDesvio / data.length * 100).toFixed(1);
             
-            // Atualizar os valores nos cards
-            document.getElementById('tempoMedioCd').textContent = formatTime(tempoMedioCd);
-            document.getElementById('tempoMedioViagem').textContent = formatTime(tempoMedioViagem);
-            document.getElementById('percentualAtrasos').textContent = formatPercent(percentualAtrasos);
-            document.getElementById('desviosRota').textContent = formatPercent(desviosRota);
-            
-            // Preencher tabela de motoristas
-            updateDriverTimeTable();
-        }
-        
-        // Função para atualizar a tabela de tempos por motorista
-        function updateDriverTimeTable() {
-            const tableBody = document.querySelector('#driverTimeTable tbody');
-            tableBody.innerHTML = '';
+            // Atualizar valores na interface
+            document.getElementById('tempoMedioCd').textContent = `${tempoMedioCd}min`;
+            document.getElementById('tempoMedioViagem').textContent = `${tempoMedioViagem}min`;
+            document.getElementById('percentualAtrasos').textContent = `${percentualAtrasos}%`;
+            document.getElementById('desviosRota').textContent = `${percentualDesvios}%`;
             
             // Agrupar por motorista
-            const motoristaData = {};
-            
-            filteredData.forEach(item => {
-                if (!item.entregaRealizada) return;
-                
-                if (!motoristaData[item.motorista]) {
-                    motoristaData[item.motorista] = {
+            const motoristas = {};
+            data.forEach(item => {
+                const chave = `${item.motorista}|${item.transportadora}`;
+                if (!motoristas[chave]) {
+                    motoristas[chave] = {
+                        nome: item.motorista,
                         transportadora: item.transportadora,
-                        totalEntregas: 0,
                         tempoTotalCD: 0,
                         tempoTotalViagem: 0,
-                        entregasAtrasadas: 0
+                        entregas: 0,
+                        atrasos: 0
                     };
                 }
                 
-                const data = motoristaData[item.motorista];
-                data.totalEntregas++;
-                data.tempoTotalCD += item.tempoCD || 0;
-                data.tempoTotalViagem += item.tempoViagem || 0;
-                
+                motoristas[chave].tempoTotalCD += item.tempoCD;
+                motoristas[chave].tempoTotalViagem += item.tempoViagem;
+                motoristas[chave].entregas++;
                 if (item.atraso && item.atraso > 0) {
-                    data.entregasAtrasadas++;
+                    motoristas[chave].atrasos++;
                 }
             });
             
-            // Criar linhas da tabela
-            Object.entries(motoristaData).forEach(([motorista, data]) => {
-                const tempoMedioCd = data.totalEntregas > 0 ? data.tempoTotalCD / data.totalEntregas : 0;
-                const tempoMedioViagem = data.totalEntregas > 0 ? data.tempoTotalViagem / data.totalEntregas : 0;
-                const percentualAtrasos = data.totalEntregas > 0 ? data.entregasAtrasadas / data.totalEntregas : 0;
+            // Preencher tabela de motoristas
+            const tbody = document.querySelector('#driverTimeTable tbody');
+            tbody.innerHTML = '';
+            
+            Object.values(motoristas).forEach(motorista => {
+                const tempoMedioCd = (motorista.tempoTotalCD / motorista.entregas).toFixed(0);
+                const tempoMedioViagem = (motorista.tempoTotalViagem / motorista.entregas).toFixed(0);
+                const percentualAtrasos = (motorista.atrasos / motorista.entregas * 100).toFixed(1);
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${motorista}</td>
-                    <td>${data.transportadora}</td>
-                    <td>${formatTime(tempoMedioCd)}</td>
-                    <td>${formatTime(tempoMedioViagem)}</td>
-                    <td>${formatPercent(percentualAtrasos)}</td>
+                    <td>${motorista.nome}</td>
+                    <td>${motorista.transportadora}</td>
+                    <td>${tempoMedioCd}min</td>
+                    <td>${tempoMedioViagem}min</td>
+                    <td>${percentualAtrasos}%</td>
                 `;
-                
-                tableBody.appendChild(row);
+                tbody.appendChild(row);
             });
         }
 
         // Função para atualizar o painel de Auditoria de Entrega
-        function updateAuditPanel() {
-            if (!filteredData || filteredData.length === 0) {
-                console.warn('Sem dados para atualizar o painel de Auditoria de Entrega');
-                return;
-            }
-            
-            // Filtrar apenas entregas realizadas
-            const entregasRealizadas = filteredData.filter(item => item.entregaRealizada);
-            
-            if (entregasRealizadas.length === 0) {
-                console.warn('Sem entregas realizadas para atualizar o painel de Auditoria de Entrega');
-                return;
-            }
-            
+        function updateAuditPanel(data) {
             // Calcular métricas
-            // Entregas com POD
-            const entregasComPod = entregasRealizadas.filter(item => item.comPOD).length;
-            const percentualComPod = entregasRealizadas.length > 0 ? entregasComPod / entregasRealizadas.length : 0;
+            const entregasRealizadas = data.filter(item => item.entregaRealizada).length;
+            const entregasComPod = data.filter(item => item.comPOD).length;
+            const percentualComPod = (entregasComPod / entregasRealizadas * 100).toFixed(1);
             
-            // Falhas no Registro
-            const entregasComFalha = entregasRealizadas.filter(item => item.falhaRegistro).length;
-            const percentualFalhas = entregasRealizadas.length > 0 ? entregasComFalha / entregasRealizadas.length : 0;
+            const entregasComFalha = data.filter(item => item.falhaRegistro).length;
+            const percentualFalhas = (entregasComFalha / data.length * 100).toFixed(1);
             
-            // Divergências de Geo
-            const entregasComDivergencia = entregasRealizadas.filter(item => item.divergenciaGeo).length;
-            const percentualDivergencias = entregasRealizadas.length > 0 ? entregasComDivergencia / entregasRealizadas.length : 0;
+            const entregasComDivergencia = data.filter(item => item.divergenciaGeo).length;
+            const percentualDivergencias = (entregasComDivergencia / data.length * 100).toFixed(1);
             
-            // Tentativas Frustradas
-            const tentativasFrustradas = filteredData.filter(item => item.tentativaFrustrada).length;
-            const percentualFrustradas = filteredData.length > 0 ? tentativasFrustradas / filteredData.length : 0;
+            const entregasFrustradas = data.filter(item => item.tentativaFrustrada).length;
+            const percentualFrustradas = (entregasFrustradas / data.length * 100).toFixed(1);
             
-            // Atualizar os valores nos cards
-            document.getElementById('entregasComPod').textContent = formatPercent(percentualComPod);
-            document.getElementById('falhasRegistro').textContent = formatPercent(percentualFalhas);
-            document.getElementById('divergenciasGeo').textContent = formatPercent(percentualDivergencias);
-            document.getElementById('tentativasFrustradas').textContent = formatPercent(percentualFrustradas);
-            
-            // Preencher tabela de falhas por motorista
-            updateDriverFailureTable();
-        }
-        
-        // Função para atualizar a tabela de falhas por motorista
-        function updateDriverFailureTable() {
-            const tableBody = document.querySelector('#driverFailureTable tbody');
-            tableBody.innerHTML = '';
+            // Atualizar valores na interface
+            document.getElementById('entregasComPod').textContent = `${percentualComPod}%`;
+            document.getElementById('falhasRegistro').textContent = `${percentualFalhas}%`;
+            document.getElementById('divergenciasGeo').textContent = `${percentualDivergencias}%`;
+            document.getElementById('tentativasFrustradas').textContent = `${percentualFrustradas}%`;
             
             // Agrupar por motorista
-            const motoristaData = {};
-            
-            filteredData.forEach(item => {
-                if (!motoristaData[item.motorista]) {
-                    motoristaData[item.motorista] = {
+            const motoristas = {};
+            data.forEach(item => {
+                const chave = `${item.motorista}|${item.transportadora}`;
+                if (!motoristas[chave]) {
+                    motoristas[chave] = {
+                        nome: item.motorista,
                         transportadora: item.transportadora,
-                        totalEntregas: 0,
-                        entregasRealizadas: 0,
-                        entregasComPod: 0,
-                        entregasComFalha: 0
+                        total: 0,
+                        comPOD: 0,
+                        falhas: 0
                     };
                 }
                 
-                const data = motoristaData[item.motorista];
-                data.totalEntregas++;
-                
-                if (item.entregaRealizada) {
-                    data.entregasRealizadas++;
-                    
-                    if (item.comPOD) {
-                        data.entregasComPod++;
-                    }
-                    
-                    if (item.falhaRegistro) {
-                        data.entregasComFalha++;
-                    }
+                motoristas[chave].total++;
+                if (item.comPOD) {
+                    motoristas[chave].comPOD++;
+                }
+                if (item.falhaRegistro || item.divergenciaGeo || item.tentativaFrustrada) {
+                    motoristas[chave].falhas++;
                 }
             });
             
-            // Criar linhas da tabela
-            Object.entries(motoristaData).forEach(([motorista, data]) => {
-                const percentualComPod = data.entregasRealizadas > 0 ? data.entregasComPod / data.entregasRealizadas : 0;
-                const percentualFalhas = data.entregasRealizadas > 0 ? data.entregasComFalha / data.entregasRealizadas : 0;
+            // Preencher tabela de falhas por motorista
+            const tbody = document.querySelector('#driverFailureTable tbody');
+            tbody.innerHTML = '';
+            
+            Object.values(motoristas).forEach(motorista => {
+                const percentualPOD = (motorista.comPOD / motorista.total * 100).toFixed(1);
+                const percentualFalhas = (motorista.falhas / motorista.total * 100).toFixed(1);
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${motorista}</td>
-                    <td>${data.transportadora}</td>
-                    <td>${formatNumber(data.totalEntregas)}</td>
-                    <td>${formatPercent(percentualComPod)}</td>
-                    <td>${formatPercent(percentualFalhas)}</td>
+                    <td>${motorista.nome}</td>
+                    <td>${motorista.transportadora}</td>
+                    <td>${motorista.total}</td>
+                    <td>${percentualPOD}%</td>
+                    <td>${percentualFalhas}%</td>
                 `;
-                
-                tableBody.appendChild(row);
+                tbody.appendChild(row);
             });
         }
 
-        // Função para obter o enterpriseId da URL
-        function getEnterpriseIdFromURL() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const enterpriseId = urlParams.get('enterpriseId');
-            return enterpriseId || 'qzDVZ1jB6IC60baxtsDU'; // ID padrão
-        }
-
-        // Função para formatar números
-        function formatNumber(value, decimals = 0) {
-            return new Intl.NumberFormat('pt-BR', {
-                minimumFractionDigits: decimals,
-                maximumFractionDigits: decimals
-            }).format(value || 0);
-        }
-
-        // Função para formatar valores monetários
-        function formatCurrency(value) {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'currency',
-                currency: 'BRL'
-            }).format(value || 0);
-        }
-
-        // Função para formatar porcentagens
-        function formatPercent(value) {
-            return new Intl.NumberFormat('pt-BR', {
-                style: 'percent',
-                minimumFractionDigits: 1,
-                maximumFractionDigits: 1
-            }).format(value || 0);
-        }
-
-        // Função para formatar tempo em minutos para horas e minutos
-        function formatTime(minutes) {
-            const hours = Math.floor(minutes / 60);
-            const mins = Math.floor(minutes % 60);
-            
-            if (hours > 0) {
-                return `${hours}h ${mins}min`;
-            } else {
-                return `${mins}min`;
-            }
-        }
-
         // Inicializar quando o DOM estiver carregado
-        document.addEventListener('DOMContentLoaded', function() {
-            // Carregar os dados mockados
-            loadData();
+        document.addEventListener('DOMContentLoaded', () => {
+            // Esconder o loading overlay
+            document.getElementById('loadingOverlay').style.display = 'none';
+            
+            // Mostrar o painel inicial (Performance)
+            showPanel('performance');
         });
     </script>
 </body>
