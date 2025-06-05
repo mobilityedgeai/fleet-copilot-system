@@ -49,6 +49,13 @@ def bi_checklist():
     enterprise_id = request.args.get('enterpriseId', 'qzDVZ1jB6IC60baxtsDU')
     return render_template('bi_checklist.html', enterprise_id=enterprise_id)
 
+# BI Frotas Agregadas/Spot
+@app.route('/api/copilot/bi-frotas')
+def bi_frotas():
+    """BI de Frotas Agregadas/Spot"""
+    enterprise_id = request.args.get('enterpriseId', 'qzDVZ1jB6IC60baxtsDU')
+    return render_template('bi_frotas.html', enterprise_id=enterprise_id)
+
 # BI Viagens
 @app.route('/api/copilot/bi-viagens')
 def bi_viagens():
@@ -93,8 +100,15 @@ def list_bis():
             'id': 'checklist',
             'name': 'Checklist',
             'description': 'Inspeções e verificações de conformidade',
-            'status': 'coming_soon',
+            'status': 'available',
             'url': '/api/copilot/bi-checklist'
+        },
+        {
+            'id': 'frotas',
+            'name': 'Frotas Agregadas/Spot',
+            'description': 'Gestão de frotas terceirizadas e spot',
+            'status': 'available',
+            'url': '/api/copilot/bi-frotas'
         },
         {
             'id': 'viagens',
