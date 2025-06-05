@@ -743,7 +743,7 @@
                 </div>
             </div>
 
-            <div class="loading">
+            <div class="loading" id="checklistLoading">
                 <div class="spinner"></div>
                 <p>Carregando dados do checklist...</p>
             </div>
@@ -1057,7 +1057,7 @@
                 </div>
             </div>
 
-            <div class="loading">
+            <div class="loading" id="fuelLoading">
                 <div class="spinner"></div>
                 <p>Carregando dados de combustível...</p>
             </div>
@@ -1275,9 +1275,21 @@
                     currentData = data.data;
                     filteredData = [...currentData];
                     
+                    console.log('🔄 Atualizando estatísticas...');
                     updateChecklistStats();
+                    
+                    console.log('🔄 Populando filtros...');
                     populateChecklistFilters();
+                    
+                    console.log('🔄 Renderizando tabela...');
                     renderChecklistTable();
+                    
+                    console.log('🔄 Renderizando tabela por status...');
+                    renderStatusTable();
+                    
+                    console.log('🔄 Renderizando tabela não conformes...');
+                    renderNonConformeTable();
+                    
                     hideLoading('checklist');
                     
                     console.log('✅ Dados do checklist carregados com sucesso');
@@ -1334,20 +1346,29 @@
 
         // Ocultar loading
         function hideLoading(section) {
-            const loadingElement = document.querySelector(`#${section}-section .loading`);
+            const loadingElement = document.getElementById(`${section}Loading`);
             if (loadingElement) {
                 loadingElement.style.display = 'none';
+                console.log(`✅ Loading ocultado para seção: ${section}`);
             }
         }
 
         // Atualizar estatísticas do checklist
         function updateChecklistStats() {
+            console.log('📊 Atualizando estatísticas do checklist...');
+            
             const total = filteredData.length;
             const conforme = filteredData.filter(item => 
-                item.Status && item.Status.toLowerCase().includes('conforme')
+                item.Status && (
+                    item.Status.toLowerCase().includes('conforme') ||
+                    item.Status.toLowerCase().includes('aprovado') ||
+                    item.Status.toLowerCase().includes('ok')
+                )
             ).length;
             const nonConforme = total - conforme;
             const percentage = total > 0 ? ((conforme / total) * 100).toFixed(1) : 0;
+
+            console.log(`📈 Stats: Total=${total}, Conforme=${conforme}, Não Conforme=${nonConforme}, %=${percentage}`);
 
             document.getElementById('totalRecords').textContent = total;
             document.getElementById('conformeRecords').textContent = conforme;
@@ -1357,10 +1378,19 @@
 
         // Popular filtros do checklist
         function populateChecklistFilters() {
+            console.log('🔧 Populando filtros do checklist...');
+            
             const responsibles = [...new Set(currentData.map(item => item.Responsible).filter(Boolean))];
             const plates = [...new Set(currentData.map(item => item.VehiclePlate).filter(Boolean))];
             const types = [...new Set(currentData.map(item => item.AssetType).filter(Boolean))];
             const drivers = [...new Set(currentData.map(item => item.DriverName).filter(Boolean))];
+
+            console.log('📋 Filtros encontrados:', {
+                responsibles: responsibles.length,
+                plates: plates.length,
+                types: types.length,
+                drivers: drivers.length
+            });
 
             populateSelect('responsibleFilter', responsibles);
             populateSelect('plateFilter', plates);
@@ -1371,7 +1401,10 @@
         // Popular select
         function populateSelect(selectId, options) {
             const select = document.getElementById(selectId);
-            if (!select) return;
+            if (!select) {
+                console.error(`❌ Select não encontrado: ${selectId}`);
+                return;
+            }
             
             // Manter primeira opção (Todos...)
             const firstOption = select.children[0];
@@ -1384,12 +1417,19 @@
                 optionElement.textContent = option;
                 select.appendChild(optionElement);
             });
+            
+            console.log(`✅ Select ${selectId} populado com ${options.length} opções`);
         }
 
         // Renderizar tabela do checklist
         function renderChecklistTable() {
+            console.log('📋 Renderizando tabela do checklist...');
+            
             const tbody = document.querySelector('#generalTable tbody');
-            if (!tbody) return;
+            if (!tbody) {
+                console.error('❌ Tbody da tabela geral não encontrado');
+                return;
+            }
 
             tbody.innerHTML = '';
 
@@ -1397,7 +1437,9 @@
             const endIndex = startIndex + itemsPerPage;
             const pageData = filteredData.slice(startIndex, endIndex);
 
-            pageData.forEach(item => {
+            console.log(`📄 Renderizando página ${currentPage}: ${startIndex}-${endIndex} de ${filteredData.length} registros`);
+
+            pageData.forEach((item, index) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${formatDate(item.Timestamp)}</td>
@@ -1412,6 +1454,94 @@
             });
 
             updatePagination();
+            console.log(`✅ Tabela renderizada com ${pageData.length} linhas`);
+        }
+
+        // Renderizar tabela por status
+        function renderStatusTable() {
+            console.log('📊 Renderizando tabela por status...');
+            
+            const tbody = document.querySelector('#statusTable tbody');
+            if (!tbody) {
+                console.error('❌ Tbody da tabela de status não encontrado');
+                return;
+            }
+
+            tbody.innerHTML = '';
+
+            // Agrupar por status
+            const statusGroups = {};
+            filteredData.forEach(item => {
+                const status = item.Status || 'Sem Status';
+                if (!statusGroups[status]) {
+                    statusGroups[status] = {
+                        count: 0,
+                        lastOccurrence: null
+                    };
+                }
+                statusGroups[status].count++;
+                
+                const itemDate = new Date(item.Timestamp);
+                if (!statusGroups[status].lastOccurrence || itemDate > statusGroups[status].lastOccurrence) {
+                    statusGroups[status].lastOccurrence = itemDate;
+                }
+            });
+
+            const total = filteredData.length;
+            
+            Object.keys(statusGroups).forEach(status => {
+                const group = statusGroups[status];
+                const percentage = total > 0 ? ((group.count / total) * 100).toFixed(1) : 0;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${status}</td>
+                    <td>${group.count}</td>
+                    <td>${percentage}%</td>
+                    <td>${formatDate(group.lastOccurrence)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            console.log(`✅ Tabela de status renderizada com ${Object.keys(statusGroups).length} grupos`);
+        }
+
+        // Renderizar tabela não conformes
+        function renderNonConformeTable() {
+            console.log('⚠️ Renderizando tabela não conformes...');
+            
+            const tbody = document.querySelector('#nonconformeTable tbody');
+            if (!tbody) {
+                console.error('❌ Tbody da tabela não conforme não encontrado');
+                return;
+            }
+
+            tbody.innerHTML = '';
+
+            // Filtrar apenas não conformes
+            const nonConformeData = filteredData.filter(item => 
+                item.Status && !(
+                    item.Status.toLowerCase().includes('conforme') ||
+                    item.Status.toLowerCase().includes('aprovado') ||
+                    item.Status.toLowerCase().includes('ok')
+                )
+            );
+
+            nonConformeData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${formatDate(item.Timestamp)}</td>
+                    <td>${item.Responsible || '-'}</td>
+                    <td>${item.VehiclePlate || '-'}</td>
+                    <td>${item.AssetType || '-'}</td>
+                    <td>${item.DriverName || '-'}</td>
+                    <td>${item.Status || '-'}</td>
+                    <td>${item.Observations || '-'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            console.log(`✅ Tabela não conformes renderizada com ${nonConformeData.length} registros`);
         }
 
         // Atualizar métricas de combustível
@@ -1620,7 +1750,7 @@
 
         // Aplicar filtros
         function applyFilters() {
-            console.log('🔍 Aplicando filtros...');
+            console.log('🔍 Aplicando filtros do checklist...');
             
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
@@ -1628,6 +1758,10 @@
             const plate = document.getElementById('plateFilter').value;
             const type = document.getElementById('typeFilter').value;
             const driver = document.getElementById('driverFilter').value;
+
+            console.log('🔧 Filtros aplicados:', {
+                startDate, endDate, responsible, plate, type, driver
+            });
 
             filteredData = currentData.filter(item => {
                 let matches = true;
@@ -1664,9 +1798,13 @@
                 return matches;
             });
 
+            console.log(`📊 Filtros resultaram em ${filteredData.length} de ${currentData.length} registros`);
+
             currentPage = 1;
             updateChecklistStats();
             renderChecklistTable();
+            renderStatusTable();
+            renderNonConformeTable();
         }
 
         // Aplicar filtros de combustível
@@ -1713,6 +1851,8 @@
 
         // Limpar filtros
         function clearFilters() {
+            console.log('🗑️ Limpando filtros do checklist...');
+            
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
             document.getElementById('responsibleFilter').value = '';
@@ -1724,6 +1864,8 @@
             currentPage = 1;
             updateChecklistStats();
             renderChecklistTable();
+            renderStatusTable();
+            renderNonConformeTable();
         }
 
         function clearFuelFilters() {
@@ -1743,6 +1885,8 @@
 
         // Trocar aba
         function switchTab(tabName) {
+            console.log('🔄 Trocando para aba:', tabName);
+            
             // Remover classe active de todas as abas
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
