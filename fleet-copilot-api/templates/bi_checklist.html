@@ -49,107 +49,131 @@
 
         /* Header */
         .header {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 30px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--info));
-        }
-
-        .header-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            background: var(--primary);
-            border-radius: 20px;
+        .header-title {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 15px;
         }
 
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
+        .header-title svg {
+            width: 32px;
+            height: 32px;
             color: var(--primary);
         }
 
-        .header p {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
+        .header-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
         }
 
-        /* Filters Section */
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 0 0 1px var(--primary-dark), 0 0 20px rgba(20, 184, 166, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--surface-light);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-lighter);
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.1);
+        }
+
+        /* Filters */
         .filters-section {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 30px;
+            border-radius: 12px;
+            padding: 24px;
             margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.05);
         }
 
-        .filters-header {
+        .filters-title {
             display: flex;
             align-items: center;
-            margin-bottom: 25px;
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
-        .filters-header svg {
-            width: 24px;
-            height: 24px;
-            margin-right: 12px;
+        .filters-title svg {
+            width: 20px;
+            height: 20px;
             color: var(--primary);
         }
 
-        .filters-header h2 {
-            font-size: 1.5rem;
+        .filters-title h3 {
+            font-size: 1.1rem;
             font-weight: 600;
-            color: var(--primary);
+            color: var(--text);
         }
 
         .filters-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 25px;
+            gap: 16px;
+            margin-bottom: 20px;
         }
 
         .filter-group {
             display: flex;
             flex-direction: column;
+            gap: 6px;
         }
 
         .filter-group label {
-            font-size: 0.9rem;
+            font-size: 14px;
             font-weight: 500;
             color: var(--text-secondary);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .filter-group input,
         .filter-group select {
-            background: var(--surface-light);
+            padding: 10px 12px;
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px 16px;
+            border-radius: 6px;
+            background: var(--surface-light);
             color: var(--text);
-            font-size: 1rem;
-            transition: all 0.3s ease;
+            font-size: 14px;
+            transition: all 0.2s ease;
         }
 
         .filter-group input:focus,
@@ -159,57 +183,16 @@
             box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
         }
 
-        .filter-group select option {
-            background: var(--surface-light);
-            color: var(--text);
-        }
-
         .filters-actions {
             display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: flex-end;
         }
 
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(20, 184, 166, 0.4);
-        }
-
-        .btn-secondary {
-            background: var(--surface-lighter);
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background: var(--border);
-            transform: translateY(-2px);
-        }
-
-        /* Metrics Grid */
-        .metrics-grid {
+        /* Metrics */
+        .metrics-section {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -217,12 +200,17 @@
         .metric-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 30px;
-            text-align: center;
-            transition: all 0.3s ease;
+            border-radius: 12px;
+            padding: 24px;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(20, 184, 166, 0.1);
         }
 
         .metric-card::before {
@@ -233,128 +221,84 @@
             right: 0;
             height: 3px;
             background: var(--primary);
+            opacity: 0.8;
         }
 
-        .metric-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            border-color: var(--primary);
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .metric-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .metric-icon {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 20px;
-            background: rgba(20, 184, 166, 0.1);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .metric-icon svg {
-            width: 32px;
-            height: 32px;
+            width: 24px;
+            height: 24px;
             color: var(--primary);
+            opacity: 0.8;
         }
 
         .metric-value {
             font-size: 2.5rem;
             font-weight: 700;
-            color: var(--primary);
+            color: var(--text);
+            line-height: 1;
             margin-bottom: 8px;
         }
 
-        .metric-label {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .metric-change {
+            font-size: 12px;
             font-weight: 500;
-        }
-
-        /* Insights Section */
-        .insights-section {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 30px;
-        }
-
-        .insights-header {
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
+            gap: 4px;
         }
 
-        .insights-header svg {
-            width: 24px;
-            height: 24px;
-            margin-right: 12px;
-            color: var(--primary);
+        .metric-change.positive {
+            color: var(--success);
         }
 
-        .insights-header h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--primary);
+        .metric-change.negative {
+            color: var(--error);
         }
 
-        .insights-grid {
+        .metric-change.neutral {
+            color: var(--text-muted);
+        }
+
+        /* Charts */
+        .charts-section {
             display: grid;
-            gap: 15px;
-        }
-
-        .insight-item {
-            background: var(--surface-light);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            border-left: 4px solid var(--primary);
-        }
-
-        .insight-item p {
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        /* Charts Grid */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
             margin-bottom: 30px;
         }
 
         .chart-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 30px;
-            transition: all 0.3s ease;
-        }
-
-        .chart-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.05);
         }
 
         .chart-header {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
-        .chart-header svg {
-            width: 24px;
-            height: 24px;
-            margin-right: 12px;
-            color: var(--primary);
-        }
-
-        .chart-header h3 {
-            font-size: 1.3rem;
+        .chart-title {
+            font-size: 1.1rem;
             font-weight: 600;
             color: var(--text);
         }
@@ -364,57 +308,108 @@
             height: 300px;
         }
 
-        /* Tables Section */
+        /* Insights */
+        .insights-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.05);
+        }
+
+        .insights-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .insights-title svg {
+            width: 20px;
+            height: 20px;
+            color: var(--primary);
+        }
+
+        .insights-title h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .insights-container {
+            display: grid;
+            gap: 16px;
+        }
+
+        .insight-item {
+            background: var(--surface-light);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 16px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .insight-item p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Tables */
         .tables-section {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 30px;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.05);
         }
 
         .tables-header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            margin-bottom: 25px;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
         .tables-title {
             display: flex;
             align-items: center;
+            gap: 12px;
         }
 
         .tables-title svg {
-            width: 24px;
-            height: 24px;
-            margin-right: 12px;
+            width: 20px;
+            height: 20px;
             color: var(--primary);
         }
 
         .tables-title h2 {
-            font-size: 1.5rem;
+            font-size: 1.1rem;
             font-weight: 600;
-            color: var(--primary);
+            color: var(--text);
         }
 
         .table-tabs {
             display: flex;
+            gap: 4px;
+            margin-bottom: 20px;
             background: var(--surface-light);
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 4px;
-            margin-bottom: 25px;
         }
 
         .table-tab {
-            padding: 12px 24px;
+            flex: 1;
+            padding: 10px 16px;
             border: none;
             background: transparent;
             color: var(--text-secondary);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            font-size: 14px;
             font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .table-tab.active {
@@ -422,9 +417,14 @@
             color: white;
         }
 
+        .table-tab:hover:not(.active) {
+            background: var(--surface-lighter);
+            color: var(--text);
+        }
+
         .table-container {
             overflow-x: auto;
-            border-radius: 12px;
+            border-radius: 8px;
             border: 1px solid var(--border);
         }
 
@@ -438,126 +438,126 @@
             background: var(--surface-lighter);
             color: var(--text);
             font-weight: 600;
-            padding: 16px;
+            padding: 12px 16px;
             text-align: left;
             border-bottom: 1px solid var(--border);
-            font-size: 0.9rem;
+            font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .data-table td {
-            padding: 16px;
+            padding: 12px 16px;
             border-bottom: 1px solid var(--border);
             color: var(--text-secondary);
+            font-size: 14px;
         }
 
-        .data-table tbody tr:hover {
+        .data-table tr:hover {
             background: var(--surface);
         }
 
         .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .status-conforme {
-            background: rgba(16, 185, 129, 0.2);
+            background: rgba(16, 185, 129, 0.1);
             color: var(--success);
-            border: 1px solid var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
         .status-nao-conforme {
-            background: rgba(239, 68, 68, 0.2);
+            background: rgba(239, 68, 68, 0.1);
             color: var(--error);
-            border: 1px solid var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
         .status-pendente {
-            background: rgba(245, 158, 11, 0.2);
+            background: rgba(245, 158, 11, 0.1);
             color: var(--warning);
-            border: 1px solid var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
         }
 
-        /* Loading States */
         .loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
             padding: 40px;
-            color: var(--text-secondary);
         }
 
-        .loading::before {
-            content: '';
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--border);
-            border-top: 2px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
+        .error {
+            text-align: center;
+            color: var(--error);
+            padding: 40px;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Responsive Design */
+        /* Responsive */
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
             }
 
             .header {
-                padding: 30px 20px;
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
             }
 
-            .header h1 {
-                font-size: 2rem;
+            .header-actions {
+                width: 100%;
+                justify-content: flex-start;
             }
 
             .filters-grid {
                 grid-template-columns: 1fr;
             }
 
-            .charts-grid {
+            .metrics-section {
                 grid-template-columns: 1fr;
             }
 
-            .metrics-grid {
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                height: 250px;
             }
 
             .filters-actions {
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+
+            .tables-header {
                 flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-title h1 {
+                font-size: 1.5rem;
+            }
+
+            .metric-value {
+                font-size: 2rem;
             }
 
             .btn {
-                justify-content: center;
+                padding: 8px 12px;
+                font-size: 13px;
             }
-        }
-
-        /* Utility Classes */
-        .hidden {
-            display: none !important;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .mb-20 {
-            margin-bottom: 20px;
-        }
-
-        .mt-20 {
-            margin-top: 20px;
         }
     </style>
 </head>
@@ -565,72 +565,73 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="header-icon">
+            <div class="header-title">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M9 12l2 2 4-4"/>
                     <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
                     <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"/>
                     <path d="M3 12h6m6 0h6"/>
                 </svg>
+                <h1>BI Checklist</h1>
             </div>
-            <h1>BI Checklist</h1>
-            <p>Inspeções e verificações de conformidade com monitoramento de qualidade</p>
+            <div class="header-actions">
+                <a href="/api/copilot/dashboard" class="btn btn-secondary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9,22 9,12 15,12 15,22"/>
+                    </svg>
+                    Menu Principal
+                </a>
+            </div>
         </div>
 
-        <!-- Filters Section -->
+        <!-- Filters -->
         <div class="filters-section">
-            <div class="filters-header">
+            <div class="filters-title">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"/>
                 </svg>
-                <h2>Filtros de Análise</h2>
+                <h3>Filtros</h3>
             </div>
-            
             <div class="filters-grid">
                 <div class="filter-group">
                     <label for="dataInicial">Data Inicial</label>
-                    <input type="date" id="dataInicial" name="dataInicial">
+                    <input type="date" id="dataInicial">
                 </div>
-                
                 <div class="filter-group">
                     <label for="dataFinal">Data Final</label>
-                    <input type="date" id="dataFinal" name="dataFinal">
+                    <input type="date" id="dataFinal">
                 </div>
-                
                 <div class="filter-group">
                     <label for="responsavel">Responsável</label>
-                    <select id="responsavel" name="responsavel">
-                        <option value="">Todos os responsáveis</option>
+                    <select id="responsavel">
+                        <option value="">Todos</option>
                     </select>
                 </div>
-                
                 <div class="filter-group">
-                    <label for="placa">Placa do Veículo</label>
-                    <select id="placa" name="placa">
-                        <option value="">Todas as placas</option>
+                    <label for="placa">Placa</label>
+                    <select id="placa">
+                        <option value="">Todas</option>
                     </select>
                 </div>
-                
-                <div class="filter-group">
-                    <label for="tipoAtivo">Tipo de Ativo</label>
-                    <select id="tipoAtivo" name="tipoAtivo">
-                        <option value="">Todos os tipos</option>
-                    </select>
-                </div>
-                
                 <div class="filter-group">
                     <label for="motorista">Motorista</label>
-                    <select id="motorista" name="motorista">
-                        <option value="">Todos os motoristas</option>
+                    <select id="motorista">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="planName">Plano</label>
+                    <select id="planName">
+                        <option value="">Todos</option>
                     </select>
                 </div>
             </div>
-            
             <div class="filters-actions">
                 <button class="btn btn-primary" onclick="applyFilters()">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="11" cy="11" r="8"/>
-                        <path d="m21 21-4.35-4.35"/>
+                        <path d="M21 21l-4.35-4.35"/>
                     </svg>
                     Aplicar Filtros
                 </button>
@@ -644,158 +645,123 @@
                     </svg>
                     Limpar
                 </button>
-                <button class="btn btn-secondary" onclick="exportToExcel()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14,2 14,8 20,8"/>
-                        <line x1="16" y1="13" x2="8" y2="21"/>
-                        <line x1="8" y1="13" x2="16" y2="21"/>
-                    </svg>
-                    Excel
-                </button>
-                <button class="btn btn-secondary" onclick="exportToPDF()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14,2 14,8 20,8"/>
-                        <line x1="16" y1="13" x2="8" y2="21"/>
-                        <line x1="8" y1="13" x2="16" y2="21"/>
-                    </svg>
-                    PDF
-                </button>
             </div>
         </div>
 
-        <!-- Metrics Grid -->
-        <div class="metrics-grid">
+        <!-- Metrics -->
+        <div class="metrics-section">
             <div class="metric-card">
-                <div class="metric-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 12l2 2 4-4"/>
-                        <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
-                        <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"/>
-                        <path d="M3 12h6m6 0h6"/>
+                <div class="metric-header">
+                    <div class="metric-title">Total de Registros</div>
+                    <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
                     </svg>
                 </div>
-                <div class="metric-value" id="totalRegistros">-</div>
-                <div class="metric-label">Total de Registros</div>
+                <div class="metric-value" id="totalRegistros">0</div>
+                <div class="metric-change neutral">
+                    <span>Registros de checklist</span>
+                </div>
             </div>
-            
+
             <div class="metric-card">
-                <div class="metric-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <div class="metric-header">
+                    <div class="metric-title">Conformes</div>
+                    <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                         <polyline points="22,4 12,14.01 9,11.01"/>
                     </svg>
                 </div>
-                <div class="metric-value" id="conformes">-</div>
-                <div class="metric-label">Conformes</div>
+                <div class="metric-value" id="conformes">0</div>
+                <div class="metric-change positive">
+                    <span>Registros aprovados</span>
+                </div>
             </div>
-            
+
             <div class="metric-card">
-                <div class="metric-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <div class="metric-header">
+                    <div class="metric-title">Não Conformes</div>
+                    <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"/>
                         <line x1="15" y1="9" x2="9" y2="15"/>
                         <line x1="9" y1="9" x2="15" y2="15"/>
                     </svg>
                 </div>
-                <div class="metric-value" id="naoConformes">-</div>
-                <div class="metric-label">Não Conformes</div>
+                <div class="metric-value" id="naoConformes">0</div>
+                <div class="metric-change negative">
+                    <span>Registros com problemas</span>
+                </div>
             </div>
-            
+
             <div class="metric-card">
-                <div class="metric-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <div class="metric-header">
+                    <div class="metric-title">Taxa de Conformidade</div>
+                    <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"/>
                         <polyline points="12,6 12,12 16,14"/>
                     </svg>
                 </div>
-                <div class="metric-value" id="pendentes">-</div>
-                <div class="metric-label">Pendentes</div>
-            </div>
-            
-            <div class="metric-card">
-                <div class="metric-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 3v18h18"/>
-                        <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
-                    </svg>
+                <div class="metric-value" id="taxaConformidade">0%</div>
+                <div class="metric-change neutral">
+                    <span>Percentual de aprovação</span>
                 </div>
-                <div class="metric-value" id="taxaConformidade">-</div>
-                <div class="metric-label">Taxa de Conformidade</div>
             </div>
         </div>
 
-        <!-- Insights Section -->
-        <div class="insights-section">
-            <div class="insights-header">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4"/>
-                    <polyline points="9,11 12,14 15,11"/>
-                    <line x1="12" y1="2" x2="12" y2="14"/>
-                </svg>
-                <h2>Insights Automáticos</h2>
-            </div>
-            <div class="insights-grid" id="insightsContainer">
-                <div class="loading">Carregando insights...</div>
-            </div>
-        </div>
-
-        <!-- Charts Grid -->
-        <div class="charts-grid">
+        <!-- Charts -->
+        <div class="charts-section">
             <div class="chart-card">
                 <div class="chart-header">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="20" x2="18" y2="10"/>
-                        <line x1="12" y1="20" x2="12" y2="4"/>
-                        <line x1="6" y1="20" x2="6" y2="14"/>
-                    </svg>
-                    <h3>Conformidade ao Longo do Tempo</h3>
+                    <h3 class="chart-title">Conformidade ao Longo do Tempo</h3>
                 </div>
                 <div class="chart-container">
                     <canvas id="conformidadeTempoChart"></canvas>
                 </div>
             </div>
-            
+
             <div class="chart-card">
                 <div class="chart-header">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                        <line x1="16" y1="2" x2="16" y2="6"/>
-                        <line x1="8" y1="2" x2="8" y2="6"/>
-                        <line x1="3" y1="10" x2="21" y2="10"/>
-                    </svg>
-                    <h3>Ranking por Responsável</h3>
+                    <h3 class="chart-title">Ranking por Responsável</h3>
                 </div>
                 <div class="chart-container">
                     <canvas id="responsavelChart"></canvas>
                 </div>
             </div>
-            
+
             <div class="chart-card">
                 <div class="chart-header">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <polyline points="12,6 12,12 16,14"/>
-                    </svg>
-                    <h3>Distribuição por Status</h3>
+                    <h3 class="chart-title">Distribuição por Status</h3>
                 </div>
                 <div class="chart-container">
                     <canvas id="statusChart"></canvas>
                 </div>
             </div>
-            
+
             <div class="chart-card">
                 <div class="chart-header">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                        <line x1="8" y1="21" x2="16" y2="21"/>
-                        <line x1="12" y1="17" x2="12" y2="21"/>
-                    </svg>
-                    <h3>Checklist por Tipo de Ativo</h3>
+                    <h3 class="chart-title">Checklist por Plano</h3>
                 </div>
                 <div class="chart-container">
-                    <canvas id="tipoAtivoChart"></canvas>
+                    <canvas id="planChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights -->
+        <div class="insights-section">
+            <div class="insights-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 11H5a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h4"/>
+                    <path d="M9 11V9a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    <path d="M9 11h6"/>
+                    <path d="M15 11v6a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-6"/>
+                    <path d="M12 16h.01"/>
+                </svg>
+                <h3>Insights Automáticos</h3>
+            </div>
+            <div class="insights-container" id="insightsContainer">
+                <div class="insight-item">
+                    <p>Carregando insights...</p>
                 </div>
             </div>
         </div>
@@ -847,15 +813,16 @@
                             <th>Data</th>
                             <th>Responsável</th>
                             <th>Placa</th>
-                            <th>Tipo de Ativo</th>
                             <th>Motorista</th>
+                            <th>Plano</th>
+                            <th>Item</th>
                             <th>Status</th>
                             <th>Observações</th>
                         </tr>
                     </thead>
                     <tbody id="checklistTableBody">
                         <tr>
-                            <td colspan="7" class="loading">Carregando dados...</td>
+                            <td colspan="8" class="loading">Carregando dados...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -946,21 +913,21 @@
                 return;
             }
 
-            // Populate responsável filter
-            const responsaveis = [...new Set(checklistData.map(item => item.responsavel).filter(Boolean))];
+            // Populate responsável filter (userRespForRegistration)
+            const responsaveis = [...new Set(checklistData.map(item => item.userRespForRegistration).filter(Boolean))];
             populateSelect('responsavel', responsaveis);
 
-            // Populate placa filter
-            const placas = [...new Set(checklistData.map(item => item.placa).filter(Boolean))];
+            // Populate placa filter (vehiclePlate)
+            const placas = [...new Set(checklistData.map(item => item.vehiclePlate).filter(Boolean))];
             populateSelect('placa', placas);
 
-            // Populate tipo de ativo filter
-            const tiposAtivo = [...new Set(checklistData.map(item => item.tipoAtivo || item.tipo_ativo).filter(Boolean))];
-            populateSelect('tipoAtivo', tiposAtivo);
-
-            // Populate motorista filter
-            const motoristas = [...new Set(checklistData.map(item => item.motorista).filter(Boolean))];
+            // Populate motorista filter (driverName)
+            const motoristas = [...new Set(checklistData.map(item => item.driverName).filter(Boolean))];
             populateSelect('motorista', motoristas);
+
+            // Populate plano filter (planName)
+            const planos = [...new Set(checklistData.map(item => item.planName).filter(Boolean))];
+            populateSelect('planName', planos);
 
             console.log('✅ Filtros populados com sucesso');
         }
@@ -987,24 +954,16 @@
             console.log('📊 Atualizando métricas...');
             
             const total = filteredData.length;
-            const conformes = filteredData.filter(item => 
-                item.status === 'Conforme' || item.status === 'conforme' || item.status === 'CONFORME'
-            ).length;
-            const naoConformes = filteredData.filter(item => 
-                item.status === 'Não Conforme' || item.status === 'nao_conforme' || item.status === 'NAO_CONFORME'
-            ).length;
-            const pendentes = filteredData.filter(item => 
-                item.status === 'Pendente' || item.status === 'pendente' || item.status === 'PENDENTE'
-            ).length;
+            const conformes = filteredData.filter(item => item.compliant === true).length;
+            const naoConformes = filteredData.filter(item => item.compliant === false).length;
             const taxaConformidade = total > 0 ? ((conformes / total) * 100).toFixed(1) + '%' : '0.0%';
 
             document.getElementById('totalRegistros').textContent = total.toLocaleString('pt-BR');
             document.getElementById('conformes').textContent = conformes.toLocaleString('pt-BR');
             document.getElementById('naoConformes').textContent = naoConformes.toLocaleString('pt-BR');
-            document.getElementById('pendentes').textContent = pendentes.toLocaleString('pt-BR');
             document.getElementById('taxaConformidade').textContent = taxaConformidade;
 
-            console.log('✅ Métricas atualizadas:', { total, conformes, naoConformes, pendentes, taxaConformidade });
+            console.log('✅ Métricas atualizadas:', { total, conformes, naoConformes, taxaConformidade });
         }
 
         function generateInsights() {
@@ -1016,9 +975,7 @@
                 insights.push('Nenhum dado disponível para análise no período selecionado.');
             } else {
                 // Insight sobre conformidade
-                const conformes = filteredData.filter(item => 
-                    item.status === 'Conforme' || item.status === 'conforme' || item.status === 'CONFORME'
-                ).length;
+                const conformes = filteredData.filter(item => item.compliant === true).length;
                 const taxaConformidade = ((conformes / filteredData.length) * 100).toFixed(1);
                 
                 if (taxaConformidade >= 90) {
@@ -1032,8 +989,8 @@
                 // Insight sobre responsável mais ativo
                 const responsavelCount = {};
                 filteredData.forEach(item => {
-                    if (item.responsavel) {
-                        responsavelCount[item.responsavel] = (responsavelCount[item.responsavel] || 0) + 1;
+                    if (item.userRespForRegistration) {
+                        responsavelCount[item.userRespForRegistration] = (responsavelCount[item.userRespForRegistration] || 0) + 1;
                     }
                 });
                 
@@ -1043,28 +1000,39 @@
                     insights.push(`O responsável ${topResponsavel[0]} realizou ${topResponsavel[1]} checklists no período analisado.`);
                 }
 
-                // Insight sobre tipo de ativo mais verificado
-                const tipoAtivoCount = {};
+                // Insight sobre plano mais verificado
+                const planoCount = {};
                 filteredData.forEach(item => {
-                    const tipo = item.tipoAtivo || item.tipo_ativo;
-                    if (tipo) {
-                        tipoAtivoCount[tipo] = (tipoAtivoCount[tipo] || 0) + 1;
+                    if (item.planName) {
+                        planoCount[item.planName] = (planoCount[item.planName] || 0) + 1;
                     }
                 });
                 
-                if (Object.keys(tipoAtivoCount).length > 0) {
-                    const topTipo = Object.entries(tipoAtivoCount)
+                if (Object.keys(planoCount).length > 0) {
+                    const topPlano = Object.entries(planoCount)
                         .sort(([,a], [,b]) => b - a)[0];
-                    insights.push(`${topTipo[0]} é o tipo de ativo mais verificado com ${topTipo[1]} checklists realizados.`);
+                    insights.push(`${topPlano[0]} é o plano mais verificado com ${topPlano[1]} checklists realizados.`);
                 }
 
                 // Insight sobre não conformidades
-                const naoConformes = filteredData.filter(item => 
-                    item.status === 'Não Conforme' || item.status === 'nao_conforme' || item.status === 'NAO_CONFORME'
-                ).length;
+                const naoConformes = filteredData.filter(item => item.compliant === false).length;
                 
                 if (naoConformes > 0) {
                     insights.push(`${naoConformes} registros não conformes identificados requerem ação corretiva imediata.`);
+                }
+
+                // Insight sobre item mais verificado
+                const itemCount = {};
+                filteredData.forEach(item => {
+                    if (item.itemName) {
+                        itemCount[item.itemName] = (itemCount[item.itemName] || 0) + 1;
+                    }
+                });
+                
+                if (Object.keys(itemCount).length > 0) {
+                    const topItem = Object.entries(itemCount)
+                        .sort(([,a], [,b]) => b - a)[0];
+                    insights.push(`"${topItem[0]}" é o item mais verificado com ${topItem[1]} registros.`);
                 }
             }
 
@@ -1085,7 +1053,7 @@
             createConformidadeTempoChart();
             createResponsavelChart();
             createStatusChart();
-            createTipoAtivoChart();
+            createPlanChart();
             
             console.log('✅ Gráficos criados com sucesso');
         }
@@ -1097,23 +1065,26 @@
             // Group data by date
             const dateGroups = {};
             filteredData.forEach(item => {
-                const date = item.data || item.timestamp;
-                if (date) {
-                    const dateKey = new Date(date).toLocaleDateString('pt-BR');
-                    if (!dateGroups[dateKey]) {
-                        dateGroups[dateKey] = { total: 0, conformes: 0 };
-                    }
-                    dateGroups[dateKey].total++;
-                    if (item.status === 'Conforme' || item.status === 'conforme' || item.status === 'CONFORME') {
-                        dateGroups[dateKey].conformes++;
-                    }
+                const date = item.timestamp ? new Date(item.timestamp).toISOString().split('T')[0] : 'Sem data';
+                if (!dateGroups[date]) {
+                    dateGroups[date] = { total: 0, conformes: 0 };
+                }
+                dateGroups[date].total++;
+                if (item.compliant === true) {
+                    dateGroups[date].conformes++;
                 }
             });
 
-            const labels = Object.keys(dateGroups).sort();
-            const conformidadeData = labels.map(date => {
+            const sortedDates = Object.keys(dateGroups).sort();
+            const labels = sortedDates.map(date => {
+                if (date === 'Sem data') return date;
+                const d = new Date(date);
+                return d.toLocaleDateString('pt-BR');
+            });
+            
+            const conformidadeData = sortedDates.map(date => {
                 const group = dateGroups[date];
-                return group.total > 0 ? (group.conformes / group.total * 100).toFixed(1) : 0;
+                return group.total > 0 ? ((group.conformes / group.total) * 100).toFixed(1) : 0;
             });
 
             if (charts.conformidadeTempo) {
@@ -1139,17 +1110,27 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            labels: { color: '#ffffff' }
+                            labels: {
+                                color: '#ffffff'
+                            }
                         }
                     },
                     scales: {
                         x: {
-                            ticks: { color: '#9ca3af' },
-                            grid: { color: '#374151' }
+                            ticks: {
+                                color: '#9ca3af'
+                            },
+                            grid: {
+                                color: '#374151'
+                            }
                         },
                         y: {
-                            ticks: { color: '#9ca3af' },
-                            grid: { color: '#374151' },
+                            ticks: {
+                                color: '#9ca3af'
+                            },
+                            grid: {
+                                color: '#374151'
+                            },
                             min: 0,
                             max: 100
                         }
@@ -1162,17 +1143,20 @@
             const ctx = document.getElementById('responsavelChart');
             if (!ctx) return;
 
-            // Count by responsável
+            // Count by responsible
             const responsavelCount = {};
             filteredData.forEach(item => {
-                if (item.responsavel) {
-                    responsavelCount[item.responsavel] = (responsavelCount[item.responsavel] || 0) + 1;
+                if (item.userRespForRegistration) {
+                    responsavelCount[item.userRespForRegistration] = (responsavelCount[item.userRespForRegistration] || 0) + 1;
                 }
             });
 
-            const sortedData = Object.entries(responsavelCount)
+            const sortedResponsaveis = Object.entries(responsavelCount)
                 .sort(([,a], [,b]) => b - a)
                 .slice(0, 10); // Top 10
+
+            const labels = sortedResponsaveis.map(([name]) => name.length > 20 ? name.substring(0, 20) + '...' : name);
+            const data = sortedResponsaveis.map(([,count]) => count);
 
             if (charts.responsavel) {
                 charts.responsavel.destroy();
@@ -1181,10 +1165,10 @@
             charts.responsavel = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: sortedData.map(([name]) => name),
+                    labels: labels,
                     datasets: [{
                         label: 'Checklists Realizados',
-                        data: sortedData.map(([, count]) => count),
+                        data: data,
                         backgroundColor: '#14b8a6',
                         borderColor: '#0f766e',
                         borderWidth: 1
@@ -1196,17 +1180,27 @@
                     indexAxis: 'y',
                     plugins: {
                         legend: {
-                            labels: { color: '#ffffff' }
+                            labels: {
+                                color: '#ffffff'
+                            }
                         }
                     },
                     scales: {
                         x: {
-                            ticks: { color: '#9ca3af' },
-                            grid: { color: '#374151' }
+                            ticks: {
+                                color: '#9ca3af'
+                            },
+                            grid: {
+                                color: '#374151'
+                            }
                         },
                         y: {
-                            ticks: { color: '#9ca3af' },
-                            grid: { color: '#374151' }
+                            ticks: {
+                                color: '#9ca3af'
+                            },
+                            grid: {
+                                color: '#374151'
+                            }
                         }
                     }
                 }
@@ -1217,34 +1211,21 @@
             const ctx = document.getElementById('statusChart');
             if (!ctx) return;
 
-            // Count by status
-            const statusCount = {};
-            filteredData.forEach(item => {
-                const status = item.status || 'Não informado';
-                statusCount[status] = (statusCount[status] || 0) + 1;
-            });
-
-            const labels = Object.keys(statusCount);
-            const data = Object.values(statusCount);
-            const colors = labels.map(status => {
-                if (status === 'Conforme' || status === 'conforme' || status === 'CONFORME') return '#10b981';
-                if (status === 'Não Conforme' || status === 'nao_conforme' || status === 'NAO_CONFORME') return '#ef4444';
-                if (status === 'Pendente' || status === 'pendente' || status === 'PENDENTE') return '#f59e0b';
-                return '#6b7280';
-            });
+            const conformes = filteredData.filter(item => item.compliant === true).length;
+            const naoConformes = filteredData.filter(item => item.compliant === false).length;
 
             if (charts.status) {
                 charts.status.destroy();
             }
 
             charts.status = new Chart(ctx, {
-                type: 'doughnut',
+                type: 'pie',
                 data: {
-                    labels: labels,
+                    labels: ['Conformes', 'Não Conformes'],
                     datasets: [{
-                        data: data,
-                        backgroundColor: colors,
-                        borderColor: '#1a1a1a',
+                        data: [conformes, naoConformes],
+                        backgroundColor: ['#10b981', '#ef4444'],
+                        borderColor: ['#059669', '#dc2626'],
                         borderWidth: 2
                     }]
                 },
@@ -1253,43 +1234,46 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom',
-                            labels: { color: '#ffffff' }
+                            labels: {
+                                color: '#ffffff'
+                            }
                         }
                     }
                 }
             });
         }
 
-        function createTipoAtivoChart() {
-            const ctx = document.getElementById('tipoAtivoChart');
+        function createPlanChart() {
+            const ctx = document.getElementById('planChart');
             if (!ctx) return;
 
-            // Count by tipo de ativo
-            const tipoCount = {};
+            // Count by plan
+            const planCount = {};
             filteredData.forEach(item => {
-                const tipo = item.tipoAtivo || item.tipo_ativo || 'Não informado';
-                tipoCount[tipo] = (tipoCount[tipo] || 0) + 1;
+                if (item.planName) {
+                    planCount[item.planName] = (planCount[item.planName] || 0) + 1;
+                }
             });
 
-            const sortedData = Object.entries(tipoCount)
+            const sortedPlans = Object.entries(planCount)
                 .sort(([,a], [,b]) => b - a);
 
-            if (charts.tipoAtivo) {
-                charts.tipoAtivo.destroy();
+            const labels = sortedPlans.map(([name]) => name);
+            const data = sortedPlans.map(([,count]) => count);
+            const colors = ['#14b8a6', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#10b981'];
+
+            if (charts.plan) {
+                charts.plan.destroy();
             }
 
-            charts.tipoAtivo = new Chart(ctx, {
-                type: 'pie',
+            charts.plan = new Chart(ctx, {
+                type: 'doughnut',
                 data: {
-                    labels: sortedData.map(([tipo]) => tipo),
+                    labels: labels,
                     datasets: [{
-                        data: sortedData.map(([, count]) => count),
-                        backgroundColor: [
-                            '#14b8a6', '#3b82f6', '#f59e0b', '#ef4444', 
-                            '#8b5cf6', '#06b6d4', '#84cc16', '#f97316'
-                        ],
-                        borderColor: '#1a1a1a',
+                        data: data,
+                        backgroundColor: colors.slice(0, data.length),
+                        borderColor: colors.slice(0, data.length).map(color => color + '80'),
                         borderWidth: 2
                     }]
                 },
@@ -1298,8 +1282,9 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom',
-                            labels: { color: '#ffffff' }
+                            labels: {
+                                color: '#ffffff'
+                            }
                         }
                     }
                 }
@@ -1309,64 +1294,64 @@
         function renderTable() {
             console.log('📋 Renderizando tabela...');
             
-            let dataToShow = filteredData;
-            
-            // Filter based on current table
-            if (currentTable === 'status') {
-                // Group by status
-                dataToShow = filteredData;
-            } else if (currentTable === 'naoConformes') {
-                dataToShow = filteredData.filter(item => 
-                    item.status === 'Não Conforme' || item.status === 'nao_conforme' || item.status === 'NAO_CONFORME'
-                );
-            }
-
             const tbody = document.getElementById('checklistTableBody');
             if (!tbody) return;
 
+            let dataToShow = [];
+            
+            switch (currentTable) {
+                case 'geral':
+                    dataToShow = filteredData;
+                    break;
+                case 'status':
+                    dataToShow = filteredData.sort((a, b) => {
+                        if (a.compliant === b.compliant) return 0;
+                        return a.compliant ? -1 : 1;
+                    });
+                    break;
+                case 'naoConformes':
+                    dataToShow = filteredData.filter(item => item.compliant === false);
+                    break;
+            }
+
             if (dataToShow.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhum registro encontrado</td></tr>';
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="loading">Nenhum registro encontrado para os filtros aplicados.</td>
+                    </tr>
+                `;
                 return;
             }
 
-            tbody.innerHTML = dataToShow.slice(0, 50).map(item => {
-                const data = item.data || item.timestamp || '-';
-                const responsavel = item.responsavel || '-';
-                const placa = item.placa || '-';
-                const tipoAtivo = item.tipoAtivo || item.tipo_ativo || '-';
-                const motorista = item.motorista || '-';
-                const status = item.status || '-';
-                const observacoes = item.observacoes || item.observacao || '-';
-
-                let statusClass = '';
-                if (status === 'Conforme' || status === 'conforme' || status === 'CONFORME') {
-                    statusClass = 'status-conforme';
-                } else if (status === 'Não Conforme' || status === 'nao_conforme' || status === 'NAO_CONFORME') {
-                    statusClass = 'status-nao-conforme';
-                } else if (status === 'Pendente' || status === 'pendente' || status === 'PENDENTE') {
-                    statusClass = 'status-pendente';
-                }
-
+            // Limit to 50 records for performance
+            const limitedData = dataToShow.slice(0, 50);
+            
+            tbody.innerHTML = limitedData.map(item => {
+                const date = item.timestamp ? new Date(item.timestamp).toLocaleDateString('pt-BR') : 'N/A';
+                const status = item.compliant === true ? 'Conforme' : (item.compliant === false ? 'Não Conforme' : 'N/A');
+                const statusClass = item.compliant === true ? 'status-conforme' : (item.compliant === false ? 'status-nao-conforme' : 'status-pendente');
+                
                 return `
                     <tr>
-                        <td>${new Date(data).toLocaleDateString('pt-BR')}</td>
-                        <td>${responsavel}</td>
-                        <td>${placa}</td>
-                        <td>${tipoAtivo}</td>
-                        <td>${motorista}</td>
+                        <td>${date}</td>
+                        <td>${item.userRespForRegistration || 'N/A'}</td>
+                        <td>${item.vehiclePlate || 'N/A'}</td>
+                        <td>${item.driverName || 'N/A'}</td>
+                        <td>${item.planName || 'N/A'}</td>
+                        <td>${item.itemName || 'N/A'}</td>
                         <td><span class="status-badge ${statusClass}">${status}</span></td>
-                        <td>${observacoes}</td>
+                        <td>${item.comments || 'N/A'}</td>
                     </tr>
                 `;
             }).join('');
 
-            console.log('✅ Tabela renderizada com sucesso');
+            console.log(`✅ Tabela renderizada com ${limitedData.length} registros`);
         }
 
         function showTable(tableType) {
             currentTable = tableType;
             
-            // Update tab active state
+            // Update active tab
             document.querySelectorAll('.table-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
@@ -1382,32 +1367,34 @@
             const dataFinal = document.getElementById('dataFinal').value;
             const responsavel = document.getElementById('responsavel').value;
             const placa = document.getElementById('placa').value;
-            const tipoAtivo = document.getElementById('tipoAtivo').value;
             const motorista = document.getElementById('motorista').value;
+            const planName = document.getElementById('planName').value;
 
             filteredData = checklistData.filter(item => {
                 // Date filter
                 if (dataInicial || dataFinal) {
-                    const itemDate = new Date(item.data || item.timestamp);
-                    if (dataInicial && itemDate < new Date(dataInicial)) return false;
-                    if (dataFinal && itemDate > new Date(dataFinal)) return false;
+                    const itemDate = item.timestamp ? new Date(item.timestamp) : null;
+                    if (itemDate) {
+                        if (dataInicial && itemDate < new Date(dataInicial)) return false;
+                        if (dataFinal && itemDate > new Date(dataFinal + 'T23:59:59')) return false;
+                    }
                 }
 
                 // Other filters
-                if (responsavel && item.responsavel !== responsavel) return false;
-                if (placa && item.placa !== placa) return false;
-                if (tipoAtivo && (item.tipoAtivo !== tipoAtivo && item.tipo_ativo !== tipoAtivo)) return false;
-                if (motorista && item.motorista !== motorista) return false;
+                if (responsavel && item.userRespForRegistration !== responsavel) return false;
+                if (placa && item.vehiclePlate !== placa) return false;
+                if (motorista && item.driverName !== motorista) return false;
+                if (planName && item.planName !== planName) return false;
 
                 return true;
             });
 
-            console.log(`✅ Filtros aplicados: ${filteredData.length} registros encontrados`);
-            
             updateMetrics();
             generateInsights();
             createCharts();
             renderTable();
+            
+            console.log(`✅ Filtros aplicados. ${filteredData.length} registros encontrados.`);
         }
 
         function clearFilters() {
@@ -1417,8 +1404,8 @@
             document.getElementById('dataFinal').value = '';
             document.getElementById('responsavel').value = '';
             document.getElementById('placa').value = '';
-            document.getElementById('tipoAtivo').value = '';
             document.getElementById('motorista').value = '';
+            document.getElementById('planName').value = '';
 
             filteredData = [...checklistData];
             
@@ -1430,19 +1417,21 @@
             console.log('✅ Filtros limpos');
         }
 
-        function exportToExcel() {
+        function exportTableToExcel() {
             console.log('📊 Exportando para Excel...');
             
-            const ws = XLSX.utils.json_to_sheet(filteredData.map(item => ({
-                'Data': new Date(item.data || item.timestamp).toLocaleDateString('pt-BR'),
-                'Responsável': item.responsavel || '',
-                'Placa': item.placa || '',
-                'Tipo de Ativo': item.tipoAtivo || item.tipo_ativo || '',
-                'Motorista': item.motorista || '',
-                'Status': item.status || '',
-                'Observações': item.observacoes || item.observacao || ''
-            })));
-            
+            const data = filteredData.map(item => ({
+                'Data': item.timestamp ? new Date(item.timestamp).toLocaleDateString('pt-BR') : 'N/A',
+                'Responsável': item.userRespForRegistration || 'N/A',
+                'Placa': item.vehiclePlate || 'N/A',
+                'Motorista': item.driverName || 'N/A',
+                'Plano': item.planName || 'N/A',
+                'Item': item.itemName || 'N/A',
+                'Status': item.compliant === true ? 'Conforme' : (item.compliant === false ? 'Não Conforme' : 'N/A'),
+                'Observações': item.comments || 'N/A'
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Checklist');
             
@@ -1452,31 +1441,34 @@
             console.log('✅ Arquivo Excel exportado:', fileName);
         }
 
-        function exportToPDF() {
+        function exportTableToPDF() {
             console.log('📄 Exportando para PDF...');
             
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            doc.setFontSize(20);
+            doc.setFontSize(16);
             doc.text('Relatório de Checklist', 20, 20);
             
             doc.setFontSize(12);
-            doc.text(`Data de geração: ${new Date().toLocaleDateString('pt-BR')}`, 20, 35);
-            doc.text(`Total de registros: ${filteredData.length}`, 20, 45);
+            doc.text(`Data de geração: ${new Date().toLocaleDateString('pt-BR')}`, 20, 30);
+            doc.text(`Total de registros: ${filteredData.length}`, 20, 40);
             
-            // Add summary
-            const conformes = filteredData.filter(item => 
-                item.status === 'Conforme' || item.status === 'conforme' || item.status === 'CONFORME'
-            ).length;
-            const naoConformes = filteredData.filter(item => 
-                item.status === 'Não Conforme' || item.status === 'nao_conforme' || item.status === 'NAO_CONFORME'
-            ).length;
-            const taxaConformidade = filteredData.length > 0 ? ((conformes / filteredData.length) * 100).toFixed(1) : 0;
+            let yPosition = 60;
+            const pageHeight = doc.internal.pageSize.height;
             
-            doc.text(`Conformes: ${conformes}`, 20, 55);
-            doc.text(`Não Conformes: ${naoConformes}`, 20, 65);
-            doc.text(`Taxa de Conformidade: ${taxaConformidade}%`, 20, 75);
+            filteredData.slice(0, 20).forEach((item, index) => {
+                if (yPosition > pageHeight - 30) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                
+                const date = item.timestamp ? new Date(item.timestamp).toLocaleDateString('pt-BR') : 'N/A';
+                const status = item.compliant === true ? 'Conforme' : (item.compliant === false ? 'Não Conforme' : 'N/A');
+                
+                doc.text(`${index + 1}. ${date} - ${item.userRespForRegistration || 'N/A'} - ${item.vehiclePlate || 'N/A'} - ${status}`, 20, yPosition);
+                yPosition += 10;
+            });
             
             const fileName = `checklist_${new Date().toISOString().split('T')[0]}.pdf`;
             doc.save(fileName);
@@ -1484,24 +1476,13 @@
             console.log('✅ Arquivo PDF exportado:', fileName);
         }
 
-        function exportTableToExcel() {
-            exportToExcel();
-        }
-
-        function exportTableToPDF() {
-            exportToPDF();
-        }
-
         function showError(message) {
-            console.error('❌ Erro:', message);
-            
-            // Show error in insights section
-            const container = document.getElementById('insightsContainer');
-            if (container) {
-                container.innerHTML = `
-                    <div class="insight-item" style="border-left-color: var(--error);">
-                        <p style="color: var(--error);">❌ ${message}</p>
-                    </div>
+            const tbody = document.getElementById('checklistTableBody');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="error">${message}</td>
+                    </tr>
                 `;
             }
         }
