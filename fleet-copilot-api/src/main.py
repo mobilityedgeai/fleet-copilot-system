@@ -1,6 +1,12 @@
+import os
+import sys
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 
-app = Flask(__name__)
+# Configurar caminho para templates (um nível acima de src/)
+template_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templates')
+
+# Criar app Flask com template_folder correto
+app = Flask(__name__, template_folder=template_dir)
 
 # Rota principal - redireciona para o menu dos BIs
 @app.route('/')
@@ -122,7 +128,6 @@ def list_bis():
     return jsonify(bis)
 
 if __name__ == '__main__':
-    import os
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_ENV') != 'production'
     app.run(host='0.0.0.0', port=port, debug=debug)
