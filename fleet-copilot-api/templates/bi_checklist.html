@@ -149,7 +149,7 @@
 
         .filters-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 16px;
             margin-bottom: 20px;
         }
@@ -343,6 +343,15 @@
             color: var(--text);
         }
 
+        .table-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
         .table-container {
             overflow-x: auto;
             border-radius: 8px;
@@ -407,6 +416,71 @@
             color: var(--warning);
         }
 
+        /* Pagination */
+        .pagination-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 15px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .pagination-info {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .pagination-btn {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            background: var(--surface-light);
+            color: var(--text);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--surface-lighter);
+            border-color: var(--primary);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .page-size-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .page-size-selector select {
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--surface-light);
+            color: var(--text);
+            font-size: 14px;
+        }
+
         .loading {
             position: fixed;
             top: 0;
@@ -463,36 +537,6 @@
             margin-bottom: 15px;
         }
 
-        /* Debug panel */
-        .debug-panel {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 15px;
-            max-width: 300px;
-            font-size: 12px;
-            z-index: 1000;
-            display: none;
-        }
-
-        .debug-panel.show {
-            display: block;
-        }
-
-        .debug-title {
-            color: var(--primary);
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .debug-item {
-            margin-bottom: 5px;
-            color: var(--text-secondary);
-        }
-
         /* Responsive */
         @media (max-width: 768px) {
             .container {
@@ -529,6 +573,16 @@
                 padding: 8px 12px;
                 font-size: 13px;
             }
+
+            .pagination-section {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .pagination-controls {
+                flex-wrap: wrap;
+            }
         }
     </style>
 </head>
@@ -546,20 +600,6 @@
                 <h1>BI Checklist</h1>
             </div>
             <div class="header-actions">
-                <button class="btn btn-secondary" onclick="toggleDebug()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2v20"/>
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                    </svg>
-                    Debug
-                </button>
-                <button class="btn btn-secondary" onclick="testConnection()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                        <polyline points="22,4 12,14.01 9,11.01"/>
-                    </svg>
-                    Testar API
-                </button>
                 <button class="btn btn-primary" onclick="refreshData()">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="23,4 23,10 17,10"/>
@@ -589,8 +629,26 @@
                     <input type="date" id="dataFinal">
                 </div>
                 <div class="filter-group">
-                    <label for="responsavel">Responsável</label>
-                    <select id="responsavel">
+                    <label for="garagem">Garagem</label>
+                    <select id="garagem">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filial">Filial</label>
+                    <select id="filial">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="tipoAtivo">Tipo de Ativo</label>
+                    <select id="tipoAtivo">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="motorista">Motorista</label>
+                    <select id="motorista">
                         <option value="">Todos</option>
                     </select>
                 </div>
@@ -601,8 +659,8 @@
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label for="motorista">Motorista</label>
-                    <select id="motorista">
+                    <label for="responsavel">Responsável</label>
+                    <select id="responsavel">
                         <option value="">Todos</option>
                     </select>
                 </div>
@@ -754,6 +812,20 @@
                     </button>
                 </div>
             </div>
+            
+            <div class="table-info">
+                <span>Mostrando <strong id="recordsShown">0</strong> de <strong id="totalRecords">0</strong> registros</span>
+                <div class="page-size-selector">
+                    <span>Registros por página:</span>
+                    <select id="pageSize" onchange="changePageSize()">
+                        <option value="50">50</option>
+                        <option value="100" selected>100</option>
+                        <option value="200">200</option>
+                        <option value="500">500</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="table-container">
                 <table class="data-table" id="checklistTable">
                     <thead>
@@ -765,6 +837,8 @@
                             <th>Status</th>
                             <th>Responsável</th>
                             <th>Plano</th>
+                            <th>Garagem</th>
+                            <th>Filial</th>
                             <th>Comentários</th>
                         </tr>
                     </thead>
@@ -772,6 +846,37 @@
                         <!-- Dados serão inseridos dinamicamente -->
                     </tbody>
                 </table>
+            </div>
+
+            <div class="pagination-section">
+                <div class="pagination-info">
+                    <span id="paginationInfo">Página 1 de 1</span>
+                </div>
+                <div class="pagination-controls">
+                    <button class="pagination-btn" id="firstPageBtn" onclick="goToPage(1)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="11,17 6,12 11,7"/>
+                            <polyline points="18,17 13,12 18,7"/>
+                        </svg>
+                    </button>
+                    <button class="pagination-btn" id="prevPageBtn" onclick="goToPage(currentPage - 1)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15,18 9,12 15,6"/>
+                        </svg>
+                    </button>
+                    <div id="pageNumbers"></div>
+                    <button class="pagination-btn" id="nextPageBtn" onclick="goToPage(currentPage + 1)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9,18 15,12 9,6"/>
+                        </svg>
+                    </button>
+                    <button class="pagination-btn" id="lastPageBtn" onclick="goToPage(totalPages)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="13,17 18,12 13,7"/>
+                            <polyline points="6,17 11,12 6,7"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -782,22 +887,15 @@
         <p>Carregando dados do checklist...</p>
     </div>
 
-    <!-- Debug Panel -->
-    <div id="debugPanel" class="debug-panel">
-        <div class="debug-title">🔍 Debug Info</div>
-        <div class="debug-item">Enterprise ID: <span id="debugEnterpriseId">--</span></div>
-        <div class="debug-item">API URL: <span id="debugApiUrl">--</span></div>
-        <div class="debug-item">Dados carregados: <span id="debugDataCount">--</span></div>
-        <div class="debug-item">Dados filtrados: <span id="debugFilteredCount">--</span></div>
-        <div class="debug-item">Status API: <span id="debugApiStatus">--</span></div>
-        <div class="debug-item">Última atualização: <span id="debugLastUpdate">--</span></div>
-    </div>
-
     <script>
         // Variáveis globais
         let checklistData = [];
+        let vehicleData = [];
         let filteredData = [];
         let charts = {};
+        let currentPage = 1;
+        let pageSize = 100;
+        let totalPages = 1;
 
         // Configuração da API
         const API_BASE_URL = 'https://firebase-bi-api.onrender.com';
@@ -858,66 +956,118 @@
             `;
         }
 
-        // Função principal para carregar dados
-        async function loadChecklistData() {
+        // Função para carregar dados de veículos
+        async function loadVehicleData() {
             try {
-                showLoading();
-                const apiUrl = `${API_BASE_URL}/checklist?enterpriseId=${ENTERPRISE_ID}`;
-                console.log('🔗 URL da API checklist:', apiUrl);
-                
-                updateDebugInfo('apiUrl', apiUrl);
-                updateDebugInfo('apiStatus', 'Carregando...');
+                const apiUrl = `${API_BASE_URL}/vehicles?enterpriseId=${ENTERPRISE_ID}`;
+                console.log('🔗 URL da API vehicles:', apiUrl);
                 
                 const response = await fetch(apiUrl);
                 
                 if (!response.ok) {
-                    throw new Error(`Erro na API: ${response.status} - ${response.statusText}`);
+                    console.warn('⚠️ API vehicles não disponível:', response.status);
+                    return [];
                 }
                 
                 const result = await response.json();
-                console.log('📊 Resposta da API checklist:', result);
+                console.log('🚗 Resposta da API vehicles:', result);
                 
-                updateDebugInfo('apiStatus', `${response.status} OK`);
+                if (result.data && Array.isArray(result.data)) {
+                    vehicleData = result.data.map(item => ({
+                        plate: item.plate || item.vehiclePlate || '',
+                        garage: item.garage || '',
+                        branchName: item.branchName || item.filial || '',
+                        assetType: item.assetType || item.tipoAtivo || '',
+                        driverName: item.driverName || item.motorista || ''
+                    }));
+                    console.log(`✅ ${vehicleData.length} veículos carregados`);
+                    return vehicleData;
+                } else {
+                    console.warn('⚠️ Estrutura de dados inesperada da API vehicles:', result);
+                    return [];
+                }
                 
-                if (!result.data || result.data.length === 0) {
-                    console.warn('⚠️ Nenhum dado retornado da API checklist');
-                    updateDebugInfo('dataCount', '0');
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados de veículos:', error);
+                return [];
+            }
+        }
+
+        // Função principal para carregar dados
+        async function loadChecklistData() {
+            try {
+                showLoading();
+                
+                // Carregar dados de veículos e checklist em paralelo
+                const [vehicles, checklist] = await Promise.all([
+                    loadVehicleData(),
+                    loadChecklistDataFromAPI()
+                ]);
+                
+                vehicleData = vehicles;
+                
+                if (!checklist || checklist.length === 0) {
                     showNoDataMessage();
                 } else {
-                    console.log(`✅ ${result.data.length} registros de checklist carregados`);
-                    
-                    // Processar dados da API
-                    checklistData = result.data.map(item => ({
-                        _doc_id: item._doc_id || '',
-                        timestamp: item.timestamp || item.issueOpenDate || '',
-                        vehiclePlate: item.vehiclePlate || '',
-                        driverName: item.driverName || '',
-                        itemName: item.itemName || '',
-                        compliant: item.compliant === true || item.compliant === 'true',
-                        noCompliant: item.noCompliant === true || item.noCompliant === 'true',
-                        userRespForRegistration: item.userRespForRegistration || '',
-                        planName: item.planName || '',
-                        comments: item.comments || '',
-                        issueSource: item.issueSource || '',
-                        enterpriseId: item.enterpriseId || '',
-                        photo: item.photo || ''
-                    }));
-
+                    checklistData = checklist;
                     filteredData = [...checklistData];
-                    
-                    updateDebugInfo('dataCount', checklistData.length);
-                    updateDebugInfo('filteredCount', filteredData.length);
-                    updateDebugInfo('lastUpdate', new Date().toLocaleTimeString());
                     
                     hideLoading();
                     populateFilters();
                     updateDashboard();
                 }
             } catch (error) {
-                console.error('❌ Erro ao carregar dados checklist:', error);
-                updateDebugInfo('apiStatus', `Erro: ${error.message}`);
+                console.error('❌ Erro ao carregar dados:', error);
                 showError(`Erro ao conectar com a API: ${error.message}`);
             }
+        }
+
+        // Função para carregar dados de checklist da API
+        async function loadChecklistDataFromAPI() {
+            const apiUrl = `${API_BASE_URL}/checklist?enterpriseId=${ENTERPRISE_ID}`;
+            console.log('🔗 URL da API checklist:', apiUrl);
+            
+            const response = await fetch(apiUrl);
+            
+            if (!response.ok) {
+                throw new Error(`Erro na API: ${response.status} - ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            console.log('📊 Resposta da API checklist:', result);
+            
+            if (!result.data || result.data.length === 0) {
+                console.warn('⚠️ Nenhum dado retornado da API checklist');
+                return [];
+            }
+            
+            console.log(`✅ ${result.data.length} registros de checklist carregados`);
+            
+            // Processar dados da API e enriquecer com dados de veículos
+            return result.data.map(item => {
+                // Buscar dados do veículo correspondente
+                const vehicle = vehicleData.find(v => v.plate === item.vehiclePlate) || {};
+                
+                return {
+                    _doc_id: item._doc_id || '',
+                    timestamp: item.timestamp || item.issueOpenDate || '',
+                    vehiclePlate: item.vehiclePlate || '',
+                    driverName: item.driverName || '',
+                    itemName: item.itemName || '',
+                    compliant: item.compliant === true || item.compliant === 'true',
+                    noCompliant: item.noCompliant === true || item.noCompliant === 'true',
+                    userRespForRegistration: item.userRespForRegistration || '',
+                    planName: item.planName || '',
+                    comments: item.comments || '',
+                    issueSource: item.issueSource || '',
+                    enterpriseId: item.enterpriseId || '',
+                    photo: item.photo || '',
+                    // Dados enriquecidos do veículo
+                    garage: vehicle.garage || 'Não informado',
+                    branchName: vehicle.branchName || 'Não informado',
+                    assetType: vehicle.assetType || 'Não informado'
+                };
+            });
         }
 
         // Função para popular filtros
@@ -929,19 +1079,26 @@
                 return;
             }
 
-            // Populate responsável filter
-            const responsaveis = [...new Set(checklistData.map(item => item.userRespForRegistration).filter(Boolean))];
-            populateSelect('responsavel', responsaveis);
+            // Filtros de dados de veículos
+            const garagens = [...new Set(checklistData.map(item => item.garage).filter(Boolean))];
+            populateSelect('garagem', garagens);
 
-            // Populate placa filter
-            const placas = [...new Set(checklistData.map(item => item.vehiclePlate).filter(Boolean))];
-            populateSelect('placa', placas);
+            const filiais = [...new Set(checklistData.map(item => item.branchName).filter(Boolean))];
+            populateSelect('filial', filiais);
 
-            // Populate motorista filter
+            const tiposAtivo = [...new Set(checklistData.map(item => item.assetType).filter(Boolean))];
+            populateSelect('tipoAtivo', tiposAtivo);
+
+            // Filtros de dados de checklist
             const motoristas = [...new Set(checklistData.map(item => item.driverName).filter(Boolean))];
             populateSelect('motorista', motoristas);
 
-            // Populate plano filter
+            const placas = [...new Set(checklistData.map(item => item.vehiclePlate).filter(Boolean))];
+            populateSelect('placa', placas);
+
+            const responsaveis = [...new Set(checklistData.map(item => item.userRespForRegistration).filter(Boolean))];
+            populateSelect('responsavel', responsaveis);
+
             const planos = [...new Set(checklistData.map(item => item.planName).filter(Boolean))];
             populateSelect('planName', planos);
 
@@ -971,9 +1128,12 @@
         function applyFilters() {
             const dataInicial = document.getElementById('dataInicial').value;
             const dataFinal = document.getElementById('dataFinal').value;
-            const responsavel = document.getElementById('responsavel').value;
-            const placa = document.getElementById('placa').value;
+            const garagem = document.getElementById('garagem').value;
+            const filial = document.getElementById('filial').value;
+            const tipoAtivo = document.getElementById('tipoAtivo').value;
             const motorista = document.getElementById('motorista').value;
+            const placa = document.getElementById('placa').value;
+            const responsavel = document.getElementById('responsavel').value;
             const planName = document.getElementById('planName').value;
 
             filteredData = checklistData.filter(item => {
@@ -984,17 +1144,24 @@
                     if (dataFinal && itemDate > new Date(dataFinal + 'T23:59:59')) return false;
                 }
 
-                // Outros filtros
-                if (responsavel && item.userRespForRegistration !== responsavel) return false;
-                if (placa && item.vehiclePlate !== placa) return false;
+                // Filtros de veículos
+                if (garagem && item.garage !== garagem) return false;
+                if (filial && item.branchName !== filial) return false;
+                if (tipoAtivo && item.assetType !== tipoAtivo) return false;
+
+                // Filtros de checklist
                 if (motorista && item.driverName !== motorista) return false;
+                if (placa && item.vehiclePlate !== placa) return false;
+                if (responsavel && item.userRespForRegistration !== responsavel) return false;
                 if (planName && item.planName !== planName) return false;
 
                 return true;
             });
 
             console.log(`🔍 Filtros aplicados: ${filteredData.length} de ${checklistData.length} registros`);
-            updateDebugInfo('filteredCount', filteredData.length);
+            
+            // Reset pagination
+            currentPage = 1;
             updateDashboard();
         }
 
@@ -1002,13 +1169,16 @@
         function clearFilters() {
             document.getElementById('dataInicial').value = '';
             document.getElementById('dataFinal').value = '';
-            document.getElementById('responsavel').value = '';
-            document.getElementById('placa').value = '';
+            document.getElementById('garagem').value = '';
+            document.getElementById('filial').value = '';
+            document.getElementById('tipoAtivo').value = '';
             document.getElementById('motorista').value = '';
+            document.getElementById('placa').value = '';
+            document.getElementById('responsavel').value = '';
             document.getElementById('planName').value = '';
             
             filteredData = [...checklistData];
-            updateDebugInfo('filteredCount', filteredData.length);
+            currentPage = 1;
             updateDashboard();
         }
 
@@ -1016,6 +1186,7 @@
         function updateDashboard() {
             updateMetrics();
             updateCharts();
+            updatePagination();
             updateTable();
         }
 
@@ -1041,7 +1212,7 @@
             document.getElementById('percentualNaoConformes').textContent = percentualNaoConformes;
         }
 
-        // Função para atualizar gráficos
+        // Função para atualizar gráficos (usa TODOS os dados filtrados, sem limite)
         function updateCharts() {
             updateConformidadeChart();
             updateItensChart();
@@ -1049,12 +1220,12 @@
             updatePlanoChart();
         }
 
-        // Gráfico de conformidade por período
+        // Gráfico de conformidade por período (sem limite de registros)
         function updateConformidadeChart() {
             const ctx = document.getElementById('conformidadeChart');
             if (charts.conformidade) charts.conformidade.destroy();
 
-            // Agrupar dados por mês
+            // Agrupar dados por mês (TODOS os dados filtrados)
             const monthlyData = {};
             filteredData.forEach(item => {
                 const date = new Date(item.timestamp);
@@ -1120,7 +1291,7 @@
             });
         }
 
-        // Gráfico de top itens não conformes
+        // Gráfico de top itens não conformes (sem limite de registros)
         function updateItensChart() {
             const ctx = document.getElementById('itensChart');
             if (charts.itens) charts.itens.destroy();
@@ -1174,7 +1345,7 @@
             });
         }
 
-        // Gráfico de conformidade por responsável
+        // Gráfico de conformidade por responsável (sem limite de registros)
         function updateResponsavelChart() {
             const ctx = document.getElementById('responsavelChart');
             if (charts.responsavel) charts.responsavel.destroy();
@@ -1236,7 +1407,7 @@
             });
         }
 
-        // Gráfico de distribuição por plano
+        // Gráfico de distribuição por plano (sem limite de registros)
         function updatePlanoChart() {
             const ctx = document.getElementById('planoChart');
             if (charts.plano) charts.plano.destroy();
@@ -1273,15 +1444,78 @@
             });
         }
 
-        // Função para atualizar tabela
+        // Função para atualizar paginação
+        function updatePagination() {
+            totalPages = Math.ceil(filteredData.length / pageSize);
+            if (currentPage > totalPages) currentPage = 1;
+            if (currentPage < 1) currentPage = 1;
+
+            // Atualizar informações
+            document.getElementById('totalRecords').textContent = filteredData.length.toLocaleString('pt-BR');
+            document.getElementById('paginationInfo').textContent = `Página ${currentPage} de ${totalPages}`;
+
+            // Atualizar controles
+            document.getElementById('firstPageBtn').disabled = currentPage === 1;
+            document.getElementById('prevPageBtn').disabled = currentPage === 1;
+            document.getElementById('nextPageBtn').disabled = currentPage === totalPages;
+            document.getElementById('lastPageBtn').disabled = currentPage === totalPages;
+
+            // Atualizar números das páginas
+            updatePageNumbers();
+        }
+
+        // Função para atualizar números das páginas
+        function updatePageNumbers() {
+            const pageNumbersContainer = document.getElementById('pageNumbers');
+            pageNumbersContainer.innerHTML = '';
+
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => goToPage(i);
+                pageNumbersContainer.appendChild(pageBtn);
+            }
+        }
+
+        // Função para ir para uma página específica
+        function goToPage(page) {
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            updateTable();
+            updatePagination();
+        }
+
+        // Função para alterar tamanho da página
+        function changePageSize() {
+            pageSize = parseInt(document.getElementById('pageSize').value);
+            currentPage = 1;
+            updatePagination();
+            updateTable();
+        }
+
+        // Função para atualizar tabela (com paginação)
         function updateTable() {
             const tbody = document.querySelector('#checklistTable tbody');
             tbody.innerHTML = '';
 
-            // Mostrar últimos 100 registros
-            const recentData = filteredData.slice(0, 100);
+            // Calcular índices para paginação
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, filteredData.length);
+            const pageData = filteredData.slice(startIndex, endIndex);
 
-            recentData.forEach(item => {
+            // Atualizar contador de registros mostrados
+            document.getElementById('recordsShown').textContent = pageData.length.toLocaleString('pt-BR');
+
+            pageData.forEach(item => {
                 const row = tbody.insertRow();
                 
                 const date = new Date(item.timestamp);
@@ -1299,46 +1533,11 @@
                     <td><span class="status-badge ${statusClass}">${statusIcon} ${statusText}</span></td>
                     <td>${item.userRespForRegistration}</td>
                     <td>${item.planName}</td>
+                    <td>${item.garage}</td>
+                    <td>${item.branchName}</td>
                     <td>${item.comments}</td>
                 `;
             });
-        }
-
-        // Funções de debug
-        function updateDebugInfo(key, value) {
-            const element = document.getElementById(`debug${key.charAt(0).toUpperCase() + key.slice(1)}`);
-            if (element) {
-                element.textContent = value;
-            }
-        }
-
-        function toggleDebug() {
-            const panel = document.getElementById('debugPanel');
-            panel.classList.toggle('show');
-            
-            if (panel.classList.contains('show')) {
-                updateDebugInfo('enterpriseId', ENTERPRISE_ID);
-            }
-        }
-
-        // Função para testar conexão
-        async function testConnection() {
-            try {
-                showLoading();
-                const apiUrl = `${API_BASE_URL}/checklist?enterpriseId=${ENTERPRISE_ID}`;
-                console.log('🧪 Testando conexão com API:', apiUrl);
-                
-                const response = await fetch(apiUrl);
-                const result = await response.json();
-                
-                hideLoading();
-                
-                alert(`✅ Teste de Conexão\n\nStatus: ${response.status}\nDados: ${result.data?.length || 0} registros\nAPI: Funcionando`);
-                
-            } catch (error) {
-                hideLoading();
-                alert(`❌ Teste de Conexão\n\nErro: ${error.message}\nAPI: Com problemas`);
-            }
         }
 
         // Função para atualizar dados
@@ -1347,15 +1546,51 @@
             loadChecklistData();
         }
 
-        // Funções de exportação
+        // Funções de exportação (usam TODOS os dados filtrados)
         function exportToExcel() {
             console.log('📊 Exportando para Excel...');
-            alert('Funcionalidade de exportação Excel será implementada em breve!');
+            
+            if (!filteredData || filteredData.length === 0) {
+                alert('Nenhum dado disponível para exportação.');
+                return;
+            }
+
+            // Preparar dados para exportação
+            const exportData = filteredData.map(item => ({
+                'Data': new Date(item.timestamp).toLocaleDateString('pt-BR'),
+                'Placa': item.vehiclePlate,
+                'Motorista': item.driverName,
+                'Item': item.itemName,
+                'Status': item.compliant ? 'Conforme' : 'Não Conforme',
+                'Responsável': item.userRespForRegistration,
+                'Plano': item.planName,
+                'Garagem': item.garage,
+                'Filial': item.branchName,
+                'Comentários': item.comments
+            }));
+
+            // Criar workbook
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Checklist');
+
+            // Salvar arquivo
+            const fileName = `checklist_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            
+            console.log(`✅ Exportação Excel concluída: ${exportData.length} registros`);
         }
 
         function exportToPDF() {
             console.log('📄 Exportando para PDF...');
-            alert('Funcionalidade de exportação PDF será implementada em breve!');
+            
+            if (!filteredData || filteredData.length === 0) {
+                alert('Nenhum dado disponível para exportação.');
+                return;
+            }
+
+            // Implementação básica de PDF
+            alert(`Exportação PDF será implementada em breve!\n\nDados disponíveis: ${filteredData.length} registros`);
         }
 
         // Inicializar aplicação
