@@ -10,22 +10,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
-            --primary: #14d8b4;           /* Atualizado para o verde água mais brilhante */
-            --primary-dark: #0fb8a0;      /* Versão mais escura do primary */
-            --background: #1a1e23;        /* Atualizado para o fundo mais escuro */
-            --surface: #2a2e33;           /* Atualizado para o cinza dos cards */
-            --surface-light: #3a3e43;     /* Versão mais clara do surface */
-            --surface-lighter: #4a4e53;   /* Versão ainda mais clara do surface */
-            --text: #ffffff;              /* Mantido */
-            --text-secondary: #a0a0a0;    /* Ajustado para o cinza da imagem */
-            --text-muted: #707070;        /* Versão mais escura do text-secondary */
-            --border: #3a3e43;            /* Ajustado para combinar com surface-light */
-            --border-light: #4a4e53;      /* Ajustado para combinar com surface-lighter */
-            --success: #14d8b4;           /* Atualizado para o verde água */
-            --warning: #f0b429;           /* Atualizado para o amarelo da imagem */
-            --error: #e74c3c;             /* Atualizado para o vermelho da imagem */
-            --info: #3b82f6;              /* Mantido */
-            --chart-purple: #8a56e2;      /* Nova variável para o roxo dos gráficos */
+            --primary: #14d8b4;           
+            --primary-dark: #0fb8a0;      
+            --background: #1a1e23;        
+            --surface: #2a2e33;           
+            --surface-light: #3a3e43;     
+            --surface-lighter: #4a4e53;   
+            --text: #ffffff;              
+            --text-secondary: #a0a0a0;    
+            --text-muted: #707070;        
+            --border: #3a3e43;            
+            --border-light: #4a4e53;      
+            --success: #14d8b4;           
+            --warning: #f0b429;           
+            --error: #e74c3c;             
+            --info: #3b82f6;              
+            --chart-purple: #8a56e2;      
         }
 
         * {
@@ -309,54 +309,6 @@
             height: 300px;
         }
 
-        /* Insights */
-        .insights-section {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 30px;
-            box-shadow: 0 0 20px rgba(20, 216, 180, 0.05);
-        }
-
-        .insights-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .insights-title svg {
-            width: 20px;
-            height: 20px;
-            color: var(--primary);
-        }
-
-        .insights-title h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .insights-container {
-            display: grid;
-            gap: 16px;
-        }
-
-        .insight-item {
-            background: var(--surface-light);
-            border: 1px solid var(--border-light);
-            border-radius: 8px;
-            padding: 16px;
-            border-left: 4px solid var(--primary);
-        }
-
-        .insight-item p {
-            color: var(--text-secondary);
-            line-height: 1.6;
-            margin: 0;
-        }
-
         /* Tables */
         .tables-section {
             background: var(--surface);
@@ -391,42 +343,11 @@
             color: var(--text);
         }
 
-        .table-tabs {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 20px;
-            background: var(--surface-light);
-            border-radius: 8px;
-            padding: 4px;
-        }
-
-        .table-tab {
-            flex: 1;
-            padding: 10px 16px;
-            border: none;
-            background: transparent;
-            color: var(--text-secondary);
-            font-size: 14px;
-            font-weight: 500;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .table-tab.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .table-tab:hover:not(.active) {
-            background: var(--surface-lighter);
-            color: var(--text);
-        }
-
         .table-container {
             overflow-x: auto;
             border-radius: 8px;
             border: 1px solid var(--border);
+            max-height: 600px;
         }
 
         .data-table {
@@ -443,8 +364,9 @@
             text-align: left;
             border-bottom: 1px solid var(--border);
             font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .data-table td {
@@ -471,34 +393,104 @@
         }
 
         .status-conforme {
-            background: rgba(20, 216, 180, 0.1);
+            background: rgba(20, 216, 180, 0.2);
             color: var(--success);
-            border: 1px solid rgba(20, 216, 180, 0.2);
         }
 
         .status-nao-conforme {
-            background: rgba(231, 76, 60, 0.1);
+            background: rgba(231, 76, 60, 0.2);
             color: var(--error);
-            border: 1px solid rgba(231, 76, 60, 0.2);
         }
 
         .status-pendente {
-            background: rgba(240, 180, 41, 0.1);
+            background: rgba(240, 180, 41, 0.2);
             color: var(--warning);
-            border: 1px solid rgba(240, 180, 41, 0.2);
         }
 
         .loading {
-            text-align: center;
-            color: var(--text-muted);
-            font-style: italic;
-            padding: 40px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 30, 35, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
 
-        .error {
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(20, 216, 180, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading p {
+            color: var(--text);
+            font-size: 1.1rem;
+        }
+
+        .error-message {
             text-align: center;
             color: var(--error);
             padding: 40px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .no-data h3 {
+            color: var(--warning);
+            margin-bottom: 15px;
+        }
+
+        /* Debug panel */
+        .debug-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            max-width: 300px;
+            font-size: 12px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .debug-panel.show {
+            display: block;
+        }
+
+        .debug-title {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .debug-item {
+            margin-bottom: 5px;
+            color: var(--text-secondary);
         }
 
         /* Responsive */
@@ -511,11 +503,6 @@
                 flex-direction: column;
                 gap: 15px;
                 align-items: flex-start;
-            }
-
-            .header-actions {
-                width: 100%;
-                justify-content: flex-start;
             }
 
             .filters-grid {
@@ -532,23 +519,6 @@
 
             .chart-container {
                 height: 250px;
-            }
-
-            .filters-actions {
-                justify-content: flex-start;
-                flex-wrap: wrap;
-            }
-
-            .tables-header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header-title h1 {
-                font-size: 1.5rem;
             }
 
             .metric-value {
@@ -574,6 +544,30 @@
                     <path d="M3 12h6m6 0h6"/>
                 </svg>
                 <h1>BI Checklist</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="toggleDebug()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20"/>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                    Debug
+                </button>
+                <button class="btn btn-secondary" onclick="testConnection()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22,4 12,14.01 9,11.01"/>
+                    </svg>
+                    Testar API
+                </button>
+                <button class="btn btn-primary" onclick="refreshData()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23,4 23,10 17,10"/>
+                        <polyline points="1,20 1,14 7,14"/>
+                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+                    </svg>
+                    Atualizar
+                </button>
             </div>
         </div>
 
@@ -613,33 +607,29 @@
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label for="plano">Plano de Checklist</label>
-                    <select id="plano">
+                    <label for="planName">Plano</label>
+                    <select id="planName">
                         <option value="">Todos</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="status">Status</label>
-                    <select id="status">
-                        <option value="">Todos</option>
-                        <option value="conforme">Conforme</option>
-                        <option value="nao-conforme">Não Conforme</option>
                     </select>
                 </div>
             </div>
             <div class="filters-actions">
-                <button class="btn btn-primary" id="applyFilters">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <button class="btn btn-primary" onclick="applyFilters()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="11" cy="11" r="8"/>
                         <path d="M21 21l-4.35-4.35"/>
                     </svg>
                     Aplicar Filtros
                 </button>
-                <button class="btn btn-secondary" id="clearFilters">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3-3h6m-3 5v8m-4-8v8"/>
+                <button class="btn btn-secondary" onclick="clearFilters()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18"/>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                        <line x1="10" y1="11" x2="10" y2="17"/>
+                        <line x1="14" y1="11" x2="14" y2="17"/>
                     </svg>
-                    Limpar Filtros
+                    Limpar
                 </button>
             </div>
         </div>
@@ -648,67 +638,54 @@
         <div class="metrics-section">
             <div class="metric-card">
                 <div class="metric-header">
-                    <div class="metric-title">Total de Checklists</div>
+                    <div class="metric-title">Total de Itens</div>
+                    <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10,9 9,9 8,9"/>
+                    </svg>
+                </div>
+                <div class="metric-value" id="totalItens">--</div>
+                <div class="metric-change neutral">Verificações realizadas</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">Itens Conformes</div>
                     <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 12l2 2 4-4"/>
-                        <path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/>
-                        <path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"/>
-                        <path d="M3 12h6m6 0h6"/>
+                        <circle cx="12" cy="12" r="10"/>
                     </svg>
                 </div>
-                <div class="metric-value" id="totalChecklists">0</div>
-                <div class="metric-change positive">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
-                        <polyline points="18 15 12 9 6 15"/>
-                    </svg>
-                    <span>+5% vs. período anterior</span>
-                </div>
+                <div class="metric-value" id="itensConformes">--</div>
+                <div class="metric-change positive" id="percentualConformes">--</div>
             </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">Não Conformes</div>
+                    <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="15" y1="9" x2="9" y2="15"/>
+                        <line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                </div>
+                <div class="metric-value" id="itensNaoConformes">--</div>
+                <div class="metric-change negative" id="percentualNaoConformes">--</div>
+            </div>
+
             <div class="metric-card">
                 <div class="metric-header">
                     <div class="metric-title">Taxa de Conformidade</div>
                     <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                        <polyline points="22 4 12 14.01 9 11.01"/>
+                        <path d="M3 3v18h18"/>
+                        <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
                     </svg>
                 </div>
-                <div class="metric-value" id="taxaConformidade">0%</div>
-                <div class="metric-change negative">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
-                        <polyline points="6 9 12 15 18 9"/>
-                    </svg>
-                    <span>-2% vs. período anterior</span>
-                </div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-header">
-                    <div class="metric-title">Itens Verificados</div>
-                    <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                        <polyline points="22 4 12 14.01 9 11.01"/>
-                    </svg>
-                </div>
-                <div class="metric-value" id="itensVerificados">0</div>
-                <div class="metric-change positive">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
-                        <polyline points="18 15 12 9 6 15"/>
-                    </svg>
-                    <span>+12% vs. período anterior</span>
-                </div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-header">
-                    <div class="metric-title">Não Conformidades</div>
-                    <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="12"/>
-                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                </div>
-                <div class="metric-value" id="naoConformidades">0</div>
-                <div class="metric-change neutral">
-                    <span>Sem alteração vs. período anterior</span>
-                </div>
+                <div class="metric-value" id="taxaConformidade">--</div>
+                <div class="metric-change neutral">Meta: 95%</div>
             </div>
         </div>
 
@@ -716,35 +693,37 @@
         <div class="charts-section">
             <div class="chart-card">
                 <div class="chart-header">
-                    <div class="chart-title">Conformidade por Plano de Checklist</div>
+                    <div class="chart-title">Conformidade por Período</div>
                 </div>
                 <div class="chart-container">
-                    <canvas id="conformidadePorPlanoChart"></canvas>
+                    <canvas id="conformidadeChart"></canvas>
                 </div>
             </div>
+
             <div class="chart-card">
                 <div class="chart-header">
-                    <div class="chart-title">Evolução de Conformidade</div>
+                    <div class="chart-title">Top 10 Itens Não Conformes</div>
                 </div>
                 <div class="chart-container">
-                    <canvas id="evolucaoConformidadeChart"></canvas>
+                    <canvas id="itensChart"></canvas>
                 </div>
             </div>
-        </div>
 
-        <!-- Insights -->
-        <div class="insights-section">
-            <div class="insights-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="12" y1="16" x2="12" y2="12"/>
-                    <line x1="12" y1="8" x2="12.01" y2="8"/>
-                </svg>
-                <h3>Insights</h3>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">Conformidade por Responsável</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="responsavelChart"></canvas>
+                </div>
             </div>
-            <div class="insights-container" id="insightsContainer">
-                <div class="insight-item">
-                    <p>Carregando insights...</p>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">Distribuição por Plano</div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="planoChart"></canvas>
                 </div>
             </div>
         </div>
@@ -754,130 +733,233 @@
             <div class="tables-header">
                 <div class="tables-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 3h18v18H3zM3 9h18M9 21V9"/>
+                        <path d="M3 3h18v18H3zM12 8v8m-4-4h8"/>
                     </svg>
-                    <h2>Detalhamento de Checklists</h2>
+                    <h2>Detalhamento dos Itens</h2>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="exportToExcel()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                            <polyline points="14,2 14,8 20,8"/>
+                        </svg>
+                        Excel
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportToPDF()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                            <polyline points="14,2 14,8 20,8"/>
+                        </svg>
+                        PDF
+                    </button>
                 </div>
             </div>
-            <div class="table-tabs">
-                <button class="table-tab active" data-tab="checklists">Checklists</button>
-                <button class="table-tab" data-tab="itens">Itens</button>
-                <button class="table-tab" data-tab="nao-conformidades">Não Conformidades</button>
-            </div>
             <div class="table-container">
-                <table class="data-table" id="checklistsTable">
+                <table class="data-table" id="checklistTable">
                     <thead>
                         <tr>
                             <th>Data</th>
-                            <th>Plano</th>
                             <th>Placa</th>
                             <th>Motorista</th>
-                            <th>Responsável</th>
+                            <th>Item</th>
                             <th>Status</th>
+                            <th>Responsável</th>
+                            <th>Plano</th>
+                            <th>Comentários</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td colspan="6" class="loading">Carregando dados...</td>
-                        </tr>
+                        <!-- Dados serão inseridos dinamicamente -->
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading">
+        <div class="spinner"></div>
+        <p>Carregando dados do checklist...</p>
+    </div>
+
+    <!-- Debug Panel -->
+    <div id="debugPanel" class="debug-panel">
+        <div class="debug-title">🔍 Debug Info</div>
+        <div class="debug-item">Enterprise ID: <span id="debugEnterpriseId">--</span></div>
+        <div class="debug-item">API URL: <span id="debugApiUrl">--</span></div>
+        <div class="debug-item">Dados carregados: <span id="debugDataCount">--</span></div>
+        <div class="debug-item">Dados filtrados: <span id="debugFilteredCount">--</span></div>
+        <div class="debug-item">Status API: <span id="debugApiStatus">--</span></div>
+        <div class="debug-item">Última atualização: <span id="debugLastUpdate">--</span></div>
+    </div>
+
     <script>
         // Variáveis globais
-        let allData = [];
+        let checklistData = [];
         let filteredData = [];
         let charts = {};
 
-        // Função para carregar dados da API
-        async function loadData() {
+        // Configuração da API
+        const API_BASE_URL = 'https://firebase-bi-api.onrender.com';
+
+        // Função para obter enterpriseId da URL
+        function getEnterpriseId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const enterpriseId = urlParams.get('enterpriseId');
+            console.log('🔍 EnterpriseId extraído da URL:', enterpriseId);
+            return enterpriseId || 'qzDVZ1jB6IC60baxtsDU';
+        }
+
+        // Constante global para enterpriseId
+        const ENTERPRISE_ID = getEnterpriseId();
+
+        // Função para mostrar loading
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        // Função para ocultar loading
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        // Função para mostrar erro
+        function showError(message) {
+            hideLoading();
+            const container = document.querySelector('.container');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.innerHTML = `
+                <h3>❌ Erro ao carregar dados</h3>
+                <p>${message}</p>
+                <br>
+                <button class="btn btn-primary" onclick="location.reload()">
+                    🔄 Tentar Novamente
+                </button>
+            `;
+            container.insertBefore(errorDiv, container.firstChild);
+        }
+
+        // Função para mostrar mensagem de sem dados
+        function showNoDataMessage() {
+            hideLoading();
+            document.querySelector('.container').innerHTML = `
+                <div class="no-data">
+                    <h3>⚠️ Nenhum dado encontrado</h3>
+                    <p>📊 Não foram encontrados dados de checklist para o enterpriseId: ${ENTERPRISE_ID}</p>
+                    <br>
+                    <p>🔍 Verifique se o enterpriseId está correto ou se há dados disponíveis na API.</p>
+                    <p>🌐 API utilizada: ${API_BASE_URL}/checklist</p>
+                    <br>
+                    <button class="btn btn-primary" onclick="location.reload()">
+                        🔄 Tentar Novamente
+                    </button>
+                </div>
+            `;
+        }
+
+        // Função principal para carregar dados
+        async function loadChecklistData() {
             try {
-                // Obter o enterpriseId da URL
-                const urlParams = new URLSearchParams(window.location.search);
-                const enterpriseId = urlParams.get('enterpriseId') || 'qzDVZ1jB6IC60baxtsDU';
+                showLoading();
+                const apiUrl = `${API_BASE_URL}/checklist?enterpriseId=${ENTERPRISE_ID}`;
+                console.log('🔗 URL da API checklist:', apiUrl);
                 
-                // URL da API
-                const apiUrl = `https://firebase-bi-api.onrender.com/checklist?enterpriseId=${enterpriseId}`;
+                updateDebugInfo('apiUrl', apiUrl);
+                updateDebugInfo('apiStatus', 'Carregando...');
                 
-                console.log(`🔍 Buscando dados da API: ${apiUrl}`);
-                
-                // Fazer a requisição
                 const response = await fetch(apiUrl);
-                const data = await response.json();
                 
-                if (!data || !Array.isArray(data)) {
-                    throw new Error('Formato de dados inválido');
+                if (!response.ok) {
+                    throw new Error(`Erro na API: ${response.status} - ${response.statusText}`);
                 }
                 
-                console.log(`✅ ${data.length} registros carregados`);
+                const result = await response.json();
+                console.log('📊 Resposta da API checklist:', result);
                 
-                // Armazenar os dados
-                allData = data;
+                updateDebugInfo('apiStatus', `${response.status} OK`);
                 
-                // Processar os dados
-                processData();
-                
+                if (!result.data || result.data.length === 0) {
+                    console.warn('⚠️ Nenhum dado retornado da API checklist');
+                    updateDebugInfo('dataCount', '0');
+                    showNoDataMessage();
+                } else {
+                    console.log(`✅ ${result.data.length} registros de checklist carregados`);
+                    
+                    // Processar dados da API
+                    checklistData = result.data.map(item => ({
+                        _doc_id: item._doc_id || '',
+                        timestamp: item.timestamp || item.issueOpenDate || '',
+                        vehiclePlate: item.vehiclePlate || '',
+                        driverName: item.driverName || '',
+                        itemName: item.itemName || '',
+                        compliant: item.compliant === true || item.compliant === 'true',
+                        noCompliant: item.noCompliant === true || item.noCompliant === 'true',
+                        userRespForRegistration: item.userRespForRegistration || '',
+                        planName: item.planName || '',
+                        comments: item.comments || '',
+                        issueSource: item.issueSource || '',
+                        enterpriseId: item.enterpriseId || '',
+                        photo: item.photo || ''
+                    }));
+
+                    filteredData = [...checklistData];
+                    
+                    updateDebugInfo('dataCount', checklistData.length);
+                    updateDebugInfo('filteredCount', filteredData.length);
+                    updateDebugInfo('lastUpdate', new Date().toLocaleTimeString());
+                    
+                    hideLoading();
+                    populateFilters();
+                    updateDashboard();
+                }
             } catch (error) {
-                console.error('❌ Erro ao carregar dados:', error);
-                document.querySelector('#checklistsTable tbody').innerHTML = `
-                    <tr>
-                        <td colspan="6" class="error">
-                            Erro ao carregar dados. Por favor, tente novamente mais tarde.
-                        </td>
-                    </tr>
-                `;
+                console.error('❌ Erro ao carregar dados checklist:', error);
+                updateDebugInfo('apiStatus', `Erro: ${error.message}`);
+                showError(`Erro ao conectar com a API: ${error.message}`);
             }
         }
 
-        // Função para processar os dados
-        function processData() {
-            // Aplicar filtros iniciais (sem filtros)
-            applyFilters();
-            
-            // Preencher os filtros
-            populateFilters();
-            
-            // Atualizar métricas
-            updateMetrics();
-            
-            // Atualizar gráficos
-            updateCharts();
-            
-            // Atualizar tabelas
-            updateTables();
-            
-            // Gerar insights
-            generateInsights();
-        }
-
-        // Função para preencher os filtros
+        // Função para popular filtros
         function populateFilters() {
-            // Obter valores únicos para cada filtro
-            const responsaveis = [...new Set(allData.map(item => item.userRespForRegistration))].filter(Boolean).sort();
-            const placas = [...new Set(allData.map(item => item.vehiclePlate))].filter(Boolean).sort();
-            const motoristas = [...new Set(allData.map(item => item.driverName))].filter(Boolean).sort();
-            const planos = [...new Set(allData.map(item => item.planName))].filter(Boolean).sort();
+            console.log('🔧 Populando filtros...');
             
-            // Preencher os selects
-            fillSelect('responsavel', responsaveis);
-            fillSelect('placa', placas);
-            fillSelect('motorista', motoristas);
-            fillSelect('plano', planos);
+            if (!checklistData || checklistData.length === 0) {
+                console.log('⚠️ Nenhum dado disponível para popular filtros');
+                return;
+            }
+
+            // Populate responsável filter
+            const responsaveis = [...new Set(checklistData.map(item => item.userRespForRegistration).filter(Boolean))];
+            populateSelect('responsavel', responsaveis);
+
+            // Populate placa filter
+            const placas = [...new Set(checklistData.map(item => item.vehiclePlate).filter(Boolean))];
+            populateSelect('placa', placas);
+
+            // Populate motorista filter
+            const motoristas = [...new Set(checklistData.map(item => item.driverName).filter(Boolean))];
+            populateSelect('motorista', motoristas);
+
+            // Populate plano filter
+            const planos = [...new Set(checklistData.map(item => item.planName).filter(Boolean))];
+            populateSelect('planName', planos);
+
+            console.log('✅ Filtros populados com sucesso');
         }
 
-        // Função auxiliar para preencher um select
-        function fillSelect(id, options) {
-            const select = document.getElementById(id);
+        // Função para popular select
+        function populateSelect(selectId, options) {
+            const select = document.getElementById(selectId);
             if (!select) return;
-            
-            // Manter a primeira opção (Todos)
-            select.innerHTML = '<option value="">Todos</option>';
-            
-            // Adicionar as opções
-            options.forEach(option => {
+
+            // Limpar opções existentes (exceto a primeira)
+            while (select.children.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+
+            // Adicionar novas opções
+            options.sort().forEach(option => {
                 const optionElement = document.createElement('option');
                 optionElement.value = option;
                 optionElement.textContent = option;
@@ -892,35 +974,28 @@
             const responsavel = document.getElementById('responsavel').value;
             const placa = document.getElementById('placa').value;
             const motorista = document.getElementById('motorista').value;
-            const plano = document.getElementById('plano').value;
-            const status = document.getElementById('status').value;
-            
-            // Filtrar os dados
-            filteredData = allData.filter(item => {
-                // Filtro de data
-                if (dataInicial && new Date(item.timestamp) < new Date(dataInicial)) return false;
-                if (dataFinal && new Date(item.timestamp) > new Date(dataFinal + 'T23:59:59')) return false;
-                
-                // Filtros de texto
+            const planName = document.getElementById('planName').value;
+
+            filteredData = checklistData.filter(item => {
+                // Filtro por data
+                if (dataInicial || dataFinal) {
+                    const itemDate = new Date(item.timestamp);
+                    if (dataInicial && itemDate < new Date(dataInicial)) return false;
+                    if (dataFinal && itemDate > new Date(dataFinal + 'T23:59:59')) return false;
+                }
+
+                // Outros filtros
                 if (responsavel && item.userRespForRegistration !== responsavel) return false;
                 if (placa && item.vehiclePlate !== placa) return false;
                 if (motorista && item.driverName !== motorista) return false;
-                if (plano && item.planName !== plano) return false;
-                
-                // Filtro de status
-                if (status === 'conforme' && !item.compliant) return false;
-                if (status === 'nao-conforme' && item.compliant) return false;
-                
+                if (planName && item.planName !== planName) return false;
+
                 return true;
             });
-            
-            console.log(`🔍 ${filteredData.length} registros após aplicação dos filtros`);
-            
-            // Atualizar a interface
-            updateMetrics();
-            updateCharts();
-            updateTables();
-            generateInsights();
+
+            console.log(`🔍 Filtros aplicados: ${filteredData.length} de ${checklistData.length} registros`);
+            updateDebugInfo('filteredCount', filteredData.length);
+            updateDashboard();
         }
 
         // Função para limpar filtros
@@ -930,369 +1005,364 @@
             document.getElementById('responsavel').value = '';
             document.getElementById('placa').value = '';
             document.getElementById('motorista').value = '';
-            document.getElementById('plano').value = '';
-            document.getElementById('status').value = '';
+            document.getElementById('planName').value = '';
             
-            // Aplicar filtros (sem filtros)
-            applyFilters();
+            filteredData = [...checklistData];
+            updateDebugInfo('filteredCount', filteredData.length);
+            updateDashboard();
+        }
+
+        // Função para atualizar dashboard
+        function updateDashboard() {
+            updateMetrics();
+            updateCharts();
+            updateTable();
         }
 
         // Função para atualizar métricas
         function updateMetrics() {
-            // Total de checklists
-            const totalChecklists = new Set(filteredData.map(item => item.checklistId)).size;
-            document.getElementById('totalChecklists').textContent = totalChecklists.toLocaleString('pt-BR');
+            console.log('📊 Atualizando métricas...');
             
-            // Taxa de conformidade
-            const conformes = filteredData.filter(item => item.compliant).length;
-            const taxaConformidade = filteredData.length > 0 ? (conformes / filteredData.length * 100).toFixed(1) : 0;
-            document.getElementById('taxaConformidade').textContent = `${taxaConformidade}%`;
+            const total = filteredData.length;
+            const conformes = filteredData.filter(item => item.compliant === true).length;
+            const naoConformes = filteredData.filter(item => item.compliant === false).length;
+            const taxaConformidade = total > 0 ? ((conformes / total) * 100).toFixed(1) + '%' : '0.0%';
+
+            document.getElementById('totalItens').textContent = total.toLocaleString('pt-BR');
+            document.getElementById('itensConformes').textContent = conformes.toLocaleString('pt-BR');
+            document.getElementById('itensNaoConformes').textContent = naoConformes.toLocaleString('pt-BR');
+            document.getElementById('taxaConformidade').textContent = taxaConformidade;
+
+            // Percentuais
+            const percentualConformes = total > 0 ? ((conformes / total) * 100).toFixed(1) + '%' : '0%';
+            const percentualNaoConformes = total > 0 ? ((naoConformes / total) * 100).toFixed(1) + '%' : '0%';
             
-            // Itens verificados
-            const itensVerificados = filteredData.length;
-            document.getElementById('itensVerificados').textContent = itensVerificados.toLocaleString('pt-BR');
-            
-            // Não conformidades
-            const naoConformidades = filteredData.filter(item => !item.compliant).length;
-            document.getElementById('naoConformidades').textContent = naoConformidades.toLocaleString('pt-BR');
+            document.getElementById('percentualConformes').textContent = percentualConformes;
+            document.getElementById('percentualNaoConformes').textContent = percentualNaoConformes;
         }
 
         // Função para atualizar gráficos
         function updateCharts() {
-            // Destruir gráficos existentes
-            Object.values(charts).forEach(chart => chart.destroy());
-            charts = {};
-            
-            // Gráfico de conformidade por plano
-            updateConformidadePorPlanoChart();
-            
-            // Gráfico de evolução de conformidade
-            updateEvolucaoConformidadeChart();
+            updateConformidadeChart();
+            updateItensChart();
+            updateResponsavelChart();
+            updatePlanoChart();
         }
 
-        // Função para atualizar o gráfico de conformidade por plano
-        function updateConformidadePorPlanoChart() {
-            const ctx = document.getElementById('conformidadePorPlanoChart').getContext('2d');
-            
-            // Agrupar por plano
-            const planos = {};
+        // Gráfico de conformidade por período
+        function updateConformidadeChart() {
+            const ctx = document.getElementById('conformidadeChart');
+            if (charts.conformidade) charts.conformidade.destroy();
+
+            // Agrupar dados por mês
+            const monthlyData = {};
             filteredData.forEach(item => {
-                const plano = item.planName || 'Sem plano';
-                if (!planos[plano]) {
-                    planos[plano] = { total: 0, conformes: 0 };
+                const date = new Date(item.timestamp);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                
+                if (!monthlyData[monthKey]) {
+                    monthlyData[monthKey] = { conformes: 0, total: 0 };
                 }
-                planos[plano].total++;
+                
+                monthlyData[monthKey].total++;
                 if (item.compliant) {
-                    planos[plano].conformes++;
+                    monthlyData[monthKey].conformes++;
                 }
             });
-            
-            // Preparar dados para o gráfico
-            const labels = Object.keys(planos);
-            const data = labels.map(plano => {
-                const taxa = planos[plano].total > 0 ? 
-                    (planos[plano].conformes / planos[plano].total * 100).toFixed(1) : 0;
-                return parseFloat(taxa);
+
+            const sortedMonths = Object.keys(monthlyData).sort();
+            const labels = sortedMonths.map(month => {
+                const [year, monthNum] = month.split('-');
+                return `${monthNum}/${year}`;
             });
+            const conformidadeData = sortedMonths.map(month => {
+                const data = monthlyData[month];
+                return data.total > 0 ? (data.conformes / data.total) * 100 : 0;
+            });
+
+            charts.conformidade = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Taxa de Conformidade (%)',
+                        data: conformidadeData,
+                        borderColor: '#14d8b4',
+                        backgroundColor: 'rgba(20, 216, 180, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: '#3a3e43' },
+                            ticks: { 
+                                color: '#a0a0a0',
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: { color: '#3a3e43' },
+                            ticks: { color: '#a0a0a0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Gráfico de top itens não conformes
+        function updateItensChart() {
+            const ctx = document.getElementById('itensChart');
+            if (charts.itens) charts.itens.destroy();
+
+            const naoConformes = filteredData.filter(item => !item.compliant);
+            const itemCount = {};
             
-            // Criar o gráfico
-            charts.conformidadePorPlano = new Chart(ctx, {
+            naoConformes.forEach(item => {
+                const itemName = item.itemName || 'Não informado';
+                itemCount[itemName] = (itemCount[itemName] || 0) + 1;
+            });
+
+            const sortedItems = Object.entries(itemCount)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 10);
+
+            const labels = sortedItems.map(([item]) => item.length > 30 ? item.substring(0, 30) + '...' : item);
+            const data = sortedItems.map(([,count]) => count);
+
+            charts.itens = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Não Conformidades',
+                        data: data,
+                        backgroundColor: 'rgba(231, 76, 60, 0.8)',
+                        borderColor: '#e74c3c',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: '#3a3e43' },
+                            ticks: { color: '#a0a0a0' }
+                        },
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: '#3a3e43' },
+                            ticks: { color: '#a0a0a0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Gráfico de conformidade por responsável
+        function updateResponsavelChart() {
+            const ctx = document.getElementById('responsavelChart');
+            if (charts.responsavel) charts.responsavel.destroy();
+
+            const responsavelData = {};
+            filteredData.forEach(item => {
+                const resp = item.userRespForRegistration || 'Não informado';
+                if (!responsavelData[resp]) {
+                    responsavelData[resp] = { conformes: 0, total: 0 };
+                }
+                responsavelData[resp].total++;
+                if (item.compliant) {
+                    responsavelData[resp].conformes++;
+                }
+            });
+
+            const labels = Object.keys(responsavelData);
+            const conformidadeData = labels.map(resp => {
+                const data = responsavelData[resp];
+                return data.total > 0 ? (data.conformes / data.total) * 100 : 0;
+            });
+
+            charts.responsavel = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
                         label: 'Taxa de Conformidade (%)',
-                        data: data,
-                        backgroundColor: 'rgba(20, 216, 180, 0.7)',
-                        borderColor: 'rgba(20, 216, 180, 1)',
+                        data: conformidadeData,
+                        backgroundColor: 'rgba(138, 86, 226, 0.8)',
+                        borderColor: '#8a56e2',
                         borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
                             max: 100,
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: 'rgba(255, 255, 255, 0.7)'
+                            grid: { color: '#3a3e43' },
+                            ticks: { 
+                                color: '#a0a0a0',
+                                callback: function(value) {
+                                    return value + '%';
+                                }
                             }
                         },
                         x: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: 'rgba(255, 255, 255, 0.7)'
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: 'rgba(255, 255, 255, 0.7)'
-                            }
+                            grid: { color: '#3a3e43' },
+                            ticks: { color: '#a0a0a0' }
                         }
                     }
                 }
             });
         }
 
-        // Função para atualizar o gráfico de evolução de conformidade
-        function updateEvolucaoConformidadeChart() {
-            const ctx = document.getElementById('evolucaoConformidadeChart').getContext('2d');
-            
-            // Agrupar por data
-            const datas = {};
+        // Gráfico de distribuição por plano
+        function updatePlanoChart() {
+            const ctx = document.getElementById('planoChart');
+            if (charts.plano) charts.plano.destroy();
+
+            const planoData = {};
             filteredData.forEach(item => {
-                const data = new Date(item.timestamp).toISOString().split('T')[0];
-                if (!datas[data]) {
-                    datas[data] = { total: 0, conformes: 0 };
-                }
-                datas[data].total++;
-                if (item.compliant) {
-                    datas[data].conformes++;
-                }
+                const plano = item.planName || 'Não informado';
+                planoData[plano] = (planoData[plano] || 0) + 1;
             });
-            
-            // Ordenar datas
-            const datasOrdenadas = Object.keys(datas).sort();
-            
-            // Preparar dados para o gráfico
-            const labels = datasOrdenadas;
-            const data = labels.map(data => {
-                const taxa = datas[data].total > 0 ? 
-                    (datas[data].conformes / datas[data].total * 100).toFixed(1) : 0;
-                return parseFloat(taxa);
-            });
-            
-            // Criar o gráfico
-            charts.evolucaoConformidade = new Chart(ctx, {
-                type: 'line',
+
+            const labels = Object.keys(planoData);
+            const data = Object.values(planoData);
+            const colors = ['#14d8b4', '#8a56e2', '#f0b429', '#e74c3c', '#3b82f6'];
+
+            charts.plano = new Chart(ctx, {
+                type: 'doughnut',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Taxa de Conformidade (%)',
                         data: data,
-                        backgroundColor: 'rgba(138, 86, 226, 0.2)',
-                        borderColor: 'rgba(138, 86, 226, 1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: true,
-                        pointBackgroundColor: 'rgba(138, 86, 226, 1)',
-                        pointRadius: 4
+                        backgroundColor: colors.slice(0, labels.length)
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: 'rgba(255, 255, 255, 0.7)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: 'rgba(255, 255, 255, 0.7)'
-                            }
-                        }
-                    },
                     plugins: {
                         legend: {
-                            labels: {
-                                color: 'rgba(255, 255, 255, 0.7)'
-                            }
+                            position: 'bottom',
+                            labels: { color: '#a0a0a0' }
                         }
                     }
                 }
             });
         }
 
-        // Função para atualizar tabelas
-        function updateTables() {
-            // Tabela de checklists
-            updateChecklistsTable();
-        }
+        // Função para atualizar tabela
+        function updateTable() {
+            const tbody = document.querySelector('#checklistTable tbody');
+            tbody.innerHTML = '';
 
-        // Função para atualizar a tabela de checklists
-        function updateChecklistsTable() {
-            const tbody = document.querySelector('#checklistsTable tbody');
-            
-            if (filteredData.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="loading">
-                            Nenhum dado encontrado para os filtros selecionados.
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            // Agrupar por checklist
-            const checklists = {};
-            filteredData.forEach(item => {
-                const id = item.checklistId;
-                if (!checklists[id]) {
-                    checklists[id] = {
-                        data: new Date(item.timestamp),
-                        plano: item.planName,
-                        placa: item.vehiclePlate,
-                        motorista: item.driverName,
-                        responsavel: item.userRespForRegistration,
-                        itens: [],
-                        conformes: 0,
-                        total: 0
-                    };
-                }
-                checklists[id].itens.push(item);
-                checklists[id].total++;
-                if (item.compliant) {
-                    checklists[id].conformes++;
-                }
-            });
-            
-            // Ordenar por data (mais recente primeiro)
-            const checklistsOrdenados = Object.values(checklists).sort((a, b) => b.data - a.data);
-            
-            // Limitar a 100 registros para performance
-            const checklistsLimitados = checklistsOrdenados.slice(0, 100);
-            
-            // Preencher a tabela
-            tbody.innerHTML = checklistsLimitados.map(checklist => {
-                const status = checklist.conformes === checklist.total ? 'conforme' : 'nao-conforme';
-                const statusText = status === 'conforme' ? 'Conforme' : 'Não Conforme';
+            // Mostrar últimos 100 registros
+            const recentData = filteredData.slice(0, 100);
+
+            recentData.forEach(item => {
+                const row = tbody.insertRow();
                 
-                return `
-                    <tr>
-                        <td>${checklist.data.toLocaleDateString('pt-BR')}</td>
-                        <td>${checklist.plano || '-'}</td>
-                        <td>${checklist.placa || '-'}</td>
-                        <td>${checklist.motorista || '-'}</td>
-                        <td>${checklist.responsavel || '-'}</td>
-                        <td><span class="status-badge status-${status}">${statusText}</span></td>
-                    </tr>
+                const date = new Date(item.timestamp);
+                const formattedDate = date.toLocaleDateString('pt-BR');
+                
+                const statusClass = item.compliant ? 'status-conforme' : 'status-nao-conforme';
+                const statusText = item.compliant ? 'Conforme' : 'Não Conforme';
+                const statusIcon = item.compliant ? '✓' : '✗';
+                
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>${item.vehiclePlate}</td>
+                    <td>${item.driverName}</td>
+                    <td>${item.itemName}</td>
+                    <td><span class="status-badge ${statusClass}">${statusIcon} ${statusText}</span></td>
+                    <td>${item.userRespForRegistration}</td>
+                    <td>${item.planName}</td>
+                    <td>${item.comments}</td>
                 `;
-            }).join('');
+            });
         }
 
-        // Função para gerar insights
-        function generateInsights() {
-            const container = document.getElementById('insightsContainer');
-            
-            if (filteredData.length === 0) {
-                container.innerHTML = `
-                    <div class="insight-item">
-                        <p>Nenhum dado encontrado para os filtros selecionados.</p>
-                    </div>
-                `;
-                return;
+        // Funções de debug
+        function updateDebugInfo(key, value) {
+            const element = document.getElementById(`debug${key.charAt(0).toUpperCase() + key.slice(1)}`);
+            if (element) {
+                element.textContent = value;
             }
-            
-            // Calcular métricas para insights
-            const totalChecklists = new Set(filteredData.map(item => item.checklistId)).size;
-            const conformes = filteredData.filter(item => item.compliant).length;
-            const naoConformes = filteredData.filter(item => !item.compliant).length;
-            const taxaConformidade = filteredData.length > 0 ? (conformes / filteredData.length * 100).toFixed(1) : 0;
-            
-            // Agrupar por plano para encontrar o melhor e o pior
-            const planos = {};
-            filteredData.forEach(item => {
-                const plano = item.planName || 'Sem plano';
-                if (!planos[plano]) {
-                    planos[plano] = { total: 0, conformes: 0 };
-                }
-                planos[plano].total++;
-                if (item.compliant) {
-                    planos[plano].conformes++;
-                }
-            });
-            
-            // Calcular taxa de conformidade por plano
-            Object.keys(planos).forEach(plano => {
-                planos[plano].taxa = planos[plano].total > 0 ? 
-                    (planos[plano].conformes / planos[plano].total * 100) : 0;
-            });
-            
-            // Encontrar o melhor e o pior plano (com pelo menos 5 itens)
-            const planosRelevantes = Object.entries(planos)
-                .filter(([_, dados]) => dados.total >= 5);
-            
-            let melhorPlano = { nome: '-', taxa: 0 };
-            let piorPlano = { nome: '-', taxa: 100 };
-            
-            planosRelevantes.forEach(([plano, dados]) => {
-                if (dados.taxa > melhorPlano.taxa) {
-                    melhorPlano = { nome: plano, taxa: dados.taxa };
-                }
-                if (dados.taxa < piorPlano.taxa) {
-                    piorPlano = { nome: plano, taxa: dados.taxa };
-                }
-            });
-            
-            // Gerar insights
-            const insights = [];
-            
-            // Insight sobre o volume
-            insights.push(`No período analisado, foram realizados <strong>${totalChecklists}</strong> checklists, totalizando <strong>${filteredData.length}</strong> itens verificados.`);
-            
-            // Insight sobre a conformidade
-            insights.push(`A taxa geral de conformidade é de <strong>${taxaConformidade}%</strong>, com <strong>${conformes}</strong> itens conformes e <strong>${naoConformes}</strong> não conformes.`);
-            
-            // Insight sobre o melhor plano
-            if (melhorPlano.nome !== '-') {
-                insights.push(`O plano de checklist com melhor desempenho é <strong>${melhorPlano.nome}</strong>, com taxa de conformidade de <strong>${melhorPlano.taxa.toFixed(1)}%</strong>.`);
-            }
-            
-            // Insight sobre o pior plano
-            if (piorPlano.nome !== '-' && piorPlano.nome !== melhorPlano.nome) {
-                insights.push(`O plano de checklist que requer mais atenção é <strong>${piorPlano.nome}</strong>, com taxa de conformidade de apenas <strong>${piorPlano.taxa.toFixed(1)}%</strong>.`);
-            }
-            
-            // Preencher o container
-            container.innerHTML = insights.map(insight => `
-                <div class="insight-item">
-                    <p>${insight}</p>
-                </div>
-            `).join('');
         }
 
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', () => {
-            // Carregar dados
-            loadData();
+        function toggleDebug() {
+            const panel = document.getElementById('debugPanel');
+            panel.classList.toggle('show');
             
-            // Event listener para o botão de aplicar filtros
-            document.getElementById('applyFilters').addEventListener('click', applyFilters);
-            
-            // Event listener para o botão de limpar filtros
-            document.getElementById('clearFilters').addEventListener('click', clearFilters);
-            
-            // Event listeners para as abas da tabela
-            document.querySelectorAll('.table-tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Remover classe active de todas as abas
-                    document.querySelectorAll('.table-tab').forEach(t => t.classList.remove('active'));
-                    
-                    // Adicionar classe active à aba clicada
-                    tab.classList.add('active');
-                    
-                    // TODO: Implementar troca de tabelas
-                });
-            });
+            if (panel.classList.contains('show')) {
+                updateDebugInfo('enterpriseId', ENTERPRISE_ID);
+            }
+        }
+
+        // Função para testar conexão
+        async function testConnection() {
+            try {
+                showLoading();
+                const apiUrl = `${API_BASE_URL}/checklist?enterpriseId=${ENTERPRISE_ID}`;
+                console.log('🧪 Testando conexão com API:', apiUrl);
+                
+                const response = await fetch(apiUrl);
+                const result = await response.json();
+                
+                hideLoading();
+                
+                alert(`✅ Teste de Conexão\n\nStatus: ${response.status}\nDados: ${result.data?.length || 0} registros\nAPI: Funcionando`);
+                
+            } catch (error) {
+                hideLoading();
+                alert(`❌ Teste de Conexão\n\nErro: ${error.message}\nAPI: Com problemas`);
+            }
+        }
+
+        // Função para atualizar dados
+        function refreshData() {
+            console.log('🔄 Atualizando dados...');
+            loadChecklistData();
+        }
+
+        // Funções de exportação
+        function exportToExcel() {
+            console.log('📊 Exportando para Excel...');
+            alert('Funcionalidade de exportação Excel será implementada em breve!');
+        }
+
+        function exportToPDF() {
+            console.log('📄 Exportando para PDF...');
+            alert('Funcionalidade de exportação PDF será implementada em breve!');
+        }
+
+        // Inicializar aplicação
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Iniciando BI Checklist...');
+            console.log('🏢 Enterprise ID:', ENTERPRISE_ID);
+            loadChecklistData();
         });
     </script>
 </body>
