@@ -63,6 +63,13 @@ def bi_viagens():
     enterprise_id = request.args.get('enterpriseId', 'qzDVZ1jB6IC60baxtsDU')
     return render_template('bi_viagens.html', enterprise_id=enterprise_id)
 
+# BI Trips - Análise de Viagens (Sentinel Insights)
+@app.route('/api/copilot/bi-trips')
+def bi_trips():
+    """BI de Trips - Análise de Viagens com dados do Sentinel Insights"""
+    enterprise_id = request.args.get('enterpriseId', 'qzDVZ1jB6IC60baxtsDU')
+    return render_template('bi_trips.html', enterprise_id=enterprise_id)
+
 # BI Manutenção
 @app.route('/api/copilot/bi-manutencao')
 def bi_manutencao():
@@ -116,6 +123,13 @@ def list_bis():
             'description': 'Rotas e deslocamentos da frota',
             'status': 'coming_soon',
             'url': '/api/copilot/bi-viagens'
+        },
+        {
+            'id': 'trips',
+            'name': 'Trips - Análise de Viagens',
+            'description': 'Performance, custos, segurança e emissões das viagens (Sentinel Insights)',
+            'status': 'available',
+            'url': '/api/copilot/bi-trips'
         },
         {
             'id': 'manutencao',
