@@ -1,0 +1,2305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BI Gestão de Veículos - Fleet Copilot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary: #14d8b4;           
+            --primary-dark: #0fb8a0;      
+            --background: #1a1e23;        
+            --surface: #2a2e33;           
+            --surface-light: #3a3e43;     
+            --surface-lighter: #4a4e53;   
+            --text: #ffffff;              
+            --text-secondary: #a0a0a0;    
+            --text-muted: #707070;        
+            --border: #3a3e43;            
+            --border-light: #4a4e53;      
+            --success: #14d8b4;           
+            --warning: #f0b429;           
+            --error: #e74c3c;             
+            --info: #3b82f6;              
+            --chart-purple: #8a56e2;      
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-title svg {
+            width: 32px;
+            height: 32px;
+            color: var(--primary);
+        }
+
+        .header-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* Navegação entre painéis */
+        .dashboard-nav {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(20, 216, 180, 0.05);
+        }
+
+        .nav-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .nav-title svg {
+            width: 20px;
+            height: 20px;
+            color: var(--primary);
+        }
+
+        .nav-title h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface-light);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .nav-btn:hover:not(.active) {
+            background: var(--surface-lighter);
+            border-color: var(--border-light);
+        }
+
+        /* Filtros */
+        .filters {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(20, 216, 180, 0.05);
+        }
+
+        .filters-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .filters-title svg {
+            width: 20px;
+            height: 20px;
+            color: var(--primary);
+        }
+
+        .filters-title h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface-light);
+            color: var(--text);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(20, 216, 180, 0.1);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(20, 216, 180, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(20, 216, 180, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--surface-light);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-lighter);
+            border-color: var(--border-light);
+        }
+
+        /* Painéis */
+        .dashboard-panel {
+            display: none;
+        }
+
+        .dashboard-panel.active {
+            display: block;
+        }
+
+        /* Métricas */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(20, 216, 180, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(20, 216, 180, 0.1);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary);
+            opacity: 0.8;
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .metric-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--primary);
+            opacity: 0.8;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        /* Status badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: rgba(20, 216, 180, 0.2);
+            color: var(--success);
+        }
+
+        .status-inactive {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--error);
+        }
+
+        .status-warning {
+            background: rgba(240, 180, 41, 0.2);
+            color: var(--warning);
+        }
+
+        /* Gráficos */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 0 20px rgba(20, 216, 180, 0.05);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Tabelas */
+        .table-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(20, 216, 180, 0.05);
+            overflow-x: auto;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .table-header h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 600px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--surface-light);
+            color: var(--text);
+            font-weight: 600;
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        tr:hover {
+            background: var(--surface-light);
+        }
+
+        /* Loading */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 30, 35, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(20, 216, 180, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading p {
+            color: var(--text);
+            font-size: 1.1rem;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .no-data h3 {
+            color: var(--warning);
+            margin-bottom: 15px;
+        }
+
+        /* Alertas */
+        .alert-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .alert-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid var(--error);
+        }
+
+        .alert-card.warning {
+            border-left-color: var(--warning);
+        }
+
+        .alert-card.info {
+            border-left-color: var(--info);
+        }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+
+        .alert-content {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header-title h1 {
+                font-size: 1.5rem;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-wrapper {
+                height: 250px;
+            }
+
+            .metric-value {
+                font-size: 2rem;
+            }
+
+            .btn {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+            }
+
+            .nav-btn {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14,2 14,8 20,8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10,9 9,9 8,9"></polyline>
+                </svg>
+                <h1>BI Gestão de Veículos</h1>
+            </div>
+        </div>
+
+        <!-- Navegação entre painéis -->
+        <div class="dashboard-nav">
+            <div class="nav-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9,22 9,12 15,12 15,22"></polyline>
+                </svg>
+                <h3>Painéis de Análise</h3>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn active" onclick="showPanel('composicao')">Composição da Frota</button>
+                <button class="nav-btn" onclick="showPanel('valor')">Análise de Valor</button>
+                <button class="nav-btn" onclick="showPanel('utilizacao')">Utilização</button>
+                <button class="nav-btn" onclick="showPanel('manutencao')">Manutenção</button>
+                <button class="nav-btn" onclick="showPanel('conformidade')">Conformidade</button>
+                <button class="nav-btn" onclick="showPanel('centrocusto')">Centro de Custo</button>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters">
+            <div class="filters-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"/>
+                </svg>
+                <h3>Filtros</h3>
+            </div>
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="statusFilter">Status do Veículo</label>
+                    <select id="statusFilter">
+                        <option value="">Todos os status</option>
+                        <option value="true">Ativo</option>
+                        <option value="false">Inativo</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="companyFilter">Empresa</label>
+                    <select id="companyFilter">
+                        <option value="">Todas as empresas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="branchFilter">Filial</label>
+                    <select id="branchFilter">
+                        <option value="">Todas as filiais</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="typeFilter">Tipo de Veículo</label>
+                    <select id="typeFilter">
+                        <option value="">Todos os tipos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="brandFilter">Marca</label>
+                    <select id="brandFilter">
+                        <option value="">Todas as marcas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="yearFilter">Ano</label>
+                    <select id="yearFilter">
+                        <option value="">Todos os anos</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-primary" onclick="applyFilters()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    Aplicar Filtros
+                </button>
+                <button class="btn btn-secondary" onclick="clearFilters()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18"/>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                        <line x1="10" y1="11" x2="10" y2="17"/>
+                        <line x1="14" y1="11" x2="14" y2="17"/>
+                    </svg>
+                    Limpar
+                </button>
+            </div>
+        </div>
+
+        <!-- Painel 1: Composição da Frota -->
+        <div id="composicao" class="dashboard-panel active">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Total de Veículos</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M7 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
+                            <path d="M17 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path>
+                            <path d="M5 17h-2v-6l2-5h9l4 5h1a2 2 0 0 1 2 2v4h-2m-4 0h-6m-6 -6h15m-6 0v-5"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="totalVehicles">--</div>
+                    <div class="metric-label">Cadastrados</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Veículos Ativos</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4"></path>
+                            <circle cx="12" cy="12" r="10"></circle>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="activeVehicles">--</div>
+                    <div class="metric-label">Em operação</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Veículos Próprios</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 9a2 2 0 0 1 2-2h.93a2 2 0 0 0 1.664-.89l.812-1.22A2 2 0 0 1 10.07 4h3.86a2 2 0 0 1 1.664.89l.812 1.22A2 2 0 0 0 18.07 7H19a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"></path>
+                            <circle cx="12" cy="13" r="3"></circle>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="ownedVehicles">--</div>
+                    <div class="metric-label">Próprios</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Veículos Locados</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="rentedVehicles">--</div>
+                    <div class="metric-label">Locados</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Idade Média</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12,6 12,12 16,14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="avgAge">--</div>
+                    <div class="metric-label">Anos</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Km Médio</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 2v20"></path>
+                            <path d="M14 2v20"></path>
+                            <path d="M4 7h16"></path>
+                            <path d="M4 17h16"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="avgMileage">--</div>
+                    <div class="metric-label">Quilômetros</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            Distribuição por Tipo
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 3v18h18"></path>
+                                <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path>
+                            </svg>
+                            Distribuição por Marca
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="brandChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2v20"></path>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                            Distribuição por Combustível
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="fuelChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            Frota por Ano de Fabricação
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="yearChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel 2: Análise de Valor -->
+        <div id="valor" class="dashboard-panel">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Valor Total da Frota</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="totalFleetValue">--</div>
+                    <div class="metric-label">Valor de Compra</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Valor FIPE Total</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 3v18h18"></path>
+                            <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="totalFipeValue">--</div>
+                    <div class="metric-label">Valor Atual</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Depreciação Total</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"></polyline>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="totalDepreciation">--</div>
+                    <div class="metric-label">Perda de Valor</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Custo Mensal Locação</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="monthlyRentalCost">--</div>
+                    <div class="metric-label">Locações</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 3v18h18"></path>
+                                <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path>
+                            </svg>
+                            Depreciação por Veículo (Top 10)
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="depreciationChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            Próprios vs Locados (Valor)
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="ownershipValueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel 3: Utilização -->
+        <div id="utilizacao" class="dashboard-panel">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Km Total da Frota</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 2v20"></path>
+                            <path d="M14 2v20"></path>
+                            <path d="M4 7h16"></path>
+                            <path d="M4 17h16"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="totalMileage">--</div>
+                    <div class="metric-label">Quilômetros</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Consumo Médio</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v20"></path>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="avgConsumption">--</div>
+                    <div class="metric-label">Km/L</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Veículos Subutilizados</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 8v8"></path>
+                            <path d="M8 12h8"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="underutilizedVehicles">--</div>
+                    <div class="metric-label">Baixo uso</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Capacidade Total Tanques</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v20"></path>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="totalTankCapacity">--</div>
+                    <div class="metric-label">Litros</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 3v18h18"></path>
+                                <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path>
+                            </svg>
+                            Top 10 Veículos por Quilometragem
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="topMileageChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2v20"></path>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                            Eficiência de Combustível por Tipo
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="fuelEfficiencyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel 4: Manutenção -->
+        <div id="manutencao" class="dashboard-panel">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Com Plano de Manutenção</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="vehiclesWithPlan">--</div>
+                    <div class="metric-label">Veículos</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Manutenção em Atraso</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 6v6l4 2"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="overdueMaintenance">--</div>
+                    <div class="metric-label">Atrasados</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Próxima Manutenção (30 dias)</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 16v-4"></path>
+                            <path d="m12 8 .01 0"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="upcomingMaintenance">--</div>
+                    <div class="metric-label">Próximos</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Km Médio Última Preventiva</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 2v20"></path>
+                            <path d="M14 2v20"></path>
+                            <path d="M4 7h16"></path>
+                            <path d="M4 17h16"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="avgLastMaintenance">--</div>
+                    <div class="metric-label">Km</div>
+                </div>
+            </div>
+
+            <div class="alert-grid">
+                <div class="alert-card">
+                    <div class="alert-title">🔧 Manutenção Urgente</div>
+                    <div class="alert-content" id="urgentMaintenanceList">
+                        Carregando alertas de manutenção...
+                    </div>
+                </div>
+
+                <div class="alert-card warning">
+                    <div class="alert-title">⚠️ Manutenção Próxima</div>
+                    <div class="alert-content" id="upcomingMaintenanceList">
+                        Carregando próximas manutenções...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel 5: Conformidade -->
+        <div id="conformidade" class="dashboard-panel">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">IPVA em Dia</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 12l2 2 4-4"></path>
+                            <circle cx="12" cy="12" r="10"></circle>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="ipvaOk">--</div>
+                    <div class="metric-label">Veículos</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Tacógrafo Válido</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12,6 12,12 16,14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="tacographOk">--</div>
+                    <div class="metric-label">Válidos</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Extintor Válido</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v20"></path>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="extinguisherOk">--</div>
+                    <div class="metric-label">Válidos</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-title">Pendências Legais</div>
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 8v8"></path>
+                            <path d="M8 12h8"></path>
+                        </svg>
+                    </div>
+                    <div class="metric-value" id="legalPendencies">--</div>
+                    <div class="metric-label">Pendências</div>
+                </div>
+            </div>
+
+            <div class="alert-grid">
+                <div class="alert-card">
+                    <div class="alert-title">🚨 Vencimentos Críticos</div>
+                    <div class="alert-content" id="criticalExpirations">
+                        Carregando vencimentos críticos...
+                    </div>
+                </div>
+
+                <div class="alert-card warning">
+                    <div class="alert-title">⚠️ Vencimentos Próximos (30 dias)</div>
+                    <div class="alert-content" id="upcomingExpirations">
+                        Carregando próximos vencimentos...
+                    </div>
+                </div>
+
+                <div class="alert-card info">
+                    <div class="alert-title">ℹ️ Equipamentos Faltantes</div>
+                    <div class="alert-content" id="missingEquipment">
+                        Carregando equipamentos faltantes...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel 6: Centro de Custo -->
+        <div id="centrocusto" class="dashboard-panel">
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 3v18h18"></path>
+                                <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path>
+                            </svg>
+                            Veículos por Centro de Custo
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="costCenterChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            Distribuição por Empresa
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="companyChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="3.27,6.96 12,12.01 20.73,6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                            Distribuição por Filial
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="branchChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 9a2 2 0 0 1 2-2h.93a2 2 0 0 0 1.664-.89l.812-1.22A2 2 0 0 1 10.07 4h3.86a2 2 0 0 1 1.664.89l.812 1.22A2 2 0 0 0 18.07 7H19a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"></path>
+                                <circle cx="12" cy="13" r="3"></circle>
+                            </svg>
+                            Valor por Centro de Custo
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="costCenterValueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-header">
+                    <h4>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14,2 14,8 20,8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10,9 9,9 8,9"></polyline>
+                        </svg>
+                        Resumo por Centro de Custo
+                    </h4>
+                    <div class="table-actions">
+                        <button class="btn btn-secondary" onclick="exportToExcel()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                <polyline points="14,2 14,8 20,8"></polyline>
+                            </svg>
+                            Excel
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportToPDF()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                <polyline points="14,2 14,8 20,8"></polyline>
+                            </svg>
+                            PDF
+                        </button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table id="costCenterTable">
+                        <thead>
+                            <tr>
+                                <th>Centro de Custo</th>
+                                <th>Empresa</th>
+                                <th>Filial</th>
+                                <th>Qtd Veículos</th>
+                                <th>Valor Total</th>
+                                <th>Km Médio</th>
+                                <th>Idade Média</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dados serão inseridos dinamicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading">
+        <div class="spinner"></div>
+        <p>Carregando dados da frota...</p>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let allData = [];
+        let filteredData = [];
+        let charts = {};
+
+        // Configuração da API
+        const API_BASE_URL = 'https://firebase-bi-api.onrender.com';
+
+        // Função para obter enterpriseId da URL
+        function getEnterpriseId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const enterpriseId = urlParams.get('enterpriseId');
+            console.log('🔍 EnterpriseId extraído da URL:', enterpriseId);
+            return enterpriseId || 'qzDVZ1jB6IC60baxtsDU';
+        }
+
+        // Constante global para enterpriseId
+        const ENTERPRISE_ID = getEnterpriseId();
+
+        // Função para mostrar loading
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        // Função para ocultar loading
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        // Função para mostrar mensagem de sem dados
+        function showNoDataMessage() {
+            hideLoading();
+            document.querySelector('.container').innerHTML = `
+                <div class="no-data">
+                    <h3>⚠️ Nenhum dado encontrado</h3>
+                    <p>📊 Não foram encontrados dados de veículos para o enterpriseId: ${ENTERPRISE_ID}</p>
+                    <br>
+                    <p>🔍 Verifique se o enterpriseId está correto ou se há dados disponíveis na API.</p>
+                    <p>🌐 API utilizada: ${API_BASE_URL}/vehicles</p>
+                    <br>
+                    <button class="btn btn-primary" onclick="location.reload()">
+                        🔄 Tentar Novamente
+                    </button>
+                </div>
+            `;
+        }
+
+        // Função principal para carregar dados
+        async function loadData() {
+            try {
+                const apiUrl = `${API_BASE_URL}/vehicles?enterpriseId=${ENTERPRISE_ID}`;
+                console.log('🔗 URL da API de veículos:', apiUrl);
+                
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error(`Erro na API: ${response.status} - ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log('📊 Resposta da API de veículos:', result);
+                
+                if (!result.data || result.data.length === 0) {
+                    console.warn('⚠️ Nenhum dado retornado da API de veículos');
+                    showNoDataMessage();
+                } else {
+                    console.log(`✅ ${result.data.length} veículos carregados com sucesso`);
+                    
+                    // Processar dados da API
+                    allData = result.data.map(item => ({
+                        vehicleID: item.vehicleID || '',
+                        vehiclePlate: item.vehiclePlate || '',
+                        vehicleModel: item.vehicleModel || '',
+                        vehicleBrand: item.vehicleBrand || '',
+                        vehicleColor: item.vehicleColor || '',
+                        vehicleType: item.vehicleType?.trim() || '',
+                        vehicleFuel: item.vehicleFuel || '',
+                        vehicleYear: item.vehicleYear || '',
+                        vehicleCompany: item.vehicleCompany || '',
+                        vehicleCostCenter: item.vehicleCostCenter || '',
+                        vehicleBranch: item.vehicleBranch || '',
+                        vehicleGarage: item.vehicleGarage || '',
+                        vehicleStatus: item.vehicleStatus === true || item.vehicleStatus === 'true',
+                        ownerType: item.ownerType || '',
+                        contractType: item.contractType || '',
+                        purchaseValue: parseFloat(item.purchaseValue || 0),
+                        salesPrice: parseFloat(item.salesPrice || 0),
+                        rentalValue: parseFloat(item.rentalValue || 0),
+                        fipePrice: parseFloat(item.fipePrice || 0),
+                        currentMileage: parseFloat(item.currentMileage?.replace(/[^\d]/g, '') || 0),
+                        initialMileage: parseFloat(item.initialMileage?.replace(/[^\d]/g, '') || 0),
+                        maximumMileageDFP: parseFloat(item.maximumMileageDFP?.replace(/[^\d]/g, '') || 0),
+                        vehicleConsumptionKmL: parseFloat(item.vehicleConsumptionKmL || 0),
+                        tankCapacity: parseFloat(item.tankCapacity?.replace(/[^\d]/g, '') || 0),
+                        lastPreventiveMaintenanceMileage: parseFloat(item.lastPreventiveMaintenanceMileage?.replace(/[^\d]/g, '') || 0),
+                        maintenancePlan: item.maintenancePlan || '',
+                        ipvaPaymentStatus: item.ipvaPaymentStatus || '',
+                        tacographExpirationDate: item.tacographExpirationDate || '',
+                        tacograph: item.tacograph || '',
+                        hasFireExtinguisher: item.hasFireExtinguisher === true || item.hasFireExtinguisher === 'true',
+                        fireExtinguisherExpiryDate: item.fireExtinguisherExpiryDate || '',
+                        vehicleStartHour: parseFloat(item.vehicleStartHour || 0),
+                        vehicleEndHour: parseFloat(item.vehicleEndHour || 0),
+                        contractStartDate: item.contractStartDate || '',
+                        contractEndDate: item.contractEndDate || '',
+                        VehicleEntryDate: item.VehicleEntryDate || ''
+                    }));
+
+                    // Calcular campos derivados
+                    allData.forEach(item => {
+                        // Idade do veículo
+                        const currentYear = new Date().getFullYear();
+                        item.age = item.vehicleYear ? currentYear - parseInt(item.vehicleYear) : 0;
+                        
+                        // Depreciação
+                        if (item.purchaseValue > 0 && item.fipePrice > 0) {
+                            item.depreciation = item.purchaseValue - item.fipePrice;
+                            item.depreciationPercent = (item.depreciation / item.purchaseValue) * 100;
+                        } else {
+                            item.depreciation = 0;
+                            item.depreciationPercent = 0;
+                        }
+                        
+                        // Quilometragem rodada
+                        item.mileageTraveled = item.currentMileage - item.initialMileage;
+                        
+                        // Status de manutenção
+                        if (item.lastPreventiveMaintenanceMileage > 0 && item.currentMileage > 0) {
+                            item.kmSinceLastMaintenance = item.currentMileage - item.lastPreventiveMaintenanceMileage;
+                        } else {
+                            item.kmSinceLastMaintenance = 0;
+                        }
+                    });
+
+                    filteredData = [...allData];
+                    
+                    hideLoading();
+                    initializeFilters();
+                    updateDashboard();
+                }
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados de veículos:', error);
+                hideLoading();
+                document.querySelector('.container').innerHTML = `
+                    <div class="no-data">
+                        <h3>❌ Erro ao carregar dados</h3>
+                        <p><strong>Erro:</strong> ${error.message}</p>
+                        <p><strong>API:</strong> ${API_BASE_URL}/vehicles</p>
+                        <p><strong>EnterpriseId:</strong> ${ENTERPRISE_ID}</p>
+                        <br>
+                        <button class="btn btn-primary" onclick="location.reload()">
+                            🔄 Tentar Novamente
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Função para inicializar filtros
+        function initializeFilters() {
+            // Extrair valores únicos para os filtros
+            const companies = [...new Set(allData.map(item => item.vehicleCompany).filter(Boolean))].sort();
+            const branches = [...new Set(allData.map(item => item.vehicleBranch).filter(Boolean))].sort();
+            const types = [...new Set(allData.map(item => item.vehicleType).filter(Boolean))].sort();
+            const brands = [...new Set(allData.map(item => item.vehicleBrand).filter(Boolean))].sort();
+            const years = [...new Set(allData.map(item => item.vehicleYear).filter(Boolean))].sort().reverse();
+
+            // Preencher os selects
+            populateSelect('companyFilter', companies);
+            populateSelect('branchFilter', branches);
+            populateSelect('typeFilter', types);
+            populateSelect('brandFilter', brands);
+            populateSelect('yearFilter', years);
+        }
+
+        // Função para preencher select
+        function populateSelect(selectId, options) {
+            const select = document.getElementById(selectId);
+            // Limpar opções existentes (exceto a primeira)
+            while (select.children.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+            
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                select.appendChild(optionElement);
+            });
+        }
+
+        // Função para aplicar filtros
+        function applyFilters() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const companyFilter = document.getElementById('companyFilter').value;
+            const branchFilter = document.getElementById('branchFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            const brandFilter = document.getElementById('brandFilter').value;
+            const yearFilter = document.getElementById('yearFilter').value;
+
+            filteredData = allData.filter(item => {
+                if (statusFilter && item.vehicleStatus.toString() !== statusFilter) return false;
+                if (companyFilter && item.vehicleCompany !== companyFilter) return false;
+                if (branchFilter && item.vehicleBranch !== branchFilter) return false;
+                if (typeFilter && item.vehicleType !== typeFilter) return false;
+                if (brandFilter && item.vehicleBrand !== brandFilter) return false;
+                if (yearFilter && item.vehicleYear !== yearFilter) return false;
+                
+                return true;
+            });
+
+            console.log(`🔍 Filtros aplicados: ${filteredData.length} de ${allData.length} veículos`);
+            updateDashboard();
+        }
+
+        // Função para limpar filtros
+        function clearFilters() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('companyFilter').value = '';
+            document.getElementById('branchFilter').value = '';
+            document.getElementById('typeFilter').value = '';
+            document.getElementById('brandFilter').value = '';
+            document.getElementById('yearFilter').value = '';
+            
+            filteredData = [...allData];
+            updateDashboard();
+        }
+
+        // Função para mostrar painel
+        function showPanel(panelId) {
+            // Ocultar todos os painéis
+            document.querySelectorAll('.dashboard-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            
+            // Remover classe active de todos os botões
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Mostrar painel selecionado
+            document.getElementById(panelId).classList.add('active');
+            
+            // Adicionar classe active ao botão correspondente
+            event.target.classList.add('active');
+            
+            // Atualizar dashboard para o painel atual
+            updateDashboard();
+        }
+
+        // Função para atualizar dashboard
+        function updateDashboard() {
+            const activePanel = document.querySelector('.dashboard-panel.active').id;
+            
+            switch(activePanel) {
+                case 'composicao':
+                    updateComposicaoPanel();
+                    break;
+                case 'valor':
+                    updateValorPanel();
+                    break;
+                case 'utilizacao':
+                    updateUtilizacaoPanel();
+                    break;
+                case 'manutencao':
+                    updateManutencaoPanel();
+                    break;
+                case 'conformidade':
+                    updateConformidadePanel();
+                    break;
+                case 'centrocusto':
+                    updateCentroCustoPanel();
+                    break;
+            }
+        }
+
+        // Atualizar painel de composição
+        function updateComposicaoPanel() {
+            // Métricas
+            const totalVehicles = filteredData.length;
+            const activeVehicles = filteredData.filter(v => v.vehicleStatus).length;
+            const ownedVehicles = filteredData.filter(v => v.ownerType?.includes('Próprio')).length;
+            const rentedVehicles = filteredData.filter(v => v.ownerType?.includes('Locado')).length;
+            
+            const validAges = filteredData.filter(v => v.age > 0);
+            const avgAge = validAges.length > 0 ? validAges.reduce((sum, v) => sum + v.age, 0) / validAges.length : 0;
+            
+            const validMileages = filteredData.filter(v => v.currentMileage > 0);
+            const avgMileage = validMileages.length > 0 ? validMileages.reduce((sum, v) => sum + v.currentMileage, 0) / validMileages.length : 0;
+
+            document.getElementById('totalVehicles').textContent = totalVehicles.toLocaleString('pt-BR');
+            document.getElementById('activeVehicles').textContent = activeVehicles.toLocaleString('pt-BR');
+            document.getElementById('ownedVehicles').textContent = ownedVehicles.toLocaleString('pt-BR');
+            document.getElementById('rentedVehicles').textContent = rentedVehicles.toLocaleString('pt-BR');
+            document.getElementById('avgAge').textContent = avgAge.toFixed(1);
+            document.getElementById('avgMileage').textContent = avgMileage.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+
+            // Gráficos
+            updateTypeChart();
+            updateBrandChart();
+            updateFuelChart();
+            updateYearChart();
+        }
+
+        // Atualizar painel de valor
+        function updateValorPanel() {
+            const totalFleetValue = filteredData.reduce((sum, v) => sum + v.purchaseValue, 0);
+            const totalFipeValue = filteredData.reduce((sum, v) => sum + v.fipePrice, 0);
+            const totalDepreciation = filteredData.reduce((sum, v) => sum + v.depreciation, 0);
+            const monthlyRentalCost = filteredData.reduce((sum, v) => sum + v.rentalValue, 0);
+
+            document.getElementById('totalFleetValue').textContent = `R$ ${totalFleetValue.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+            document.getElementById('totalFipeValue').textContent = `R$ ${totalFipeValue.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+            document.getElementById('totalDepreciation').textContent = `R$ ${totalDepreciation.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+            document.getElementById('monthlyRentalCost').textContent = `R$ ${monthlyRentalCost.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+
+            updateDepreciationChart();
+            updateOwnershipValueChart();
+        }
+
+        // Atualizar painel de utilização
+        function updateUtilizacaoPanel() {
+            const totalMileage = filteredData.reduce((sum, v) => sum + v.currentMileage, 0);
+            const validConsumptions = filteredData.filter(v => v.vehicleConsumptionKmL > 0);
+            const avgConsumption = validConsumptions.length > 0 ? validConsumptions.reduce((sum, v) => sum + v.vehicleConsumptionKmL, 0) / validConsumptions.length : 0;
+            const underutilizedVehicles = filteredData.filter(v => v.currentMileage < 10000 && v.age > 1).length;
+            const totalTankCapacity = filteredData.reduce((sum, v) => sum + v.tankCapacity, 0);
+
+            document.getElementById('totalMileage').textContent = totalMileage.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+            document.getElementById('avgConsumption').textContent = avgConsumption.toFixed(1);
+            document.getElementById('underutilizedVehicles').textContent = underutilizedVehicles.toLocaleString('pt-BR');
+            document.getElementById('totalTankCapacity').textContent = totalTankCapacity.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+
+            updateTopMileageChart();
+            updateFuelEfficiencyChart();
+        }
+
+        // Atualizar painel de manutenção
+        function updateManutencaoPanel() {
+            const vehiclesWithPlan = filteredData.filter(v => v.maintenancePlan && v.maintenancePlan !== '').length;
+            const overdueMaintenance = filteredData.filter(v => v.kmSinceLastMaintenance > 10000).length;
+            const upcomingMaintenance = filteredData.filter(v => v.kmSinceLastMaintenance > 8000 && v.kmSinceLastMaintenance <= 10000).length;
+            
+            const validLastMaintenance = filteredData.filter(v => v.lastPreventiveMaintenanceMileage > 0);
+            const avgLastMaintenance = validLastMaintenance.length > 0 ? validLastMaintenance.reduce((sum, v) => sum + v.lastPreventiveMaintenanceMileage, 0) / validLastMaintenance.length : 0;
+
+            document.getElementById('vehiclesWithPlan').textContent = vehiclesWithPlan.toLocaleString('pt-BR');
+            document.getElementById('overdueMaintenance').textContent = overdueMaintenance.toLocaleString('pt-BR');
+            document.getElementById('upcomingMaintenance').textContent = upcomingMaintenance.toLocaleString('pt-BR');
+            document.getElementById('avgLastMaintenance').textContent = avgLastMaintenance.toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+
+            // Atualizar alertas de manutenção
+            updateMaintenanceAlerts();
+        }
+
+        // Atualizar painel de conformidade
+        function updateConformidadePanel() {
+            const ipvaOk = filteredData.filter(v => v.ipvaPaymentStatus === 'Pago' || v.ipvaPaymentStatus === 'Em dia').length;
+            const tacographOk = filteredData.filter(v => v.tacograph && v.tacographExpirationDate).length;
+            const extinguisherOk = filteredData.filter(v => v.hasFireExtinguisher).length;
+            const legalPendencies = filteredData.length - Math.max(ipvaOk, tacographOk, extinguisherOk);
+
+            document.getElementById('ipvaOk').textContent = ipvaOk.toLocaleString('pt-BR');
+            document.getElementById('tacographOk').textContent = tacographOk.toLocaleString('pt-BR');
+            document.getElementById('extinguisherOk').textContent = extinguisherOk.toLocaleString('pt-BR');
+            document.getElementById('legalPendencies').textContent = legalPendencies.toLocaleString('pt-BR');
+
+            // Atualizar alertas de conformidade
+            updateComplianceAlerts();
+        }
+
+        // Atualizar painel de centro de custo
+        function updateCentroCustoPanel() {
+            updateCostCenterChart();
+            updateCompanyChart();
+            updateBranchChart();
+            updateCostCenterValueChart();
+            updateCostCenterTable();
+        }
+
+        // Funções para gráficos específicos
+        function updateTypeChart() {
+            const ctx = document.getElementById('typeChart');
+            if (charts.type) charts.type.destroy();
+
+            const typeData = {};
+            filteredData.forEach(item => {
+                const type = item.vehicleType || 'Não informado';
+                typeData[type] = (typeData[type] || 0) + 1;
+            });
+
+            const labels = Object.keys(typeData);
+            const data = Object.values(typeData);
+            const colors = ['#14d8b4', '#8a56e2', '#f0b429', '#e74c3c', '#3b82f6', '#27ae60'];
+
+            charts.type = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.slice(0, labels.length)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#a0a0a0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateBrandChart() {
+            const ctx = document.getElementById('brandChart');
+            if (charts.brand) charts.brand.destroy();
+
+            const brandData = {};
+            filteredData.forEach(item => {
+                const brand = item.vehicleBrand || 'Não informado';
+                brandData[brand] = (brandData[brand] || 0) + 1;
+            });
+
+            const sortedBrands = Object.entries(brandData).sort(([,a], [,b]) => b - a).slice(0, 10);
+            const labels = sortedBrands.map(([brand]) => brand);
+            const data = sortedBrands.map(([,count]) => count);
+
+            charts.brand = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: data,
+                        backgroundColor: 'rgba(138, 86, 226, 0.8)',
+                        borderColor: '#8a56e2',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#3a3e43' },
+                            ticks: { color: '#a0a0a0' }
+                        },
+                        x: {
+                            grid: { color: '#3a3e43' },
+                            ticks: { color: '#a0a0a0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateFuelChart() {
+            const ctx = document.getElementById('fuelChart');
+            if (charts.fuel) charts.fuel.destroy();
+
+            const fuelData = {};
+            filteredData.forEach(item => {
+                const fuel = item.vehicleFuel || 'Não informado';
+                fuelData[fuel] = (fuelData[fuel] || 0) + 1;
+            });
+
+            const labels = Object.keys(fuelData);
+            const data = Object.values(fuelData);
+            const colors = ['#14d8b4', '#f0b429', '#e74c3c', '#8a56e2', '#3b82f6'];
+
+            charts.fuel = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.slice(0, labels.length)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#a0a0a0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateYearChart() {
+            const ctx = document.getElementById('yearChart');
+            if (charts.year) charts.year.destroy();
+
+            const yearData = {};
+            filteredData.forEach(item => {
+                const year = item.vehicleYear || 'Não informado';
+                yearData[year] = (yearData[year] || 0) + 1;
+            });
+
+            const sortedYears = Object.entries(yearData).sort(([a], [b]) => b.localeCompare(a));
+            const labels = sortedYears.map(([year]) => year);
+            const data = sortedYears.map(([,count]) => count);
+
+            charts.year = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: data,
+                        backgroundColor: 'rgba(20, 216, 180, 0.8)',
+                        borderColor: '#14d8b4',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#3a3e43' },
+                            ticks: { color: '#a0a0a0' }
+                        },
+                        x: {
+                            grid: { color: '#3a3e43' },
+                            ticks: { color: '#a0a0a0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateDepreciationChart() {
+            const ctx = document.getElementById('depreciationChart');
+            if (charts.depreciation) charts.depreciation.destroy();
+
+            const depreciationData = filteredData
+                .filter(v => v.depreciation > 0)
+                .sort((a, b) => b.depreciation - a.depreciation)
+                .slice(0, 10);
+
+            const labels = depreciationData.map(v => v.vehiclePlate);
+            const data = depreciationData.map(v => v.depreciation);
+
+            charts.depreciation = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Depreciação (R$)',
+                        data: data,
+                        backgroundColor: 'rgba(231, 76, 60, 0.8)',
+                        borderColor: '#e74c3c',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: '#3a3e43' },
+                            ticks: { color: '#a0a0a0' }
+                        },
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: '#3a3e43' },
+                            ticks: { 
+                                color: '#a0a0a0',
+                                callback: function(value) {
+                                    return 'R$ ' + value.toLocaleString('pt-BR');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateOwnershipValueChart() {
+            const ctx = document.getElementById('ownershipValueChart');
+            if (charts.ownershipValue) charts.ownershipValue.destroy();
+
+            const ownedValue = filteredData.filter(v => v.ownerType?.includes('Próprio')).reduce((sum, v) => sum + v.purchaseValue, 0);
+            const rentedValue = filteredData.filter(v => v.ownerType?.includes('Locado')).reduce((sum, v) => sum + v.rentalValue * 12, 0); // Valor anual
+
+            charts.ownershipValue = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Veículos Próprios', 'Veículos Locados (Anual)'],
+                    datasets: [{
+                        data: [ownedValue, rentedValue],
+                        backgroundColor: ['#14d8b4', '#f0b429']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#a0a0a0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTopMileageChart() {
+            const ctx = document.getElementById('topMileageChart');
+            if (charts.topMileage) charts.topMileage.destroy();
+
+            const topMileage = filteredData
+                .filter(v => v.currentMileage > 0)
+                .sort((a, b) => b.currentMileage - a.currentMileage)
+                .slice(0, 10);
+
+            const labels = topMileage.map(v => v.vehiclePlate);
+            const data = topMileage.map(v => v.currentMileage);
+
+            charts.topMileage = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Quilometragem',
+                        data: data,
+                        backgroundColor: 'rgba(240, 180, 41, 0.8)',
+                        borderColor: '#f0b429',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: '#3a3e43' },
+                            ticks: { color: '#a0a0a0' }
+                        },
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: '#3a3e43' },
+                            ticks: { 
+                                color: '#a0a0a0',
+                                callback: function(value) {
+                                    return value.toLocaleString('pt-BR') + ' km';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateFuelEfficiencyChart() {
+            const ctx = document.getElementById('fuelEfficiencyChart');
+            if (charts.fuelEfficiency) charts.fuelEfficiency.destroy();
+
+            const efficiencyByType = {};
+            filteredData.forEach(item => {
+                if (item.vehicleConsumptionKmL > 0) {
+                    const type = item.vehicleType || 'Não informado';
+                    if (!efficiencyByType[type]) {
+                        efficiencyByType[type] = { total: 0, count: 0 };
+                    }
+                    efficiencyByType[type].total += item.vehicleConsumptionKmL;
+                    efficiencyByType[type].count++;
+                }
+            });
+
+            const avgEfficiency = Object.entries(efficiencyByType)
+                .map(([type, data]) => [type, data.total / data.count])
+                .sort(([,a], [,b]) => b - a);
+
+            const labels = avgEfficiency.map(([type]) => type);
+            const data = avgEfficiency.map(([,efficiency]) => efficiency);
+
+            charts.fuelEfficiency = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Km/L',
+                        data: data,
+                        backgroundColor: 'rgba(20, 216, 180, 0.8)',
+                        borderColor: '#14d8b4',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#3a3e43' },
+                            ticks: { color: '#a0a0a0' }
+                        },
+                        x: {
+                            grid: { color: '#3a3e43' },
+                            ticks: { color: '#a0a0a0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCostCenterChart() {
+            const ctx = document.getElementById('costCenterChart');
+            if (charts.costCenter) charts.costCenter.destroy();
+
+            const costCenterData = {};
+            filteredData.forEach(item => {
+                const costCenter = item.vehicleCostCenter || 'Não informado';
+                costCenterData[costCenter] = (costCenterData[costCenter] || 0) + 1;
+            });
+
+            const sortedCostCenters = Object.entries(costCenterData).sort(([,a], [,b]) => b - a).slice(0, 10);
+            const labels = sortedCostCenters.map(([cc]) => cc);
+            const data = sortedCostCenters.map(([,count]) => count);
+
+            charts.costCenter = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: data,
+                        backgroundColor: 'rgba(138, 86, 226, 0.8)',
+                        borderColor: '#8a56e2',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#3a3e43' },
+                            ticks: { color: '#a0a0a0' }
+                        },
+                        x: {
+                            grid: { color: '#3a3e43' },
+                            ticks: { 
+                                color: '#a0a0a0',
+                                maxRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCompanyChart() {
+            const ctx = document.getElementById('companyChart');
+            if (charts.company) charts.company.destroy();
+
+            const companyData = {};
+            filteredData.forEach(item => {
+                const company = item.vehicleCompany || 'Não informado';
+                companyData[company] = (companyData[company] || 0) + 1;
+            });
+
+            const labels = Object.keys(companyData);
+            const data = Object.values(companyData);
+            const colors = ['#14d8b4', '#8a56e2', '#f0b429', '#e74c3c', '#3b82f6'];
+
+            charts.company = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.slice(0, labels.length)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#a0a0a0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateBranchChart() {
+            const ctx = document.getElementById('branchChart');
+            if (charts.branch) charts.branch.destroy();
+
+            const branchData = {};
+            filteredData.forEach(item => {
+                const branch = item.vehicleBranch || 'Não informado';
+                branchData[branch] = (branchData[branch] || 0) + 1;
+            });
+
+            const labels = Object.keys(branchData);
+            const data = Object.values(branchData);
+            const colors = ['#14d8b4', '#8a56e2', '#f0b429', '#e74c3c', '#3b82f6', '#27ae60'];
+
+            charts.branch = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.slice(0, labels.length)
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#a0a0a0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCostCenterValueChart() {
+            const ctx = document.getElementById('costCenterValueChart');
+            if (charts.costCenterValue) charts.costCenterValue.destroy();
+
+            const costCenterValueData = {};
+            filteredData.forEach(item => {
+                const costCenter = item.vehicleCostCenter || 'Não informado';
+                if (!costCenterValueData[costCenter]) {
+                    costCenterValueData[costCenter] = 0;
+                }
+                costCenterValueData[costCenter] += item.purchaseValue || item.fipePrice || 0;
+            });
+
+            const sortedCostCenterValues = Object.entries(costCenterValueData)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 10);
+
+            const labels = sortedCostCenterValues.map(([cc]) => cc);
+            const data = sortedCostCenterValues.map(([,value]) => value);
+
+            charts.costCenterValue = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Valor (R$)',
+                        data: data,
+                        backgroundColor: 'rgba(20, 216, 180, 0.8)',
+                        borderColor: '#14d8b4',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: '#3a3e43' },
+                            ticks: { color: '#a0a0a0' }
+                        },
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: '#3a3e43' },
+                            ticks: { 
+                                color: '#a0a0a0',
+                                callback: function(value) {
+                                    return 'R$ ' + (value / 1000).toFixed(0) + 'k';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCostCenterTable() {
+            const tbody = document.querySelector('#costCenterTable tbody');
+            tbody.innerHTML = '';
+
+            const costCenterSummary = {};
+            filteredData.forEach(item => {
+                const costCenter = item.vehicleCostCenter || 'Não informado';
+                if (!costCenterSummary[costCenter]) {
+                    costCenterSummary[costCenter] = {
+                        company: item.vehicleCompany || 'Não informado',
+                        branch: item.vehicleBranch || 'Não informado',
+                        count: 0,
+                        totalValue: 0,
+                        totalMileage: 0,
+                        totalAge: 0,
+                        validMileage: 0,
+                        validAge: 0
+                    };
+                }
+                
+                const summary = costCenterSummary[costCenter];
+                summary.count++;
+                summary.totalValue += item.purchaseValue || item.fipePrice || 0;
+                
+                if (item.currentMileage > 0) {
+                    summary.totalMileage += item.currentMileage;
+                    summary.validMileage++;
+                }
+                
+                if (item.age > 0) {
+                    summary.totalAge += item.age;
+                    summary.validAge++;
+                }
+            });
+
+            Object.entries(costCenterSummary).forEach(([costCenter, summary]) => {
+                const avgMileage = summary.validMileage > 0 ? summary.totalMileage / summary.validMileage : 0;
+                const avgAge = summary.validAge > 0 ? summary.totalAge / summary.validAge : 0;
+                
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${costCenter}</td>
+                    <td>${summary.company}</td>
+                    <td>${summary.branch}</td>
+                    <td>${summary.count}</td>
+                    <td>R$ ${summary.totalValue.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}</td>
+                    <td>${avgMileage.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} km</td>
+                    <td>${avgAge.toFixed(1)} anos</td>
+                `;
+            });
+        }
+
+        function updateMaintenanceAlerts() {
+            const urgentList = document.getElementById('urgentMaintenanceList');
+            const upcomingList = document.getElementById('upcomingMaintenanceList');
+            
+            const urgentVehicles = filteredData.filter(v => v.kmSinceLastMaintenance > 10000);
+            const upcomingVehicles = filteredData.filter(v => v.kmSinceLastMaintenance > 8000 && v.kmSinceLastMaintenance <= 10000);
+            
+            urgentList.innerHTML = urgentVehicles.length > 0 
+                ? urgentVehicles.slice(0, 5).map(v => `${v.vehiclePlate} - ${v.kmSinceLastMaintenance.toLocaleString('pt-BR')} km desde última manutenção`).join('<br>')
+                : 'Nenhum veículo com manutenção urgente.';
+                
+            upcomingList.innerHTML = upcomingVehicles.length > 0
+                ? upcomingVehicles.slice(0, 5).map(v => `${v.vehiclePlate} - ${v.kmSinceLastMaintenance.toLocaleString('pt-BR')} km desde última manutenção`).join('<br>')
+                : 'Nenhum veículo com manutenção próxima.';
+        }
+
+        function updateComplianceAlerts() {
+            const criticalList = document.getElementById('criticalExpirations');
+            const upcomingList = document.getElementById('upcomingExpirations');
+            const missingList = document.getElementById('missingEquipment');
+            
+            const ipvaPending = filteredData.filter(v => !v.ipvaPaymentStatus || v.ipvaPaymentStatus === '');
+            const missingExtinguisher = filteredData.filter(v => !v.hasFireExtinguisher);
+            const missingTacograph = filteredData.filter(v => !v.tacograph || v.tacograph === '');
+            
+            criticalList.innerHTML = ipvaPending.length > 0
+                ? `${ipvaPending.length} veículos com IPVA pendente: ${ipvaPending.slice(0, 3).map(v => v.vehiclePlate).join(', ')}`
+                : 'Nenhum vencimento crítico identificado.';
+                
+            upcomingList.innerHTML = 'Monitoramento de vencimentos em desenvolvimento.';
+            
+            const missingItems = [];
+            if (missingExtinguisher.length > 0) missingItems.push(`${missingExtinguisher.length} veículos sem extintor`);
+            if (missingTacograph.length > 0) missingItems.push(`${missingTacograph.length} veículos sem tacógrafo`);
+            
+            missingList.innerHTML = missingItems.length > 0 ? missingItems.join('<br>') : 'Todos os equipamentos obrigatórios estão presentes.';
+        }
+
+        // Funções de exportação
+        function exportToExcel() {
+            console.log('📊 Exportando para Excel...');
+            alert('Funcionalidade de exportação Excel será implementada em breve!');
+        }
+
+        function exportToPDF() {
+            console.log('📄 Exportando para PDF...');
+            alert('Funcionalidade de exportação PDF será implementada em breve!');
+        }
+
+        // Inicializar aplicação
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Iniciando BI Gestão de Veículos...');
+            console.log('🏢 Enterprise ID:', ENTERPRISE_ID);
+            loadData();
+        });
+    </script>
+</body>
+</html>
+
