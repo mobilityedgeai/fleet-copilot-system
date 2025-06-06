@@ -70,6 +70,13 @@ def bi_trips():
     enterprise_id = request.args.get('enterpriseId', 'qzDVZ1jB6IC60baxtsDU')
     return render_template('bi_trips.html', enterprise_id=enterprise_id)
 
+# BI Scorecard Preditivo de Risco
+@app.route('/api/copilot/scorecard-preditivo')
+def scorecard_preditivo():
+    """Scorecard Preditivo de Risco - Análise Avançada de Segurança e Prevenção de Acidentes"""
+    enterprise_id = request.args.get('enterpriseId', 'qzDVZ1jB6IC60baxtsDU')
+    return render_template('scorecard_preditivo.html', enterprise_id=enterprise_id)
+
 # BI Manutenção
 @app.route('/api/copilot/bi-manutencao')
 def bi_manutencao():
@@ -137,6 +144,13 @@ def list_bis():
             'description': 'Performance, custos, segurança e emissões das viagens (Sentinel Insights)',
             'status': 'available',
             'url': '/api/copilot/bi-trips'
+        },
+        {
+            'id': 'scorecard-preditivo',
+            'name': 'Scorecard Preditivo de Risco',
+            'description': 'Análise avançada de segurança e prevenção de acidentes com algoritmo preditivo',
+            'status': 'available',
+            'url': '/api/copilot/scorecard-preditivo'
         },
         {
             'id': 'manutencao',
