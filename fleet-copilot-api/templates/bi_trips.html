@@ -1002,17 +1002,19 @@
                 const response = await fetch(`${API_BASE_URL}/trips?enterpriseId=${enterpriseId}`);
                 
                 if (!response.ok) {
-                    throw new Error(`Erro na API: ${response.status}`);
+                    throw new Error(`Erro na API: ${response.status} - ${response.statusText}`);
                 }
 
                 const result = await response.json();
-                console.log('📊 Dados recebidos:', result);
+                console.log('📊 Resposta da API:', result);
 
-                if (result.data && Array.isArray(result.data)) {
+                // Verificar se há dados na resposta
+                if (result.data && Array.isArray(result.data) && result.data.length > 0) {
                     tripsData = result.data;
                     filteredData = [...tripsData];
                     
-                    console.log(`✅ ${tripsData.length} viagens carregadas`);
+                    console.log(`✅ ${tripsData.length} viagens carregadas com sucesso!`);
+                    console.log('📋 Primeira viagem:', tripsData[0]);
                     
                     // Ocultar loading
                     document.getElementById('loading').style.display = 'none';
@@ -1022,28 +1024,62 @@
                     updateDashboard();
                     
                 } else {
-                    throw new Error('Dados não encontrados na resposta da API');
+                    throw new Error(`Nenhuma viagem encontrada para o enterpriseId: ${enterpriseId}`);
                 }
 
             } catch (error) {
                 console.error('❌ Erro ao carregar dados:', error);
                 document.getElementById('loading').innerHTML = `
-                    <div style="color: var(--error);">
-                        <h3>Erro ao carregar dados</h3>
-                        <p>${error.message}</p>
-                        <button onclick="loadTripsData()" class="btn btn-primary" style="margin-top: 10px;">
-                            Tentar Novamente
+                    <div style="color: var(--error); text-align: center;">
+                        <h3>❌ Erro ao carregar dados</h3>
+                        <p><strong>Detalhes:</strong> ${error.message}</p>
+                        <p><strong>API:</strong> ${API_BASE_URL}/trips</p>
+                        <p><strong>EnterpriseId:</strong> ${getUrlParameter('enterpriseId') || 'qzDVZ1jB6IC60baxtsDU'}</p>
+                        <button onclick="loadTripsData()" class="btn btn-primary" style="margin-top: 15px;">
+                            🔄 Tentar Novamente
+                        </button>
+                        <button onclick="testApiConnection()" class="btn btn-secondary" style="margin-top: 15px;">
+                            🔍 Testar Conexão API
                         </button>
                     </div>
                 `;
             }
         }
 
+        // Função para testar conexão com a API
+        async function testApiConnection() {
+            try {
+                console.log('🔍 Testando conexão com a API...');
+                const response = await fetch(`${API_BASE_URL}/trips?enterpriseId=qzDVZ1jB6IC60baxtsDU`);
+                const result = await response.json();
+                
+                console.log('🔗 Teste de conexão:', {
+                    status: response.status,
+                    ok: response.ok,
+                    data: result
+                });
+                
+                alert(`Teste de conexão:\nStatus: ${response.status}\nDados: ${result.count || 0} registros encontrados`);
+                
+            } catch (error) {
+                console.error('❌ Erro no teste de conexão:', error);
+                alert(`Erro no teste de conexão: ${error.message}`);
+            }
+        }
+
         // Função para inicializar filtros
         function initializeFilters() {
+            if (!tripsData || tripsData.length === 0) {
+                console.warn('⚠️ Nenhum dado disponível para inicializar filtros');
+                return;
+            }
+
             // Extrair valores únicos para filtros
-            const drivers = [...new Set(tripsData.map(trip => trip.userString).filter(Boolean))];
-            const vehicles = [...new Set(tripsData.map(trip => trip.vehiclePlate).filter(Boolean))];
+            const drivers = [...new Set(tripsData.map(trip => trip.UserString || trip.userString).filter(Boolean))];
+            const vehicles = [...new Set(tripsData.map(trip => trip.vehiclePlate || trip.VehiclePlate).filter(Boolean))];
+
+            console.log('👥 Motoristas encontrados:', drivers);
+            console.log('🚗 Veículos encontrados:', vehicles);
 
             // Preencher filtros
             populateSelect('driverFilter', drivers);
@@ -1061,6 +1097,11 @@
         // Função para preencher select
         function populateSelect(selectId, options) {
             const select = document.getElementById(selectId);
+            // Limpar opções existentes (exceto a primeira)
+            while (select.children.length > 1) {
+                select.removeChild(select.lastChild);
+            }
+            
             options.forEach(option => {
                 const optionElement = document.createElement('option');
                 optionElement.value = option;
@@ -1078,14 +1119,16 @@
 
             filteredData = tripsData.filter(trip => {
                 // Filtro por motorista
-                if (driverFilter && trip.userString !== driverFilter) return false;
+                const driverField = trip.UserString || trip.userString;
+                if (driverFilter && driverField !== driverFilter) return false;
                 
                 // Filtro por veículo
-                if (vehicleFilter && trip.vehiclePlate !== vehicleFilter) return false;
+                const vehicleField = trip.vehiclePlate || trip.VehiclePlate;
+                if (vehicleFilter && vehicleField !== vehicleFilter) return false;
                 
                 // Filtro por data
                 if (startDate || endDate) {
-                    const tripDate = new Date(trip.startTimestamp);
+                    const tripDate = new Date(trip.TripStartTimestamp || trip.startTimestamp);
                     if (startDate && tripDate < new Date(startDate)) return false;
                     if (endDate && tripDate > new Date(endDate + 'T23:59:59')) return false;
                 }
@@ -1093,7 +1136,7 @@
                 return true;
             });
 
-            console.log(`🔍 Filtros aplicados: ${filteredData.length} viagens`);
+            console.log(`🔍 Filtros aplicados: ${filteredData.length} de ${tripsData.length} viagens`);
             updateDashboard();
         }
 
@@ -1124,6 +1167,11 @@
 
         // Função para atualizar dashboard
         function updateDashboard() {
+            if (!filteredData || filteredData.length === 0) {
+                console.warn('⚠️ Nenhum dado filtrado disponível para atualizar dashboard');
+                return;
+            }
+
             updateMetrics();
             updateCharts('security');
             updateTables();
@@ -1135,9 +1183,9 @@
             if (filteredData.length === 0) return;
 
             // Métricas de Segurança
-            const avgScore = filteredData.reduce((sum, trip) => sum + (trip.Score || 0), 0) / filteredData.length;
-            const totalEvents = filteredData.reduce((sum, trip) => sum + (trip.Events || 0), 0);
-            const phoneEvents = filteredData.reduce((sum, trip) => sum + (trip.phoneEvents || 0), 0);
+            const avgScore = filteredData.reduce((sum, trip) => sum + (trip.score || trip.Score || 0), 0) / filteredData.length;
+            const totalEvents = filteredData.reduce((sum, trip) => sum + (trip.totalEvents || trip.Events || 0), 0);
+            const phoneEvents = filteredData.reduce((sum, trip) => sum + (trip.AmountOfSmartphoneUsageEvents || trip.phoneEvents || 0), 0);
 
             document.getElementById('avgScore').textContent = avgScore.toFixed(1);
             document.getElementById('totalEvents').textContent = totalEvents;
@@ -1157,19 +1205,19 @@
 
             // Métricas de Eficiência
             const avgTripTime = filteredData.reduce((sum, trip) => sum + (trip.TripTime || 0), 0) / filteredData.length;
-            const avgIdleTime = filteredData.reduce((sum, trip) => sum + (trip.idleTime || 0), 0) / filteredData.length;
-            const avgDistance = filteredData.reduce((sum, trip) => sum + (trip.distance || 0), 0) / filteredData.length;
+            const avgIdleTime = filteredData.reduce((sum, trip) => sum + (trip.TotalIdlingTime || trip.idleTime || 0), 0) / filteredData.length;
+            const avgDistance = filteredData.reduce((sum, trip) => sum + (trip.TripDistance || trip.distance || 0), 0) / filteredData.length;
             const avgDrivingHours = filteredData.reduce((sum, trip) => sum + (trip.uninterruptedDrivingHours || 0), 0) / filteredData.length;
 
-            document.getElementById('avgTripTime').textContent = avgTripTime.toFixed(0);
-            document.getElementById('avgIdleTime').textContent = avgIdleTime.toFixed(0);
+            document.getElementById('avgTripTime').textContent = (avgTripTime * 60).toFixed(0); // Converter para minutos
+            document.getElementById('avgIdleTime').textContent = (avgIdleTime * 60).toFixed(0); // Converter para minutos
             document.getElementById('avgDistance').textContent = avgDistance.toFixed(1);
             document.getElementById('avgDrivingHours').textContent = avgDrivingHours.toFixed(1);
 
             // Métricas de Emissões
             const totalCO2 = filteredData.reduce((sum, trip) => sum + (trip.Co2Estimation || 0), 0);
-            const avgFuelConsumption = filteredData.reduce((sum, trip) => sum + (trip.fuelConsumption || 0), 0) / filteredData.length;
-            const totalDistance = filteredData.reduce((sum, trip) => sum + (trip.distance || 0), 0);
+            const avgFuelConsumption = filteredData.reduce((sum, trip) => sum + (trip.totalFuelConsumption || 0), 0) / filteredData.length;
+            const totalDistance = filteredData.reduce((sum, trip) => sum + (trip.TripDistance || trip.distance || 0), 0);
             const co2PerKm = totalDistance > 0 ? totalCO2 / totalDistance : 0;
             const ecoScore = Math.max(0, 100 - (avgFuelConsumption * 10));
 
@@ -1177,6 +1225,8 @@
             document.getElementById('avgFuelConsumption').textContent = avgDistance > 0 ? (avgFuelConsumption * 100 / avgDistance).toFixed(1) : '0.0';
             document.getElementById('co2PerKm').textContent = co2PerKm.toFixed(3);
             document.getElementById('ecoScore').textContent = ecoScore.toFixed(0);
+
+            console.log('📊 Métricas atualizadas com sucesso');
         }
 
         // Função para atualizar gráficos
@@ -1204,11 +1254,12 @@
             // Score por motorista
             const driverScores = {};
             filteredData.forEach(trip => {
-                if (!driverScores[trip.userString]) {
-                    driverScores[trip.userString] = { total: 0, count: 0 };
+                const driver = trip.UserString || trip.userString || 'N/A';
+                if (!driverScores[driver]) {
+                    driverScores[driver] = { total: 0, count: 0 };
                 }
-                driverScores[trip.userString].total += trip.Score || 0;
-                driverScores[trip.userString].count++;
+                driverScores[driver].total += trip.score || trip.Score || 0;
+                driverScores[driver].count++;
             });
 
             const driverLabels = Object.keys(driverScores);
@@ -1250,7 +1301,8 @@
             });
 
             // Distribuição de eventos
-            const eventTypes = ['accEvents', 'brakeEvents', 'speedEvents', 'phoneEvents', 'swervingEvents'];
+            const eventTypes = ['accEvents', 'brakeEvents', 'AmountOfSpeedOverLimitEvents', 'AmountOfSmartphoneUsageEvents', 'AmountOfSwervingEvents'];
+            const eventLabels = ['Aceleração', 'Frenagem', 'Velocidade', 'Celular', 'Zigue-zague'];
             const eventData = eventTypes.map(type => 
                 filteredData.reduce((sum, trip) => sum + (trip[type] || 0), 0)
             );
@@ -1258,7 +1310,7 @@
             updateChart('eventsDistributionChart', {
                 type: 'doughnut',
                 data: {
-                    labels: ['Aceleração', 'Frenagem', 'Velocidade', 'Celular', 'Zigue-zague'],
+                    labels: eventLabels,
                     datasets: [{
                         data: eventData,
                         backgroundColor: [
@@ -1287,7 +1339,7 @@
         function updateCostsCharts() {
             // Evolução do custo por km
             const costData = filteredData.map(trip => ({
-                x: new Date(trip.startTimestamp),
+                x: new Date(trip.TripStartTimestamp || trip.startTimestamp),
                 y: trip.totalCostPerKm || 0
             })).sort((a, b) => a.x - b.x);
 
@@ -1361,9 +1413,9 @@
         function updateEfficiencyCharts() {
             // Tempo de viagem vs tempo ocioso
             const timeData = filteredData.map(trip => ({
-                driver: trip.userString,
-                tripTime: trip.TripTime || 0,
-                idleTime: trip.idleTime || 0
+                driver: trip.UserString || trip.userString || 'N/A',
+                tripTime: (trip.TripTime || 0) * 60, // Converter para minutos
+                idleTime: (trip.TotalIdlingTime || trip.idleTime || 0) * 60 // Converter para minutos
             }));
 
             const drivers = [...new Set(timeData.map(d => d.driver))];
@@ -1415,10 +1467,10 @@
 
             // Ranking de eficiência
             const efficiencyData = drivers.map(driver => {
-                const driverTrips = filteredData.filter(trip => trip.userString === driver);
-                const avgDistance = driverTrips.reduce((sum, trip) => sum + (trip.distance || 0), 0) / driverTrips.length;
+                const driverTrips = filteredData.filter(trip => (trip.UserString || trip.userString) === driver);
+                const avgDistance = driverTrips.reduce((sum, trip) => sum + (trip.TripDistance || trip.distance || 0), 0) / driverTrips.length;
                 const avgTime = driverTrips.reduce((sum, trip) => sum + (trip.TripTime || 0), 0) / driverTrips.length;
-                return { driver, efficiency: avgTime > 0 ? avgDistance / (avgTime / 60) : 0 }; // km/h
+                return { driver, efficiency: avgTime > 0 ? avgDistance / avgTime : 0 }; // km/h
             }).sort((a, b) => b.efficiency - a.efficiency);
 
             updateChart('efficiencyRankingChart', {
@@ -1457,7 +1509,7 @@
         function updateEmissionsCharts() {
             // Evolução das emissões
             const co2Data = filteredData.map(trip => ({
-                x: new Date(trip.startTimestamp),
+                x: new Date(trip.TripStartTimestamp || trip.startTimestamp),
                 y: trip.Co2Estimation || 0
             })).sort((a, b) => a.x - b.x);
 
@@ -1497,11 +1549,12 @@
             // Consumo por motorista
             const fuelByDriver = {};
             filteredData.forEach(trip => {
-                if (!fuelByDriver[trip.userString]) {
-                    fuelByDriver[trip.userString] = { total: 0, count: 0 };
+                const driver = trip.UserString || trip.userString || 'N/A';
+                if (!fuelByDriver[driver]) {
+                    fuelByDriver[driver] = { total: 0, count: 0 };
                 }
-                fuelByDriver[trip.userString].total += trip.fuelConsumption || 0;
-                fuelByDriver[trip.userString].count++;
+                fuelByDriver[driver].total += trip.totalFuelConsumption || 0;
+                fuelByDriver[driver].count++;
             });
 
             const fuelLabels = Object.keys(fuelByDriver);
@@ -1565,18 +1618,19 @@
             const driverStats = {};
             
             filteredData.forEach(trip => {
-                if (!driverStats[trip.userString]) {
-                    driverStats[trip.userString] = {
-                        name: trip.userString,
+                const driver = trip.UserString || trip.userString || 'N/A';
+                if (!driverStats[driver]) {
+                    driverStats[driver] = {
+                        name: driver,
                         totalTrips: 0,
                         totalScore: 0,
                         totalEvents: 0
                     };
                 }
                 
-                driverStats[trip.userString].totalTrips++;
-                driverStats[trip.userString].totalScore += trip.Score || 0;
-                driverStats[trip.userString].totalEvents += trip.Events || 0;
+                driverStats[driver].totalTrips++;
+                driverStats[driver].totalScore += trip.score || trip.Score || 0;
+                driverStats[driver].totalEvents += trip.totalEvents || trip.Events || 0;
             });
 
             const driversArray = Object.values(driverStats).map(driver => ({
@@ -1609,21 +1663,21 @@
             tbody.innerHTML = '';
 
             const sortedTrips = [...filteredData].sort((a, b) => 
-                new Date(b.startTimestamp) - new Date(a.startTimestamp)
+                new Date(b.TripStartTimestamp || b.startTimestamp) - new Date(a.TripStartTimestamp || a.startTimestamp)
             ).slice(0, 20); // Últimas 20 viagens
 
             sortedTrips.forEach(trip => {
                 const row = tbody.insertRow();
-                const date = new Date(trip.startTimestamp).toLocaleDateString('pt-BR');
-                const route = `${trip.startAddress || 'N/A'} → ${trip.finalAddress || 'N/A'}`;
+                const date = new Date(trip.TripStartTimestamp || trip.startTimestamp).toLocaleDateString('pt-BR');
+                const route = `${trip.StartAddress || trip.startAddress || 'N/A'} → ${trip.FinalAddress || trip.finalAddress || 'N/A'}`;
                 
                 row.innerHTML = `
                     <td>${date}</td>
-                    <td>${trip.userString || 'N/A'}</td>
-                    <td>${trip.vehiclePlate || 'N/A'}</td>
+                    <td>${trip.UserString || trip.userString || 'N/A'}</td>
+                    <td>${trip.vehiclePlate || trip.VehiclePlate || 'N/A'}</td>
                     <td title="${route}">${route.length > 50 ? route.substring(0, 50) + '...' : route}</td>
-                    <td>${(trip.distance || 0).toFixed(1)}</td>
-                    <td>${trip.Score || 0}</td>
+                    <td>${(trip.TripDistance || trip.distance || 0).toFixed(1)}</td>
+                    <td>${trip.score || trip.Score || 0}</td>
                     <td>R$ ${(trip.totalCost || 0).toFixed(2)}</td>
                 `;
             });
@@ -1635,8 +1689,8 @@
             
             if (filteredData.length === 0) return;
 
-            const avgScore = filteredData.reduce((sum, trip) => sum + (trip.Score || 0), 0) / filteredData.length;
-            const totalEvents = filteredData.reduce((sum, trip) => sum + (trip.Events || 0), 0);
+            const avgScore = filteredData.reduce((sum, trip) => sum + (trip.score || trip.Score || 0), 0) / filteredData.length;
+            const totalEvents = filteredData.reduce((sum, trip) => sum + (trip.totalEvents || trip.Events || 0), 0);
             const avgCost = filteredData.reduce((sum, trip) => sum + (trip.totalCostPerKm || 0), 0) / filteredData.length;
 
             if (avgScore >= 85) {
@@ -1664,13 +1718,11 @@
         // Funções de exportação
         function exportToExcel() {
             console.log('📊 Exportando para Excel...');
-            // Implementar exportação Excel
             alert('Funcionalidade de exportação Excel será implementada em breve!');
         }
 
         function exportToPDF() {
             console.log('📄 Exportando para PDF...');
-            // Implementar exportação PDF
             alert('Funcionalidade de exportação PDF será implementada em breve!');
         }
 
