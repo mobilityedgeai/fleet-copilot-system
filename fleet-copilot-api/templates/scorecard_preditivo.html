@@ -12,14 +12,14 @@
             --primary: #1dd1a1;           /* Verde água principal */
             --primary-dark: #10ac84;      /* Verde água escuro */
             --primary-light: #55efc4;     /* Verde água claro */
-            --background: #2f3640;        /* Fundo escuro */
-            --surface: #40495a;           /* Superfície */
-            --surface-light: #57606f;     /* Superfície clara */
-            --surface-lighter: #747d8c;   /* Superfície mais clara */
+            --background: #1a1e23;        /* Fundo preto padrão dos BIs */
+            --surface: #2c3e50;           /* Superfície */
+            --surface-light: #34495e;     /* Superfície clara */
+            --surface-lighter: #57606f;   /* Superfície mais clara */
             --text: #ffffff;              /* Texto branco */
             --text-secondary: #a4b0be;    /* Texto secundário */
             --text-muted: #747d8c;        /* Texto esmaecido */
-            --border: #57606f;            /* Bordas */
+            --border: #34495e;            /* Bordas */
             --success: #2ed573;           /* Verde sucesso */
             --warning: #ffa502;           /* Laranja aviso */
             --error: #ff3838;             /* Vermelho erro */
@@ -260,7 +260,7 @@
         /* Charts Section */
         .charts-section {
             display: grid;
-            grid-template-columns: 1fr 1.5fr;
+            grid-template-columns: 1fr 2fr;
             gap: 25px;
             margin-bottom: 25px;
         }
@@ -537,7 +537,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(47, 54, 64, 0.95);
+            background: rgba(26, 30, 35, 0.95);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -557,6 +557,53 @@
 
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        /* Error Message */
+        .error-message {
+            background: rgba(255, 56, 56, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            display: none;
+        }
+
+        /* Debug Panel */
+        .debug-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            max-width: 300px;
+            font-size: 0.8rem;
+            z-index: 1000;
+            display: none;
+        }
+
+        .debug-panel.show {
+            display: block;
+        }
+
+        .debug-title {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .debug-item {
+            margin-bottom: 5px;
+            color: var(--text-secondary);
+        }
+
+        .debug-value {
+            color: var(--text);
+            font-weight: 500;
         }
 
         /* Responsive */
@@ -582,16 +629,15 @@
             }
 
             .dashboard-stats {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             }
 
-            .stat-value {
-                font-size: 1.5rem;
+            .charts-section {
+                grid-template-columns: 1fr;
             }
 
             .table-controls {
                 flex-direction: column;
-                gap: 10px;
                 align-items: stretch;
             }
 
@@ -607,14 +653,32 @@
     </style>
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading">
+        <div class="spinner"></div>
+        <div style="color: var(--text-secondary); font-size: 16px;">Carregando dados...</div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="errorMessage" class="error-message"></div>
+
+    <!-- Debug Panel -->
+    <div id="debugPanel" class="debug-panel">
+        <div class="debug-title">Debug Info</div>
+        <div class="debug-item">API Status: <span class="debug-value" id="debugApiStatus">-</span></div>
+        <div class="debug-item">Trips Loaded: <span class="debug-value" id="debugTripsCount">-</span></div>
+        <div class="debug-item">Users Loaded: <span class="debug-value" id="debugUsersCount">-</span></div>
+        <div class="debug-item">DE-PARA Success: <span class="debug-value" id="debugDeParaCount">-</span></div>
+        <div class="debug-item">Last Error: <span class="debug-value" id="debugLastError">-</span></div>
+        <div class="debug-item">Last Update: <span class="debug-value" id="debugLastUpdate">-</span></div>
+    </div>
+
     <div class="container">
         <!-- Header -->
         <div class="header">
             <div class="header-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                    <line x1="12" y1="9" x2="12" y2="13"/>
-                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                 </svg>
                 <div>
                     <h1>Scorecard Preditivo de Risco</h1>
@@ -622,21 +686,21 @@
                 </div>
             </div>
             <div class="header-actions">
+                <button class="btn btn-secondary" onclick="toggleDebug()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/>
+                    </svg>
+                    Debug
+                </button>
                 <button class="btn btn-secondary" onclick="refreshData()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="23,4 23,10 17,10"/>
-                        <polyline points="1,20 1,14 7,14"/>
-                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
                     </svg>
                     Atualizar
                 </button>
-                <button class="btn btn-primary" onclick="exportData()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14,2 14,8 20,8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
-                        <polyline points="10,9 9,9 8,9"/>
+                <button class="btn btn-primary" onclick="exportToExcel()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
                     </svg>
                     Exportar Excel
                 </button>
@@ -647,48 +711,38 @@
         <div class="filters-section">
             <div class="filters-grid">
                 <div class="filter-group">
-                    <label for="transportadoraFilter">Transportadora</label>
-                    <select id="transportadoraFilter">
-                        <option value="">Todas</option>
+                    <label>Período</label>
+                    <select id="periodFilter">
+                        <option value="7">Últimos 7 dias</option>
+                        <option value="30" selected>Últimos 30 dias</option>
+                        <option value="90">Últimos 90 dias</option>
+                        <option value="365">Último ano</option>
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label for="motoristaFilter">Motorista</label>
-                    <select id="motoristaFilter">
-                        <option value="">Todos</option>
+                    <label>Motorista</label>
+                    <select id="driverFilter">
+                        <option value="">Todos os motoristas</option>
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label for="placaFilter">Placa</label>
-                    <select id="placaFilter">
-                        <option value="">Todas</option>
+                    <label>Nível de Risco</label>
+                    <select id="riskFilter">
+                        <option value="">Todos os níveis</option>
+                        <option value="very-low">Muito Baixo (0-20%)</option>
+                        <option value="low">Baixo (21-40%)</option>
+                        <option value="moderate">Moderado (41-60%)</option>
+                        <option value="high">Alto (61-80%)</option>
+                        <option value="very-high">Muito Alto (81-100%)</option>
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label for="modeloFilter">Modelo do Veículo</label>
-                    <select id="modeloFilter">
-                        <option value="">Todos</option>
-                    </select>
+                    <label>Data Início</label>
+                    <input type="date" id="startDateFilter">
                 </div>
                 <div class="filter-group">
-                    <label for="frotaFilter">Frota</label>
-                    <select id="frotaFilter">
-                        <option value="">Todas</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="proprietarioFilter">Proprietário do Veículo</label>
-                    <select id="proprietarioFilter">
-                        <option value="">Todos</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="dataInicio">Data de Início</label>
-                    <input type="date" id="dataInicio">
-                </div>
-                <div class="filter-group">
-                    <label for="dataFim">Data de Fim</label>
-                    <input type="date" id="dataFim">
+                    <label>Data Fim</label>
+                    <input type="date" id="endDateFilter">
                 </div>
             </div>
             <div class="filters-actions">
@@ -698,12 +752,12 @@
         </div>
 
         <!-- Dashboard Stats -->
-        <div class="dashboard-stats">
+        <div id="dashboardStats" class="dashboard-stats" style="display: none;">
             <div class="stat-card">
                 <div class="stat-header">
-                    <div class="stat-title">Total de Viagens</div>
-                    <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                    <span class="stat-title">Total de Viagens</span>
+                    <svg class="stat-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18,18.5A1.5,1.5 0 0,1 16.5,20A1.5,1.5 0 0,1 15,18.5A1.5,1.5 0 0,1 16.5,17A1.5,1.5 0 0,1 18,18.5M19.5,9.5L21.46,12H17V9.5M6,18.5A1.5,1.5 0 0,1 4.5,20A1.5,1.5 0 0,1 3,18.5A1.5,1.5 0 0,1 4.5,17A1.5,1.5 0 0,1 6,18.5M20,8H17V4H3C1.89,4 1,4.89 1,6V18A2,2 0 0,0 3,20H4.5A3.5,3.5 0 0,0 8,16.5A3.5,3.5 0 0,0 4.5,13A3.5,3.5 0 0,0 1,16.5V6A4,4 0 0,1 5,2H19A2,2 0 0,1 21,4V8A1,1 0 0,1 20,8Z"/>
                     </svg>
                 </div>
                 <div class="stat-value" id="totalTrips">0</div>
@@ -712,21 +766,20 @@
 
             <div class="stat-card">
                 <div class="stat-header">
-                    <div class="stat-title">Score Médio Geral</div>
-                    <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+                    <span class="stat-title">Score Médio Geral</span>
+                    <svg class="stat-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.46,13.97L5.82,21L12,17.27Z"/>
                     </svg>
                 </div>
                 <div class="stat-value" id="averageScore">0</div>
-                <div class="stat-change" id="scoreChange">Performance geral</div>
+                <div class="stat-change" id="scoreChange">Excelente</div>
             </div>
 
             <div class="stat-card">
                 <div class="stat-header">
-                    <div class="stat-title">Distância Total</div>
-                    <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/>
-                        <path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"/>
+                    <span class="stat-title">Distância Total</span>
+                    <svg class="stat-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
                     </svg>
                 </div>
                 <div class="stat-value" id="totalDistance">0 km</div>
@@ -735,57 +788,38 @@
 
             <div class="stat-card">
                 <div class="stat-header">
-                    <div class="stat-title">Eventos de Risco</div>
-                    <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                        <line x1="12" y1="9" x2="12" y2="13"/>
-                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    <span class="stat-title">Eventos de Risco</span>
+                    <svg class="stat-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z"/>
                     </svg>
                 </div>
-                <div class="stat-value" id="totalRiskEvents">0</div>
-                <div class="stat-change" id="riskEventsChange">Alertas de segurança</div>
+                <div class="stat-value" id="riskEvents">0</div>
+                <div class="stat-change neutral">Alertas de segurança</div>
             </div>
 
             <div class="stat-card">
                 <div class="stat-header">
-                    <div class="stat-title">Emissão CO₂</div>
-                    <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M3 6h18l-2 13H5L3 6z"/>
-                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                        <circle cx="12" cy="11" r="2"/>
+                    <span class="stat-title">Risco Preditivo da Frota</span>
+                    <svg class="stat-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M11,16.5L6.5,12L7.91,10.59L11,13.67L16.59,8.09L18,9.5L11,16.5Z"/>
                     </svg>
                 </div>
-                <div class="stat-value" id="totalCO2">0 kg</div>
-                <div class="stat-change neutral">Impacto ambiental</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-title">Risco Preditivo da Frota</div>
-                    <svg class="stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                        <path d="M2 17l10 5 10-5"/>
-                        <path d="M2 12l10 5 10-5"/>
-                    </svg>
-                </div>
-                <div class="stat-value" id="fleetPredictiveRisk">0%</div>
-                <div class="stat-change" id="fleetRiskLevel">Nível de risco</div>
+                <div class="stat-value" id="fleetRisk">0%</div>
+                <div class="stat-change" id="riskChange">Baixo</div>
             </div>
         </div>
 
-        <!-- Charts Section -->
-        <div class="charts-section">
-            <!-- Predictive Risk Gauge -->
+        <!-- Charts -->
+        <div id="chartsSection" class="charts-section" style="display: none;">
             <div class="chart-card">
                 <div class="chart-header">
                     <div class="chart-title">Risco Preditivo da Frota</div>
                 </div>
-                <div class="gauge-container">
+                <div class="chart-container">
                     <canvas id="riskGaugeChart"></canvas>
                 </div>
             </div>
 
-            <!-- Driver Risk Distribution -->
             <div class="chart-card">
                 <div class="chart-header">
                     <div class="chart-title">Distribuição de Risco por Motorista (Top 10)</div>
@@ -796,14 +830,21 @@
             </div>
         </div>
 
-        <!-- Enhanced Table -->
-        <div class="table-section">
+        <!-- Table -->
+        <div id="tableSection" class="table-section" style="display: none;">
             <div class="table-header">
                 <div class="table-title">Detalhamento das Viagens com Risco Preditivo</div>
                 <div class="table-controls">
-                    <input type="text" class="search-box" id="tableSearch" placeholder="Buscar por motorista ou placa...">
+                    <input type="text" class="search-box" id="searchBox" placeholder="Buscar motorista...">
+                    <select class="pagination-select" id="pageSize" onchange="changePageSize()">
+                        <option value="50">50 por página</option>
+                        <option value="100" selected>100 por página</option>
+                        <option value="200">200 por página</option>
+                        <option value="500">500 por página</option>
+                    </select>
                 </div>
             </div>
+
             <div class="table-container">
                 <table class="enhanced-table">
                     <thead>
@@ -820,441 +861,454 @@
                             <th>Nível</th>
                         </tr>
                     </thead>
-                    <tbody id="tripsTableBody">
-                        <!-- Dados serão inseridos via JavaScript -->
+                    <tbody id="tableBody">
                     </tbody>
                 </table>
             </div>
-            
-            <!-- Pagination -->
+
             <div class="pagination-container">
-                <div class="pagination-info">
-                    <span id="paginationInfo">Mostrando 0 de 0 registros</span>
+                <div class="pagination-info" id="paginationInfo">
+                    Mostrando 0-0 de 0 registros
                 </div>
                 <div class="pagination-controls">
-                    <select class="pagination-select" id="pageSize" onchange="changePageSize()">
-                        <option value="50">50 por página</option>
-                        <option value="100" selected>100 por página</option>
-                        <option value="200">200 por página</option>
-                        <option value="500">500 por página</option>
-                    </select>
-                    <div class="pagination-buttons" id="paginationButtons">
-                        <!-- Botões serão inseridos via JavaScript -->
+                    <div class="pagination-buttons">
+                        <button class="pagination-btn" onclick="goToPage(1)" id="firstPageBtn">Primeira</button>
+                        <button class="pagination-btn" onclick="previousPage()" id="prevPageBtn">Anterior</button>
+                        <span id="pageNumbers"></span>
+                        <button class="pagination-btn" onclick="nextPage()" id="nextPageBtn">Próxima</button>
+                        <button class="pagination-btn" onclick="goToPage(totalPages)" id="lastPageBtn">Última</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Loading Overlay -->
-    <div class="loading" id="loadingOverlay">
-        <div class="spinner"></div>
-        <div style="color: var(--text-secondary); font-size: 16px;">Carregando dados...</div>
-    </div>
-
     <script>
-        // Global variables
-        let allTripsData = [];
-        let filteredTripsData = [];
+        // Configuração da API
+        const API_BASE_URL = 'https://firebase-bi-api.onrender.com';
+        const ENTERPRISE_ID = new URLSearchParams(window.location.search).get('enterpriseId') || 'qzDVZ1jB6IC60baxtsDU';
+
+        // Variáveis globais
+        let tripsData = [];
         let usersData = [];
+        let usersMap = new Map();
+        let filteredData = [];
         let currentPage = 1;
         let pageSize = 100;
         let totalPages = 1;
-        
-        // Get enterprise ID from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const ENTERPRISE_ID = urlParams.get('enterpriseId') || 'qzDVZ1jB6IC60baxtsDU';
-        
-        // API Configuration
-        const API_BASE_URL = 'https://firebase-bi-api.onrender.com';
+        let riskGaugeChart = null;
+        let driverRiskChart = null;
 
-        // Initialize the application
+        // Debug
+        let debugInfo = {
+            apiStatus: 'Connecting...',
+            tripsCount: 0,
+            usersCount: 0,
+            deParaCount: 0,
+            lastError: 'None',
+            lastUpdate: 'Never'
+        };
+
+        // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Iniciando Scorecard Preditivo de Risco');
-            console.log('📊 Enterprise ID:', ENTERPRISE_ID);
+            console.log('🚀 Scorecard Preditivo iniciado');
+            console.log('🏢 Enterprise ID:', ENTERPRISE_ID);
+            
+            initializeDateFilters();
             loadData();
         });
 
-        // Load data from APIs
+        function initializeDateFilters() {
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+            
+            document.getElementById('endDateFilter').value = today.toISOString().split('T')[0];
+            document.getElementById('startDateFilter').value = thirtyDaysAgo.toISOString().split('T')[0];
+        }
+
         async function loadData() {
-            showLoading(true);
             try {
+                showLoading(true);
+                hideError();
+                
                 console.log('📡 Carregando dados das APIs...');
+                debugInfo.apiStatus = 'Loading...';
+                updateDebugPanel();
+
+                // Carregar dados em paralelo
+                const [tripsResponse, usersResponse] = await Promise.all([
+                    fetch(`${API_BASE_URL}/trips?enterpriseId=${ENTERPRISE_ID}`),
+                    fetch(`${API_BASE_URL}/users?enterpriseId=${ENTERPRISE_ID}`)
+                ]);
+
+                // Verificar respostas
+                if (!tripsResponse.ok) {
+                    throw new Error(`Erro na API trips: ${tripsResponse.status}`);
+                }
+                if (!usersResponse.ok) {
+                    throw new Error(`Erro na API users: ${usersResponse.status}`);
+                }
+
+                const tripsResult = await tripsResponse.json();
+                const usersResult = await usersResponse.json();
+
+                console.log('✅ Dados carregados:', {
+                    trips: tripsResult.count,
+                    users: usersResult.count
+                });
+
+                // Processar dados
+                tripsData = tripsResult.data || [];
+                usersData = usersResult.data || [];
+
+                debugInfo.apiStatus = 'Connected';
+                debugInfo.tripsCount = tripsData.length;
+                debugInfo.usersCount = usersData.length;
+                debugInfo.lastUpdate = new Date().toLocaleTimeString();
+
+                // Criar mapa de usuários para DE-PARA
+                createUsersMap();
                 
-                // Load users first for name mapping
-                await loadUsers();
+                // Processar dados de viagens
+                processTripsData();
                 
-                // Load trips data
-                await loadTrips();
+                // Aplicar filtros iniciais
+                applyFilters();
                 
-                // Process and display data
-                processData();
-                updateDashboard();
-                updateCharts();
-                updateTable();
+                showLoading(false);
                 
-                console.log('✅ Dados carregados com sucesso!');
             } catch (error) {
                 console.error('❌ Erro ao carregar dados:', error);
-                showError('Erro ao carregar dados. Verifique a conexão com a API.');
-            } finally {
+                debugInfo.apiStatus = 'Error';
+                debugInfo.lastError = error.message;
+                showError(`Erro ao carregar dados: ${error.message}`);
                 showLoading(false);
             }
+            
+            updateDebugPanel();
         }
 
-        // Load users data for name mapping
-        async function loadUsers() {
-            try {
-                console.log('👥 Carregando dados de usuários...');
-                const response = await fetch(`${API_BASE_URL}/userregistration?enterpriseId=${ENTERPRISE_ID}`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        function createUsersMap() {
+            console.log('👥 Criando mapa de usuários para DE-PARA...');
+            usersMap.clear();
+            let mappingCount = 0;
+
+            usersData.forEach(user => {
+                if (user.uid && user.display_name) {
+                    usersMap.set(user.uid, user.display_name);
+                    console.log(`👤 Mapeamento: ${user.uid} → ${user.display_name}`);
+                    mappingCount++;
                 }
                 
-                const result = await response.json();
-                usersData = result.data || [];
-                
-                console.log(`✅ ${usersData.length} usuários carregados`);
-                
-                // Create mapping for quick lookup
-                usersData.forEach(user => {
-                    console.log(`👤 Usuário: ${user._doc_id} → ${user.NomeCompleto}`);
-                });
-                
-            } catch (error) {
-                console.error('❌ Erro ao carregar usuários:', error);
-                usersData = [];
-            }
-        }
-
-        // Load trips data
-        async function loadTrips() {
-            try {
-                console.log('🚗 Carregando dados de viagens...');
-                const response = await fetch(`${API_BASE_URL}/trips?enterpriseId=${ENTERPRISE_ID}`);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                // Fallbacks para diferentes campos de ID
+                if (user.id && user.display_name && !usersMap.has(user.id)) {
+                    usersMap.set(user.id, user.display_name);
+                    mappingCount++;
                 }
                 
-                const result = await response.json();
-                allTripsData = result.data || [];
-                
-                console.log(`✅ ${allTripsData.length} viagens carregadas`);
-                
-                // Enrich trips with driver names
-                allTripsData.forEach(trip => {
-                    trip.driverName = getDriverName(trip.UserString);
-                });
-                
-            } catch (error) {
-                console.error('❌ Erro ao carregar viagens:', error);
-                allTripsData = [];
-            }
+                if (user._doc_id && user.display_name && !usersMap.has(user._doc_id)) {
+                    usersMap.set(user._doc_id, user.display_name);
+                    mappingCount++;
+                }
+            });
+
+            debugInfo.deParaCount = mappingCount;
+            console.log(`✅ Mapa de usuários criado: ${mappingCount} mapeamentos`);
         }
 
-        // Get driver name from user ID
         function getDriverName(userString) {
-            if (!userString) return 'N/A';
+            if (!userString) return 'Motorista não identificado';
             
-            const user = usersData.find(u => u._doc_id === userString);
-            if (user && user.NomeCompleto) {
-                return user.NomeCompleto;
+            // Busca rápida no mapa
+            const driverName = usersMap.get(userString);
+            if (driverName) {
+                console.log(`🔄 DE-PARA: ${userString} → ${driverName}`);
+                return driverName;
             }
             
-            // Fallback to original ID
-            return userString;
+            // Fallback: busca direta no array de usuários
+            const user = usersData.find(u => 
+                u.uid === userString || 
+                u.id === userString || 
+                u._doc_id === userString
+            );
+            
+            if (user && user.display_name) {
+                console.log(`✅ DE-PARA encontrado: ${userString} → ${user.display_name}`);
+                return user.display_name;
+            }
+            
+            // Último fallback: ID truncado para legibilidade
+            const truncatedId = userString.length > 10 ? 
+                userString.substring(0, 10) + '...' : userString;
+            console.log(`⚠️ DE-PARA não encontrado para: ${userString}, usando: ${truncatedId}`);
+            return truncatedId;
         }
 
-        // Process data and calculate predictive risk
-        function processData() {
-            console.log('🔄 Processando dados e calculando risco preditivo...');
+        function processTripsData() {
+            console.log('🔄 Processando dados de viagens...');
             
-            allTripsData.forEach(trip => {
+            tripsData.forEach(trip => {
+                // Calcular scores preditivos
                 trip.predictiveRisk = calculatePredictiveRisk(trip);
                 trip.riskLevel = getRiskLevel(trip.predictiveRisk);
+                
+                // Garantir que scores tenham máximo 4 dígitos
+                trip.scoreGeral = formatScore(trip.scoreGeral);
+                trip.scoreAceleracao = formatScore(trip.scoreAceleracao);
+                trip.scoreFrenagem = formatScore(trip.scoreFrenagem);
+                trip.scoreVelocidade = formatScore(trip.scoreVelocidade);
+                
+                // Processar nome do motorista
+                trip.driverName = getDriverName(trip.user);
             });
             
-            // Sort by predictive risk (highest first)
-            allTripsData.sort((a, b) => b.predictiveRisk - a.predictiveRisk);
-            
-            // Apply initial filters
-            filteredTripsData = [...allTripsData];
-            
-            // Populate filter options
-            populateFilters();
-            
-            console.log('✅ Dados processados com sucesso');
+            console.log('✅ Dados processados');
         }
 
-        // Calculate predictive risk using ensemble learning approach
+        function formatScore(score) {
+            if (score === null || score === undefined || isNaN(score)) return 0;
+            return Math.round(parseFloat(score) * 100) / 100; // Máximo 2 casas decimais
+        }
+
         function calculatePredictiveRisk(trip) {
-            try {
-                // Extract and normalize factors
-                const score = parseFloat(trip.score) || 0;
-                const accScore = parseFloat(trip.AccScore) || 0;
-                const brakeScore = parseFloat(trip.BrakeScore) || 0;
-                const speedScore = parseFloat(trip.SpeedScore) || 0;
-                const phoneScore = parseFloat(trip.PhoneScore) || 0;
-                
-                // Risk events with weighted importance
-                const speedEvents = (parseFloat(trip.AmountOfSpeedOverLimitEvents) || 0) * 3.0; // High weight
-                const phoneEvents = (parseFloat(trip.AmountOfSmartphoneUsageEvents) || 0) * 2.5; // High weight
-                const accEvents = (parseFloat(trip.accEvents) || 0) * 1.5; // Medium weight
-                const brakeEvents = (parseFloat(trip.brakingEvents) || 0) * 1.5; // Medium weight
-                
-                // Trip duration for normalization
-                const tripTime = parseFloat(trip.TripTime) || 1;
-                
-                // Factor 1: Overall Score (40% weight) - Inverted (lower score = higher risk)
-                const normalizedScore = Math.max(0, Math.min(1, (100 - score) / 100));
-                
-                // Factor 2: Risk Events (30% weight) - Normalized by trip duration
-                const totalWeightedEvents = speedEvents + phoneEvents + accEvents + brakeEvents;
-                const eventsPerHour = totalWeightedEvents / (tripTime / 60); // Events per hour
-                const normalizedEvents = Math.min(1, eventsPerHour / 10); // Normalize to 0-1
-                
-                // Factor 3: Behavioral Scores (20% weight) - Average of specific scores
-                const behaviorScores = [accScore, brakeScore, speedScore, phoneScore].filter(s => s > 0);
-                const avgBehaviorScore = behaviorScores.length > 0 ? 
-                    behaviorScores.reduce((a, b) => a + b, 0) / behaviorScores.length : 50;
-                const normalizedBehavior = Math.max(0, Math.min(1, (100 - avgBehaviorScore) / 100));
-                
-                // Factor 4: Event Frequency (10% weight) - Events per km
-                const distance = parseFloat(trip.TripDistance) || 1;
-                const eventsPerKm = totalWeightedEvents / distance;
-                const normalizedFrequency = Math.min(1, eventsPerKm / 2); // Normalize to 0-1
-                
-                // Ensemble calculation with weights
-                const predictiveRisk = (
-                    normalizedScore * 0.4 +      // 40% weight
-                    normalizedEvents * 0.3 +     // 30% weight
-                    normalizedBehavior * 0.2 +   // 20% weight
-                    normalizedFrequency * 0.1    // 10% weight
-                );
-                
-                // Apply sigmoid function to smooth extremes and convert to percentage
-                const sigmoidRisk = 1 / (1 + Math.exp(-6 * (predictiveRisk - 0.5)));
-                const finalRisk = sigmoidRisk * 100;
-                
-                return Math.round(finalRisk * 100) / 100; // Round to 2 decimal places
-                
-            } catch (error) {
-                console.error('Erro ao calcular risco preditivo:', error);
-                return 50; // Default medium risk
-            }
+            // Algoritmo preditivo avançado com ensemble learning
+            const velocityWeight = 3.0;
+            const phoneWeight = 2.5;
+            const accelBrakeWeight = 1.5;
+            const baseWeight = 1.0;
+
+            // Normalizar scores (0-100)
+            const normalizedVelocity = Math.max(0, Math.min(100, 100 - (trip.scoreVelocidade || 0)));
+            const normalizedPhone = Math.max(0, Math.min(100, (trip.phoneUsageEvents || 0) * 10));
+            const normalizedAccelBrake = Math.max(0, Math.min(100, 
+                ((100 - (trip.scoreAceleracao || 0)) + (100 - (trip.scoreFrenagem || 0))) / 2
+            ));
+            const normalizedGeneral = Math.max(0, Math.min(100, 100 - (trip.scoreGeral || 0)));
+
+            // Calcular risco ponderado
+            const weightedRisk = (
+                (normalizedVelocity * velocityWeight) +
+                (normalizedPhone * phoneWeight) +
+                (normalizedAccelBrake * accelBrakeWeight) +
+                (normalizedGeneral * baseWeight)
+            ) / (velocityWeight + phoneWeight + accelBrakeWeight + baseWeight);
+
+            // Aplicar função sigmoid para suavizar extremos
+            const sigmoidRisk = 100 / (1 + Math.exp(-0.1 * (weightedRisk - 50)));
+
+            return Math.round(sigmoidRisk * 100) / 100;
         }
 
-        // Get risk level based on percentage
-        function getRiskLevel(riskPercentage) {
-            if (riskPercentage <= 20) return 'Muito Baixo';
-            if (riskPercentage <= 40) return 'Baixo';
-            if (riskPercentage <= 60) return 'Moderado';
-            if (riskPercentage <= 80) return 'Alto';
-            return 'Muito Alto';
+        function getRiskLevel(risk) {
+            if (risk <= 20) return 'very-low';
+            if (risk <= 40) return 'low';
+            if (risk <= 60) return 'moderate';
+            if (risk <= 80) return 'high';
+            return 'very-high';
         }
 
-        // Get risk level class for styling
-        function getRiskLevelClass(riskPercentage) {
-            if (riskPercentage <= 20) return 'risk-very-low';
-            if (riskPercentage <= 40) return 'risk-low';
-            if (riskPercentage <= 60) return 'risk-moderate';
-            if (riskPercentage <= 80) return 'risk-high';
-            return 'risk-very-high';
-        }
+        function applyFilters() {
+            console.log('🔍 Aplicando filtros...');
+            
+            const periodFilter = document.getElementById('periodFilter').value;
+            const driverFilter = document.getElementById('driverFilter').value;
+            const riskFilter = document.getElementById('riskFilter').value;
+            const startDate = document.getElementById('startDateFilter').value;
+            const endDate = document.getElementById('endDateFilter').value;
 
-        // Populate filter options with real data
-        function populateFilters() {
-            const filters = {
-                motoristaFilter: [...new Set(filteredTripsData.map(trip => trip.driverName).filter(Boolean))],
-                placaFilter: [...new Set(filteredTripsData.map(trip => trip.vehiclePlate).filter(Boolean))],
-                // Add other filters as needed
-            };
-
-            Object.keys(filters).forEach(filterId => {
-                const select = document.getElementById(filterId);
-                if (select) {
-                    // Clear existing options except first
-                    while (select.children.length > 1) {
-                        select.removeChild(select.lastChild);
-                    }
-                    
-                    // Add new options
-                    filters[filterId].sort().forEach(value => {
-                        const option = document.createElement('option');
-                        option.value = value;
-                        option.textContent = value;
-                        select.appendChild(option);
-                    });
+            filteredData = tripsData.filter(trip => {
+                // Filtro de período
+                if (periodFilter && trip.timestamp) {
+                    const tripDate = new Date(trip.timestamp);
+                    const cutoffDate = new Date();
+                    cutoffDate.setDate(cutoffDate.getDate() - parseInt(periodFilter));
+                    if (tripDate < cutoffDate) return false;
                 }
+
+                // Filtro de data específica
+                if (startDate && trip.timestamp) {
+                    const tripDate = new Date(trip.timestamp);
+                    if (tripDate < new Date(startDate)) return false;
+                }
+                if (endDate && trip.timestamp) {
+                    const tripDate = new Date(trip.timestamp);
+                    if (tripDate > new Date(endDate + 'T23:59:59')) return false;
+                }
+
+                // Filtro de motorista
+                if (driverFilter && trip.user !== driverFilter) return false;
+
+                // Filtro de risco
+                if (riskFilter && trip.riskLevel !== riskFilter) return false;
+
+                return true;
             });
+
+            console.log(`✅ Filtros aplicados: ${filteredData.length} viagens`);
+            
+            updateDashboardStats();
+            updateCharts();
+            updateTable();
+            updateDriverFilter();
         }
 
-        // Update dashboard metrics
-        function updateDashboard() {
-            const totalTrips = filteredTripsData.length;
+        function updateDashboardStats() {
+            const totalTrips = filteredData.length;
+            const totalDistance = filteredData.reduce((sum, trip) => sum + (trip.distance || 0), 0);
+            const totalEvents = filteredData.reduce((sum, trip) => sum + (trip.riskEvents || 0), 0);
+            
             const averageScore = totalTrips > 0 ? 
-                filteredTripsData.reduce((sum, trip) => sum + (parseFloat(trip.score) || 0), 0) / totalTrips : 0;
+                filteredData.reduce((sum, trip) => sum + (trip.scoreGeral || 0), 0) / totalTrips : 0;
             
-            const totalDistance = filteredTripsData.reduce((sum, trip) => sum + (parseFloat(trip.TripDistance) || 0), 0);
-            
-            const totalRiskEvents = filteredTripsData.reduce((sum, trip) => {
-                return sum + (parseFloat(trip.AmountOfSpeedOverLimitEvents) || 0) +
-                       (parseFloat(trip.AmountOfSmartphoneUsageEvents) || 0) +
-                       (parseFloat(trip.accEvents) || 0) +
-                       (parseFloat(trip.brakingEvents) || 0);
-            }, 0);
-            
-            const totalCO2 = filteredTripsData.reduce((sum, trip) => sum + (parseFloat(trip.Co2Estimation) || 0), 0);
-            
-            const fleetPredictiveRisk = totalTrips > 0 ?
-                filteredTripsData.reduce((sum, trip) => sum + trip.predictiveRisk, 0) / totalTrips : 0;
+            const fleetRisk = totalTrips > 0 ? 
+                filteredData.reduce((sum, trip) => sum + trip.predictiveRisk, 0) / totalTrips : 0;
 
-            // Update DOM elements
             document.getElementById('totalTrips').textContent = totalTrips.toLocaleString();
             document.getElementById('averageScore').textContent = averageScore.toFixed(1);
-            document.getElementById('totalDistance').textContent = `${totalDistance.toFixed(0)} km`;
-            document.getElementById('totalRiskEvents').textContent = totalRiskEvents.toLocaleString();
-            document.getElementById('totalCO2').textContent = `${totalCO2.toFixed(1)} kg`;
-            document.getElementById('fleetPredictiveRisk').textContent = `${fleetPredictiveRisk.toFixed(1)}%`;
-            
-            // Update risk level indicator
-            const riskLevelElement = document.getElementById('fleetRiskLevel');
-            const riskLevel = getRiskLevel(fleetPredictiveRisk);
-            riskLevelElement.textContent = riskLevel;
-            riskLevelElement.className = `stat-change ${getRiskLevelClass(fleetPredictiveRisk)}`;
-            
-            // Update score change indicator
-            const scoreChangeElement = document.getElementById('scoreChange');
-            if (averageScore >= 85) {
-                scoreChangeElement.textContent = 'Excelente';
-                scoreChangeElement.className = 'stat-change positive';
-            } else if (averageScore >= 70) {
-                scoreChangeElement.textContent = 'Bom';
-                scoreChangeElement.className = 'stat-change neutral';
+            document.getElementById('totalDistance').textContent = `${(totalDistance / 1000).toFixed(1)} km`;
+            document.getElementById('riskEvents').textContent = totalEvents.toLocaleString();
+            document.getElementById('fleetRisk').textContent = `${fleetRisk.toFixed(1)}%`;
+
+            // Atualizar status
+            updateScoreStatus(averageScore);
+            updateRiskStatus(fleetRisk);
+
+            document.getElementById('dashboardStats').style.display = 'grid';
+        }
+
+        function updateScoreStatus(score) {
+            const statusElement = document.getElementById('scoreChange');
+            if (score >= 80) {
+                statusElement.textContent = 'Excelente';
+                statusElement.className = 'stat-change positive';
+            } else if (score >= 60) {
+                statusElement.textContent = 'Bom';
+                statusElement.className = 'stat-change positive';
+            } else if (score >= 40) {
+                statusElement.textContent = 'Regular';
+                statusElement.className = 'stat-change neutral';
             } else {
-                scoreChangeElement.textContent = 'Precisa melhorar';
-                scoreChangeElement.className = 'stat-change negative';
+                statusElement.textContent = 'Crítico';
+                statusElement.className = 'stat-change negative';
             }
         }
 
-        // Update charts
+        function updateRiskStatus(risk) {
+            const statusElement = document.getElementById('riskChange');
+            if (risk <= 30) {
+                statusElement.textContent = 'Baixo';
+                statusElement.className = 'stat-change positive';
+            } else if (risk <= 60) {
+                statusElement.textContent = 'Médio';
+                statusElement.className = 'stat-change neutral';
+            } else {
+                statusElement.textContent = 'Alto';
+                statusElement.className = 'stat-change negative';
+            }
+        }
+
         function updateCharts() {
             updateRiskGaugeChart();
             updateDriverRiskChart();
+            document.getElementById('chartsSection').style.display = 'grid';
         }
 
-        // Update risk gauge chart
         function updateRiskGaugeChart() {
             const ctx = document.getElementById('riskGaugeChart').getContext('2d');
             
-            const fleetRisk = filteredTripsData.length > 0 ?
-                filteredTripsData.reduce((sum, trip) => sum + trip.predictiveRisk, 0) / filteredTripsData.length : 0;
-
-            // Destroy existing chart if it exists
-            if (window.riskGaugeChart) {
+            // Destruir gráfico anterior se existir
+            if (window.riskGaugeChart && typeof window.riskGaugeChart.destroy === 'function') {
                 window.riskGaugeChart.destroy();
             }
+
+            const fleetRisk = filteredData.length > 0 ? 
+                filteredData.reduce((sum, trip) => sum + trip.predictiveRisk, 0) / filteredData.length : 0;
+
+            const riskColor = fleetRisk <= 30 ? '#27ae60' : fleetRisk <= 60 ? '#f39c12' : '#e74c3c';
 
             window.riskGaugeChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     datasets: [{
                         data: [fleetRisk, 100 - fleetRisk],
-                        backgroundColor: [
-                            fleetRisk <= 20 ? '#2ecc71' :
-                            fleetRisk <= 40 ? '#27ae60' :
-                            fleetRisk <= 60 ? '#f1c40f' :
-                            fleetRisk <= 80 ? '#e67e22' : '#c0392b',
-                            'rgba(116, 125, 140, 0.2)'
-                        ],
-                        borderWidth: 0,
-                        cutout: '75%'
+                        backgroundColor: [riskColor, '#2c3e50'],
+                        borderWidth: 0
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    circumference: Math.PI,
+                    rotation: Math.PI,
+                    cutout: '75%',
                     plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            enabled: false
-                        }
-                    },
-                    animation: {
-                        animateRotate: true,
-                        duration: 2000
+                        legend: { display: false },
+                        tooltip: { enabled: false }
                     }
                 },
                 plugins: [{
                     afterDraw: function(chart) {
                         const ctx = chart.ctx;
                         const centerX = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2;
-                        const centerY = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2;
+                        const centerY = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2 + 20;
                         
-                        ctx.save();
-                        ctx.font = 'bold 24px Inter';
                         ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 24px Inter';
                         ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillText(`${fleetRisk.toFixed(1)}%`, centerX, centerY - 10);
+                        ctx.fillText(`${fleetRisk.toFixed(1)}%`, centerX, centerY);
                         
-                        ctx.font = '14px Inter';
                         ctx.fillStyle = '#a4b0be';
-                        ctx.fillText(getRiskLevel(fleetRisk), centerX, centerY + 15);
-                        ctx.restore();
+                        ctx.font = '12px Inter';
+                        ctx.fillText(fleetRisk <= 30 ? 'Baixo' : fleetRisk <= 60 ? 'Médio' : 'Alto', centerX, centerY + 20);
                     }
                 }]
             });
         }
 
-        // Update driver risk chart
         function updateDriverRiskChart() {
             const ctx = document.getElementById('driverRiskChart').getContext('2d');
             
-            // Group by driver and calculate average risk
+            // Destruir gráfico anterior se existir
+            if (window.driverRiskChart && typeof window.driverRiskChart.destroy === 'function') {
+                window.driverRiskChart.destroy();
+            }
+
+            // Agrupar por motorista e calcular risco médio
             const driverRisks = {};
-            filteredTripsData.forEach(trip => {
+            filteredData.forEach(trip => {
                 const driverName = trip.driverName;
                 if (!driverRisks[driverName]) {
                     driverRisks[driverName] = { total: 0, count: 0 };
                 }
                 driverRisks[driverName].total += trip.predictiveRisk;
-                driverRisks[driverName].count += 1;
+                driverRisks[driverName].count++;
             });
 
-            // Calculate averages and sort
-            const driverData = Object.keys(driverRisks)
-                .map(driver => ({
-                    name: driver,
-                    risk: driverRisks[driver].total / driverRisks[driver].count
+            // Calcular médias e ordenar
+            const driverData = Object.entries(driverRisks)
+                .map(([name, data]) => ({
+                    name,
+                    risk: data.total / data.count
                 }))
                 .sort((a, b) => b.risk - a.risk)
-                .slice(0, 10); // Top 10
+                .slice(0, 10);
 
-            // Destroy existing chart if it exists
-            if (window.driverRiskChart) {
-                window.driverRiskChart.destroy();
-            }
+            const labels = driverData.map(d => d.name);
+            const risks = driverData.map(d => d.risk);
+            const colors = risks.map(risk => 
+                risk <= 30 ? '#27ae60' : risk <= 60 ? '#f39c12' : '#e74c3c'
+            );
 
             window.driverRiskChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: driverData.map(d => d.name),
+                    labels: labels,
                     datasets: [{
-                        label: 'Risco Preditivo (%)',
-                        data: driverData.map(d => d.risk),
-                        backgroundColor: driverData.map(d => 
-                            d.risk <= 20 ? '#2ecc71' :
-                            d.risk <= 40 ? '#27ae60' :
-                            d.risk <= 60 ? '#f1c40f' :
-                            d.risk <= 80 ? '#e67e22' : '#c0392b'
-                        ),
-                        borderRadius: 4,
-                        borderSkipped: false
+                        data: risks,
+                        backgroundColor: colors,
+                        borderColor: colors,
+                        borderWidth: 1
                     }]
                 },
                 options: {
@@ -1262,319 +1316,234 @@
                     maintainAspectRatio: false,
                     indexAxis: 'y',
                     plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(47, 54, 64, 0.9)',
-                            titleColor: '#ffffff',
-                            bodyColor: '#a4b0be',
-                            borderColor: '#1dd1a1',
-                            borderWidth: 1,
-                            callbacks: {
-                                label: function(context) {
-                                    return `Risco: ${context.parsed.x.toFixed(1)}%`;
-                                }
-                            }
-                        }
+                        legend: { display: false }
                     },
                     scales: {
                         x: {
                             beginAtZero: true,
                             max: 100,
-                            grid: {
-                                color: 'rgba(116, 125, 140, 0.1)'
-                            },
-                            ticks: {
-                                color: '#a4b0be',
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            }
+                            grid: { color: '#34495e' },
+                            ticks: { color: '#a4b0be' }
                         },
                         y: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                color: '#a4b0be',
-                                font: {
-                                    size: 11
-                                }
-                            }
+                            grid: { color: '#34495e' },
+                            ticks: { color: '#a4b0be' }
                         }
                     }
                 }
             });
         }
 
-        // Update table with pagination
         function updateTable() {
-            const searchTerm = document.getElementById('tableSearch').value.toLowerCase();
-            
-            // Filter data based on search
-            let tableData = filteredTripsData.filter(trip => 
-                trip.driverName.toLowerCase().includes(searchTerm) ||
-                (trip.vehiclePlate && trip.vehiclePlate.toLowerCase().includes(searchTerm))
-            );
-
-            // Calculate pagination
-            totalPages = Math.ceil(tableData.length / pageSize);
-            currentPage = Math.min(currentPage, Math.max(1, totalPages));
-            
             const startIndex = (currentPage - 1) * pageSize;
-            const endIndex = Math.min(startIndex + pageSize, tableData.length);
-            const pageData = tableData.slice(startIndex, endIndex);
+            const endIndex = startIndex + pageSize;
+            const pageData = filteredData.slice(startIndex, endIndex);
 
-            // Update table body
-            const tbody = document.getElementById('tripsTableBody');
+            const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
 
             pageData.forEach(trip => {
-                const row = document.createElement('tr');
-                
-                // Format scores to maximum 4 digits
-                const formatScore = (score) => {
-                    const num = parseFloat(score) || 0;
-                    return num.toFixed(2);
-                };
-                
+                const row = tbody.insertRow();
                 row.innerHTML = `
                     <td>
                         <div class="driver-info">
                             <div class="driver-name">${trip.driverName}</div>
-                            <div class="driver-details">ID: ${trip.UserString}</div>
                         </div>
                     </td>
-                    <td>${trip.vehiclePlate || 'N/A'}</td>
+                    <td>${trip.vehiclePlate || '-'}</td>
                     <td>
                         <div class="trip-info">
-                            <div class="trip-route">${trip.StartAddress || 'N/A'} → ${trip.FinalAddress || 'N/A'}</div>
-                            <div class="trip-distance">${(parseFloat(trip.TripDistance) || 0).toFixed(1)} km</div>
+                            <div class="trip-route">${trip.route || '-'}</div>
+                            <div class="trip-distance">${(trip.distance / 1000).toFixed(1)} km</div>
                         </div>
                     </td>
-                    <td>
-                        <div class="score-badge ${getScoreClass(trip.score)}">
-                            ${formatScore(trip.score)}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="score-badge ${getScoreClass(trip.AccScore)}">
-                            ${formatScore(trip.AccScore)}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="score-badge ${getScoreClass(trip.BrakeScore)}">
-                            ${formatScore(trip.BrakeScore)}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="score-badge ${getScoreClass(trip.SpeedScore)}">
-                            ${formatScore(trip.SpeedScore)}
-                        </div>
-                    </td>
-                    <td>${getTotalRiskEvents(trip)}</td>
-                    <td><strong>${trip.predictiveRisk.toFixed(2)}%</strong></td>
-                    <td>
-                        <div class="risk-indicator ${getRiskLevelClass(trip.predictiveRisk)}">
-                            ${trip.riskLevel}
-                        </div>
-                    </td>
+                    <td><span class="score-badge ${getScoreClass(trip.scoreGeral)}">${trip.scoreGeral}</span></td>
+                    <td><span class="score-badge ${getScoreClass(trip.scoreAceleracao)}">${trip.scoreAceleracao}</span></td>
+                    <td><span class="score-badge ${getScoreClass(trip.scoreFrenagem)}">${trip.scoreFrenagem}</span></td>
+                    <td><span class="score-badge ${getScoreClass(trip.scoreVelocidade)}">${trip.scoreVelocidade}</span></td>
+                    <td>${trip.riskEvents || 0}</td>
+                    <td>${trip.predictiveRisk.toFixed(2)}%</td>
+                    <td><span class="risk-indicator risk-${trip.riskLevel}">${getRiskLevelText(trip.riskLevel)}</span></td>
                 `;
-                tbody.appendChild(row);
             });
 
-            // Update pagination info and controls
-            updatePaginationInfo(tableData.length, startIndex, endIndex);
-            updatePaginationControls();
+            updatePagination();
+            document.getElementById('tableSection').style.display = 'block';
         }
 
-        // Get score class for styling
         function getScoreClass(score) {
-            const num = parseFloat(score) || 0;
-            if (num >= 95) return 'score-excellent';
-            if (num >= 85) return 'score-good';
-            if (num >= 70) return 'score-average';
+            if (score >= 80) return 'score-excellent';
+            if (score >= 60) return 'score-good';
+            if (score >= 40) return 'score-average';
             return 'score-poor';
         }
 
-        // Get total risk events for a trip
-        function getTotalRiskEvents(trip) {
-            return (parseFloat(trip.AmountOfSpeedOverLimitEvents) || 0) +
-                   (parseFloat(trip.AmountOfSmartphoneUsageEvents) || 0) +
-                   (parseFloat(trip.accEvents) || 0) +
-                   (parseFloat(trip.brakingEvents) || 0);
+        function getRiskLevelText(level) {
+            const levels = {
+                'very-low': 'MUITO BAIXO',
+                'low': 'BAIXO',
+                'moderate': 'MODERADO',
+                'high': 'ALTO',
+                'very-high': 'MUITO ALTO'
+            };
+            return levels[level] || level.toUpperCase();
         }
 
-        // Update pagination info
-        function updatePaginationInfo(totalRecords, startIndex, endIndex) {
-            const info = document.getElementById('paginationInfo');
-            info.textContent = `Mostrando ${startIndex + 1}-${endIndex} de ${totalRecords} registros (Página ${currentPage} de ${totalPages})`;
+        function updatePagination() {
+            totalPages = Math.ceil(filteredData.length / pageSize);
+            
+            const startIndex = (currentPage - 1) * pageSize + 1;
+            const endIndex = Math.min(currentPage * pageSize, filteredData.length);
+            
+            document.getElementById('paginationInfo').textContent = 
+                `Mostrando ${startIndex}-${endIndex} de ${filteredData.length} registros (Página ${currentPage} de ${totalPages})`;
+
+            // Atualizar botões
+            document.getElementById('firstPageBtn').disabled = currentPage === 1;
+            document.getElementById('prevPageBtn').disabled = currentPage === 1;
+            document.getElementById('nextPageBtn').disabled = currentPage === totalPages;
+            document.getElementById('lastPageBtn').disabled = currentPage === totalPages;
+
+            // Atualizar números das páginas
+            updatePageNumbers();
         }
 
-        // Update pagination controls
-        function updatePaginationControls() {
-            const container = document.getElementById('paginationButtons');
-            container.innerHTML = '';
+        function updatePageNumbers() {
+            const pageNumbers = document.getElementById('pageNumbers');
+            pageNumbers.innerHTML = '';
 
-            // First page button
-            const firstBtn = createPaginationButton('Primeira', 1, currentPage === 1);
-            container.appendChild(firstBtn);
+            const maxVisible = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
 
-            // Previous page button
-            const prevBtn = createPaginationButton('Anterior', currentPage - 1, currentPage === 1);
-            container.appendChild(prevBtn);
-
-            // Page number buttons (show 5 pages around current)
-            const startPage = Math.max(1, currentPage - 2);
-            const endPage = Math.min(totalPages, currentPage + 2);
+            if (endPage - startPage + 1 < maxVisible) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
 
             for (let i = startPage; i <= endPage; i++) {
-                const pageBtn = createPaginationButton(i.toString(), i, false, i === currentPage);
-                container.appendChild(pageBtn);
+                const btn = document.createElement('button');
+                btn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+                btn.textContent = i;
+                btn.onclick = () => goToPage(i);
+                pageNumbers.appendChild(btn);
             }
-
-            // Next page button
-            const nextBtn = createPaginationButton('Próxima', currentPage + 1, currentPage === totalPages);
-            container.appendChild(nextBtn);
-
-            // Last page button
-            const lastBtn = createPaginationButton('Última', totalPages, currentPage === totalPages);
-            container.appendChild(lastBtn);
         }
 
-        // Create pagination button
-        function createPaginationButton(text, page, disabled, active = false) {
-            const button = document.createElement('button');
-            button.className = `pagination-btn ${active ? 'active' : ''}`;
-            button.textContent = text;
-            button.disabled = disabled;
+        function updateDriverFilter() {
+            const driverFilter = document.getElementById('driverFilter');
+            const currentValue = driverFilter.value;
             
-            if (!disabled) {
-                button.onclick = () => goToPage(page);
-            }
+            // Limpar opções existentes (exceto "Todos")
+            driverFilter.innerHTML = '<option value="">Todos os motoristas</option>';
             
-            return button;
+            // Obter lista única de motoristas
+            const drivers = [...new Set(tripsData.map(trip => trip.driverName))]
+                .filter(name => name && name !== 'Motorista não identificado')
+                .sort();
+            
+            drivers.forEach(driver => {
+                const option = document.createElement('option');
+                option.value = tripsData.find(trip => trip.driverName === driver)?.user || '';
+                option.textContent = driver;
+                driverFilter.appendChild(option);
+            });
+            
+            // Restaurar valor selecionado
+            driverFilter.value = currentValue;
         }
 
-        // Go to specific page
+        // Funções de paginação
         function goToPage(page) {
             currentPage = page;
             updateTable();
         }
 
-        // Change page size
+        function nextPage() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateTable();
+            }
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                updateTable();
+            }
+        }
+
         function changePageSize() {
             pageSize = parseInt(document.getElementById('pageSize').value);
             currentPage = 1;
             updateTable();
         }
 
-        // Apply filters
-        function applyFilters() {
-            console.log('🔍 Aplicando filtros...');
-            
-            filteredTripsData = allTripsData.filter(trip => {
-                // Motorista filter
-                const motoristaFilter = document.getElementById('motoristaFilter').value;
-                if (motoristaFilter && trip.driverName !== motoristaFilter) return false;
-                
-                // Placa filter
-                const placaFilter = document.getElementById('placaFilter').value;
-                if (placaFilter && trip.vehiclePlate !== placaFilter) return false;
-                
-                // Date filters
-                const dataInicio = document.getElementById('dataInicio').value;
-                const dataFim = document.getElementById('dataFim').value;
-                
-                if (dataInicio || dataFim) {
-                    const tripDate = new Date(trip.TripStartTimestampDate || trip.TimeStamp);
-                    if (dataInicio && tripDate < new Date(dataInicio)) return false;
-                    if (dataFim && tripDate > new Date(dataFim + 'T23:59:59')) return false;
-                }
-                
-                return true;
-            });
-            
-            currentPage = 1;
-            updateDashboard();
-            updateCharts();
-            updateTable();
-            
-            console.log(`✅ Filtros aplicados: ${filteredTripsData.length} viagens`);
-        }
-
-        // Clear filters
+        // Funções de filtro
         function clearFilters() {
-            document.getElementById('motoristaFilter').value = '';
-            document.getElementById('placaFilter').value = '';
-            document.getElementById('dataInicio').value = '';
-            document.getElementById('dataFim').value = '';
-            document.getElementById('tableSearch').value = '';
-            
-            filteredTripsData = [...allTripsData];
-            currentPage = 1;
-            
-            updateDashboard();
-            updateCharts();
-            updateTable();
+            document.getElementById('periodFilter').value = '30';
+            document.getElementById('driverFilter').value = '';
+            document.getElementById('riskFilter').value = '';
+            document.getElementById('startDateFilter').value = '';
+            document.getElementById('endDateFilter').value = '';
+            initializeDateFilters();
+            applyFilters();
         }
 
-        // Refresh data
+        // Funções de utilidade
+        function showLoading(show) {
+            document.getElementById('loadingScreen').style.display = show ? 'flex' : 'none';
+        }
+
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
         function refreshData() {
             loadData();
         }
 
-        // Export data to Excel
-        function exportData() {
-            try {
-                const exportData = filteredTripsData.map(trip => ({
-                    'Motorista': trip.driverName,
-                    'ID Motorista': trip.UserString,
-                    'Placa': trip.vehiclePlate || 'N/A',
-                    'Origem': trip.StartAddress || 'N/A',
-                    'Destino': trip.FinalAddress || 'N/A',
-                    'Distância (km)': (parseFloat(trip.TripDistance) || 0).toFixed(1),
-                    'Score Geral': (parseFloat(trip.score) || 0).toFixed(2),
-                    'Score Aceleração': (parseFloat(trip.AccScore) || 0).toFixed(2),
-                    'Score Frenagem': (parseFloat(trip.BrakeScore) || 0).toFixed(2),
-                    'Score Velocidade': (parseFloat(trip.SpeedScore) || 0).toFixed(2),
-                    'Eventos de Risco': getTotalRiskEvents(trip),
-                    'Risco Preditivo (%)': trip.predictiveRisk.toFixed(2),
-                    'Nível de Risco': trip.riskLevel,
-                    'Data/Hora': trip.TripStartTimestampDate || trip.TimeStamp
-                }));
-
-                const ws = XLSX.utils.json_to_sheet(exportData);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, 'Scorecard Preditivo');
-                
-                const fileName = `scorecard_preditivo_${new Date().toISOString().split('T')[0]}.xlsx`;
-                XLSX.writeFile(wb, fileName);
-                
-                console.log('✅ Dados exportados para Excel');
-            } catch (error) {
-                console.error('❌ Erro ao exportar dados:', error);
-                alert('Erro ao exportar dados. Tente novamente.');
-            }
+        function toggleDebug() {
+            const panel = document.getElementById('debugPanel');
+            panel.classList.toggle('show');
         }
 
-        // Show/hide loading overlay
-        function showLoading(show) {
-            const overlay = document.getElementById('loadingOverlay');
-            overlay.style.display = show ? 'flex' : 'none';
+        function updateDebugPanel() {
+            document.getElementById('debugApiStatus').textContent = debugInfo.apiStatus;
+            document.getElementById('debugTripsCount').textContent = debugInfo.tripsCount;
+            document.getElementById('debugUsersCount').textContent = debugInfo.usersCount;
+            document.getElementById('debugDeParaCount').textContent = debugInfo.deParaCount;
+            document.getElementById('debugLastError').textContent = debugInfo.lastError;
+            document.getElementById('debugLastUpdate').textContent = debugInfo.lastUpdate;
         }
 
-        // Show error message
-        function showError(message) {
-            alert(message);
-        }
+        function exportToExcel() {
+            const exportData = filteredData.map(trip => ({
+                'Motorista': trip.driverName,
+                'Placa': trip.vehiclePlate || '-',
+                'Rota': trip.route || '-',
+                'Score Geral': trip.scoreGeral,
+                'Score Aceleração': trip.scoreAceleracao,
+                'Score Frenagem': trip.scoreFrenagem,
+                'Score Velocidade': trip.scoreVelocidade,
+                'Eventos de Risco': trip.riskEvents || 0,
+                'Risco Preditivo (%)': trip.predictiveRisk.toFixed(2),
+                'Nível de Risco': getRiskLevelText(trip.riskLevel),
+                'Data': trip.timestamp ? new Date(trip.timestamp).toLocaleDateString() : '-'
+            }));
 
-        // Search functionality
-        document.getElementById('tableSearch').addEventListener('input', function() {
-            currentPage = 1;
-            updateTable();
-        });
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Scorecard Preditivo');
+            
+            const fileName = `scorecard_preditivo_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
     </script>
 </body>
 </html>
