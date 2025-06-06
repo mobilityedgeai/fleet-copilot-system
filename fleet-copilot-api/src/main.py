@@ -77,6 +77,13 @@ def bi_manutencao():
     enterprise_id = request.args.get('enterpriseId', 'qzDVZ1jB6IC60baxtsDU')
     return render_template('bi_manutencao.html', enterprise_id=enterprise_id)
 
+# BI Gestão de Veículos
+@app.route('/api/copilot/bi-gestao-veiculos')
+def bi_gestao_veiculos():
+    """BI de Gestão de Veículos da Frota"""
+    enterprise_id = request.args.get('enterpriseId', 'qzDVZ1jB6IC60baxtsDU')
+    return render_template('bi_gestao_veiculos.html', enterprise_id=enterprise_id)
+
 # BI Motoristas
 @app.route('/api/copilot/bi-motoristas')
 def bi_motoristas():
@@ -137,6 +144,13 @@ def list_bis():
             'description': 'Gestão de manutenção preventiva e corretiva',
             'status': 'available',
             'url': '/api/copilot/bi-manutencao'
+        },
+        {
+            'id': 'gestao-veiculos',
+            'name': 'Gestão de Veículos',
+            'description': 'Composição, valor, utilização, manutenção e conformidade da frota',
+            'status': 'available',
+            'url': '/api/copilot/bi-gestao-veiculos'
         },
         {
             'id': 'motoristas',
