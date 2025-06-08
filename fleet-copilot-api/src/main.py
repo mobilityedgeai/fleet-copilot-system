@@ -8,6 +8,15 @@ template_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templat
 # Criar app Flask com template_folder correto
 app = Flask(__name__, template_folder=template_dir)
 
+# Configurações para CORS (necessário para scorecard preditivo)
+@app.after_request
+def after_request(response):
+    """Adicionar headers CORS para compatibilidade com scorecard preditivo"""
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
+
 # Rota principal - redireciona para o menu dos BIs
 @app.route('/')
 def index():
@@ -75,7 +84,31 @@ def bi_trips():
 def scorecard_preditivo():
     """Scorecard Preditivo de Risco - Análise Avançada de Segurança e Prevenção de Acidentes"""
     enterprise_id = request.args.get('enterpriseId', 'qzDVZ1jB6IC60baxtsDU')
+    
+    # Log para debug do scorecard preditivo
+    print(f"[SCORECARD] Acessando scorecard preditivo com enterpriseId: {enterprise_id}")
+    
     return render_template('scorecard_preditivo.html', enterprise_id=enterprise_id)
+
+# Endpoint específico para dados do scorecard preditivo (se necessário)
+@app.route('/api/copilot/scorecard-preditivo/data')
+def scorecard_preditivo_data():
+    """Endpoint para dados específicos do scorecard preditivo (se necessário)"""
+    enterprise_id = request.args.get('enterpriseId', 'qzDVZ1jB6IC60baxtsDU')
+    
+    # Este endpoint pode ser usado para fornecer dados específicos do scorecard
+    # se necessário no futuro, mas atualmente o scorecard busca dados diretamente
+    # da API Firebase BI
+    
+    return jsonify({
+        'status': 'success',
+        'message': 'Scorecard preditivo configurado para buscar dados da API Firebase BI',
+        'api_endpoints': {
+            'trips': 'https://firebase-bi-api.onrender.com/trips',
+            'users': 'https://firebase-bi-api.onrender.com/users'
+        },
+        'enterprise_id': enterprise_id
+    })
 
 # BI Manutenção
 @app.route('/api/copilot/bi-manutencao')
@@ -150,7 +183,14 @@ def list_bis():
             'name': 'Scorecard Preditivo de Risco',
             'description': 'Análise avançada de segurança e prevenção de acidentes com algoritmo preditivo',
             'status': 'available',
-            'url': '/api/copilot/scorecard-preditivo'
+            'url': '/api/copilot/scorecard-preditivo',
+            'features': [
+                'Algoritmo preditivo de risco',
+                'Análise de comportamento de motoristas',
+                'Scores baseados em dados reais',
+                'Gráficos informativos e insights',
+                'Visual enterprise profissional'
+            ]
         },
         {
             'id': 'manutencao',
@@ -183,7 +223,44 @@ def list_bis():
     ]
     return jsonify(bis)
 
+# Endpoint para configurações do scorecard preditivo
+@app.route('/api/copilot/scorecard-preditivo/config')
+def scorecard_config():
+    """Configurações específicas do scorecard preditivo"""
+    return jsonify({
+        'scorecard_version': '2.0',
+        'algorithm_version': 'v1.2',
+        'data_sources': {
+            'trips_api': 'https://firebase-bi-api.onrender.com/trips',
+            'users_api': 'https://firebase-bi-api.onrender.com/users'
+        },
+        'features': {
+            'real_data_processing': True,
+            'predictive_scoring': True,
+            'enterprise_visual': True,
+            'advanced_charts': True,
+            'fallback_system': True
+        },
+        'risk_calculation': {
+            'behavior_score_weight': 0.4,
+            'events_per_trip_weight': 0.3,
+            'speed_events_weight': 0.2,
+            'trip_frequency_weight': 0.1
+        },
+        'thresholds': {
+            'low_risk': 40,
+            'medium_risk': 70,
+            'high_risk': 100
+        }
+    })
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_ENV') != 'production'
+    
+    print(f"[FLEET COPILOT] Iniciando servidor na porta {port}")
+    print(f"[FLEET COPILOT] Modo debug: {debug}")
+    print(f"[FLEET COPILOT] Template directory: {template_dir}")
+    print(f"[SCORECARD] Scorecard Preditivo disponível em: /api/copilot/scorecard-preditivo")
+    
     app.run(host='0.0.0.0', port=port, debug=debug)
