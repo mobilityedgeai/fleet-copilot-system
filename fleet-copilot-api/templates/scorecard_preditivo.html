@@ -410,56 +410,14 @@
             color: var(--text-secondary);
         }
 
-        .success {
-            background: rgba(39, 174, 96, 0.1);
-            border: 1px solid var(--success);
-            color: var(--success);
+        .error {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
             padding: 15px;
             border-radius: 8px;
             margin: 15px 0;
             font-size: 0.9rem;
-        }
-
-        .warning {
-            background: rgba(241, 196, 15, 0.1);
-            border: 1px solid var(--warning);
-            color: var(--warning);
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-size: 0.9rem;
-        }
-
-        .debug-panel {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 15px;
-            max-width: 300px;
-            z-index: 1000;
-            display: none;
-        }
-
-        .debug-panel.active {
-            display: block;
-        }
-
-        .debug-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--primary);
-            color: var(--background);
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            cursor: pointer;
-            z-index: 1001;
-            font-weight: bold;
         }
 
         @media (max-width: 768px) {
@@ -500,17 +458,6 @@
                 <button class="btn btn-primary" onclick="refreshData()">
                     Atualizar
                 </button>
-            </div>
-        </div>
-
-        <!-- Debug Toggle -->
-        <button class="debug-toggle" onclick="toggleDebug()">D</button>
-        
-        <!-- Debug Panel -->
-        <div class="debug-panel" id="debugPanel">
-            <h4 style="color: var(--primary); margin-bottom: 10px;">Debug Info</h4>
-            <div id="debugContent">
-                <p>Carregando debug...</p>
             </div>
         </div>
 
@@ -555,14 +502,9 @@
             <p>Carregando dados do scorecard preditivo...</p>
         </div>
 
-        <!-- Success State -->
-        <div id="successState" class="success" style="display: none;">
-            <p><strong>Sucesso:</strong> Dados carregados das APIs reais com sucesso!</p>
-        </div>
-
-        <!-- Warning State -->
-        <div id="warningState" class="warning" style="display: none;">
-            <p><strong>Aviso:</strong> API users não retornou dados para este enterpriseId. Usando IDs dos motoristas.</p>
+        <!-- Error State (apenas para erros críticos) -->
+        <div id="errorState" class="error" style="display: none;">
+            <p><strong>Erro:</strong> Não foi possível carregar dados das APIs. Verifique a conectividade.</p>
         </div>
 
         <!-- Metrics Grid -->
@@ -715,6 +657,16 @@
     </div>
 
     <script>
+        // Configuração de produção
+        const PRODUCTION_MODE = true;
+        
+        // Função para logs condicionais (apenas em desenvolvimento)
+        function debugLog(...args) {
+            if (!PRODUCTION_MODE) {
+                console.log(...args);
+            }
+        }
+
         // Variáveis globais
         let tripsData = [];
         let usersData = [];
@@ -724,26 +676,24 @@
         let currentPage = 1;
         let recordsPerPage = 100;
         let charts = {};
-        let usingRealData = false;
+        let currentEnterpriseId = '';
 
         // URLs das APIs
         const API_BASE = 'https://firebase-bi-api.onrender.com';
-        const ENTERPRISE_ID = 'qzDVZ1jB6IC60baxtsDU';
 
-        // Debug info
-        let debugInfo = {
-            tripsLoaded: 0,
-            usersLoaded: 0,
-            mappingsCreated: 0,
-            lastError: null,
-            apiStatus: 'connecting',
-            usingRealData: false,
-            usersApiWorking: false
-        };
+        // Obter enterpriseId da URL
+        function getEnterpriseIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const enterpriseId = urlParams.get('enterpriseId') || 'qzDVZ1jB6IC60baxtsDU';
+            debugLog('Enterprise ID obtido da URL:', enterpriseId);
+            return enterpriseId;
+        }
 
         // Inicializar aplicação
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Inicializando Scorecard Preditivo de Risco');
+            currentEnterpriseId = getEnterpriseIdFromUrl();
+            
+            debugLog('Inicializando Scorecard Preditivo de Risco para Enterprise ID:', currentEnterpriseId);
             loadData();
             setupEventListeners();
         });
@@ -756,19 +706,17 @@
             document.getElementById('minScore').addEventListener('input', applyFilters);
         }
 
-        // Carregar dados das APIs com foco em dados reais
+        // Carregar dados das APIs com filtro por enterpriseId
         async function loadData() {
             try {
-                console.log('Carregando dados das APIs reais...');
-                debugInfo.apiStatus = 'connecting';
-                updateDebugInfo();
+                debugLog('Carregando dados das APIs para Enterprise ID:', currentEnterpriseId);
                 
-                // Carregar dados das APIs com timeout mais longo
+                // Carregar dados das APIs com timeout
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos timeout
+                const timeoutId = setTimeout(() => controller.abort(), 15000);
                 
-                console.log('Tentando carregar API trips...');
-                const tripsResponse = await fetch(`${API_BASE}/trips?enterpriseId=${ENTERPRISE_ID}`, { 
+                debugLog('Carregando API trips...');
+                const tripsResponse = await fetch(`${API_BASE}/trips?enterpriseId=${currentEnterpriseId}`, { 
                     signal: controller.signal 
                 });
 
@@ -777,95 +725,97 @@
                 }
 
                 const tripsResult = await tripsResponse.json();
-                console.log('API trips carregada com sucesso:', tripsResult.count || 0, 'registros');
+                debugLog('API trips carregada:', tripsResult.count || 0, 'registros');
                 
                 tripsData = tripsResult.data || [];
-                debugInfo.tripsLoaded = tripsData.length;
 
-                // Tentar carregar users, mas não falhar se não funcionar
-                console.log('Tentando carregar API users...');
+                // Carregar users - tentar com enterpriseId primeiro, depois sem filtro
+                debugLog('Carregando API users...');
                 try {
-                    const usersResponse = await fetch(`${API_BASE}/users?enterpriseId=${ENTERPRISE_ID}`, { 
+                    const usersResponse = await fetch(`${API_BASE}/users?enterpriseId=${currentEnterpriseId}`, { 
                         signal: controller.signal 
                     });
 
                     if (usersResponse.ok) {
                         const usersResult = await usersResponse.json();
                         usersData = usersResult.data || [];
-                        debugInfo.usersLoaded = usersData.length;
-                        debugInfo.usersApiWorking = usersData.length > 0;
+                        
+                        // Se não retornou dados com enterpriseId, tentar sem filtro
+                        if (usersData.length === 0) {
+                            debugLog('Nenhum usuário encontrado com enterpriseId, tentando buscar todos...');
+                            const allUsersResponse = await fetch(`${API_BASE}/users`, { 
+                                signal: controller.signal 
+                            });
+                            
+                            if (allUsersResponse.ok) {
+                                const allUsersResult = await allUsersResponse.json();
+                                usersData = allUsersResult.data || [];
+                                debugLog('Carregados todos os usuários:', usersData.length);
+                            }
+                        }
                         
                         if (usersData.length > 0) {
-                            console.log('API users carregada com sucesso:', usersData.length, 'usuários');
+                            debugLog('API users carregada com sucesso:', usersData.length, 'usuários');
                             createUsersMap();
                         } else {
-                            console.warn('API users não retornou dados para este enterpriseId');
-                            document.getElementById('warningState').style.display = 'block';
+                            debugLog('API users não retornou dados');
                         }
                     } else {
-                        console.warn('API users retornou erro:', usersResponse.status);
-                        debugInfo.usersApiWorking = false;
-                        document.getElementById('warningState').style.display = 'block';
+                        throw new Error(`Erro na API users: ${usersResponse.status}`);
                     }
                 } catch (usersError) {
-                    console.warn('Erro na API users (continuando sem ela):', usersError);
-                    debugInfo.usersApiWorking = false;
-                    document.getElementById('warningState').style.display = 'block';
+                    debugLog('Erro na API users (continuando sem ela):', usersError);
                 }
 
                 clearTimeout(timeoutId);
 
                 // Se temos dados de trips, consideramos sucesso
                 if (tripsData.length > 0) {
-                    debugInfo.apiStatus = 'connected';
-                    debugInfo.usingRealData = true;
-                    usingRealData = true;
-                    
-                    console.log('Dados reais carregados com sucesso!');
-                    document.getElementById('successState').style.display = 'block';
+                    debugLog('Dados reais carregados com sucesso para Enterprise ID:', currentEnterpriseId);
                     
                     // Processar dados reais
                     processRealData();
                 } else {
-                    throw new Error('API trips não retornou dados');
+                    throw new Error(`Nenhuma viagem encontrada para Enterprise ID: ${currentEnterpriseId}`);
                 }
                 
             } catch (error) {
-                console.error('Erro ao carregar APIs:', error);
-                debugInfo.lastError = error.message;
-                debugInfo.apiStatus = 'error';
-                debugInfo.usingRealData = false;
+                debugLog('Erro ao carregar APIs:', error);
                 
-                // Usar dados de exemplo como fallback
-                console.log('Usando dados de exemplo como fallback');
-                processedData = generateFallbackData();
+                document.getElementById('errorState').style.display = 'block';
+                document.getElementById('errorState').innerHTML = `
+                    <p><strong>Erro:</strong> ${error.message}</p>
+                    <p>Enterprise ID: ${currentEnterpriseId}</p>
+                `;
+                
+                // Não usar fallback - mostrar erro real
+                processedData = [];
                 
             } finally {
                 // Renderizar interface sempre
                 renderInterface();
-                updateDebugInfo();
             }
         }
 
         // Criar mapa de usuários para DE-PARA
         function createUsersMap() {
-            console.log('Criando mapa de usuários para DE-PARA...');
+            debugLog('Criando mapa de usuários para DE-PARA...');
             
             usersMap.clear();
             let mappingsCreated = 0;
             
             usersData.forEach(user => {
-                if (user._doc_id && user.display_name) {
-                    usersMap.set(user._doc_id, user.display_name);
-                    mappingsCreated++;
-                } else if (user.id && user.display_name) {
-                    usersMap.set(user.id, user.display_name);
+                // Tentar diferentes campos de ID
+                const userId = user._doc_id || user.id || user.userId;
+                const userName = user.display_name || user.displayName || user.name;
+                
+                if (userId && userName && userName !== 'N/A') {
+                    usersMap.set(userId, userName);
                     mappingsCreated++;
                 }
             });
             
-            debugInfo.mappingsCreated = mappingsCreated;
-            console.log(`${mappingsCreated} mapeamentos de usuários criados`);
+            debugLog(`${mappingsCreated} mapeamentos de usuários criados`);
         }
 
         // Função para obter nome do motorista
@@ -890,11 +840,11 @@
 
         // Processar dados reais das APIs
         function processRealData() {
-            console.log('Processando dados reais das APIs...');
+            debugLog('Processando dados reais das APIs...');
             
             if (!tripsData || tripsData.length === 0) {
-                console.warn('Nenhum dado de viagens disponível');
-                processedData = generateFallbackData();
+                debugLog('Nenhum dado de viagens disponível');
+                processedData = [];
                 return;
             }
 
@@ -981,7 +931,7 @@
             // Ordenar por score de risco (maior risco primeiro)
             processedData.sort((a, b) => b.riskScore - a.riskScore);
             
-            console.log(`${processedData.length} motoristas processados com dados reais`);
+            debugLog(`${processedData.length} motoristas processados com dados reais para Enterprise ID: ${currentEnterpriseId}`);
         }
 
         // Calcular score de risco baseado em dados reais
@@ -1009,45 +959,6 @@
             riskScore += (tripFrequency * 10);
             
             return Math.min(riskScore, 100);
-        }
-
-        // Gerar dados de fallback
-        function generateFallbackData() {
-            return [
-                {
-                    driverId: 'fallback_001',
-                    driverName: 'João Silva (Exemplo)',
-                    totalTrips: 45,
-                    totalDistance: 2340000,
-                    riskScore: 78.5,
-                    riskLevel: 'high',
-                    lastTrip: '2024-06-07',
-                    eventsPerTrip: 2.3,
-                    riskTrend: 'up'
-                },
-                {
-                    driverId: 'fallback_002',
-                    driverName: 'Maria Santos (Exemplo)',
-                    totalTrips: 32,
-                    totalDistance: 1890000,
-                    riskScore: 45.2,
-                    riskLevel: 'medium',
-                    lastTrip: '2024-06-06',
-                    eventsPerTrip: 1.1,
-                    riskTrend: 'down'
-                },
-                {
-                    driverId: 'fallback_003',
-                    driverName: 'Carlos Oliveira (Exemplo)',
-                    totalTrips: 67,
-                    totalDistance: 3450000,
-                    riskScore: 23.8,
-                    riskLevel: 'low',
-                    lastTrip: '2024-06-08',
-                    eventsPerTrip: 0.4,
-                    riskTrend: 'down'
-                }
-            ];
         }
 
         // Determinar nível de risco
@@ -1095,19 +1006,25 @@
         // Renderizar interface completa
         function renderInterface() {
             document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('metricsGrid').style.display = 'grid';
-            document.getElementById('insightsSection').style.display = 'grid';
-            document.getElementById('chartsSection').style.display = 'grid';
-            document.getElementById('additionalCharts').style.display = 'grid';
-            document.getElementById('tableContainer').style.display = 'block';
-
-            // Aplicar filtros iniciais
-            applyFilters();
             
-            updateMetrics();
-            updateInsights();
-            createCharts();
-            renderTable();
+            if (processedData.length > 0) {
+                document.getElementById('metricsGrid').style.display = 'grid';
+                document.getElementById('insightsSection').style.display = 'grid';
+                document.getElementById('chartsSection').style.display = 'grid';
+                document.getElementById('additionalCharts').style.display = 'grid';
+                document.getElementById('tableContainer').style.display = 'block';
+
+                // Aplicar filtros iniciais
+                applyFilters();
+                
+                updateMetrics();
+                updateInsights();
+                createCharts();
+                renderTable();
+            } else {
+                // Mostrar mensagem de erro se não há dados
+                document.getElementById('errorState').style.display = 'block';
+            }
         }
 
         // Atualizar métricas
@@ -1686,13 +1603,14 @@
             document.getElementById('chartsSection').style.display = 'none';
             document.getElementById('additionalCharts').style.display = 'none';
             document.getElementById('tableContainer').style.display = 'none';
-            document.getElementById('successState').style.display = 'none';
-            document.getElementById('warningState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'none';
             
             // Reset variables
-            usingRealData = false;
             processedData = [];
             filteredData = [];
+            
+            // Recarregar com o enterpriseId atual
+            currentEnterpriseId = getEnterpriseIdFromUrl();
             
             loadData();
         }
@@ -1716,32 +1634,8 @@
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `scorecard_preditivo_${new Date().toISOString().split('T')[0]}.csv`;
+            link.download = `scorecard_preditivo_${currentEnterpriseId}_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
-        }
-
-        // Toggle debug panel
-        function toggleDebug() {
-            const panel = document.getElementById('debugPanel');
-            panel.classList.toggle('active');
-            updateDebugInfo();
-        }
-
-        // Atualizar informações de debug
-        function updateDebugInfo() {
-            const debugContent = document.getElementById('debugContent');
-            debugContent.innerHTML = `
-                <p><strong>Status da API:</strong> ${debugInfo.apiStatus}</p>
-                <p><strong>Usando dados reais:</strong> ${debugInfo.usingRealData ? 'Sim' : 'Não'}</p>
-                <p><strong>API Users funcionando:</strong> ${debugInfo.usersApiWorking ? 'Sim' : 'Não'}</p>
-                <p><strong>Viagens carregadas:</strong> ${debugInfo.tripsLoaded}</p>
-                <p><strong>Usuários carregados:</strong> ${debugInfo.usersLoaded}</p>
-                <p><strong>Mapeamentos criados:</strong> ${debugInfo.mappingsCreated}</p>
-                <p><strong>Motoristas processados:</strong> ${processedData.length}</p>
-                <p><strong>Dados filtrados:</strong> ${filteredData.length}</p>
-                ${debugInfo.lastError ? `<p style="color: #e74c3c;"><strong>Último erro:</strong> ${debugInfo.lastError}</p>` : ''}
-                <p><strong>Última atualização:</strong> ${new Date().toLocaleTimeString()}</p>
-            `;
         }
     </script>
 </body>
