@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scorecard Preditivo de Risco</title>
+    <title>Scorecard Preditivo de Acidentes</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <style>
         :root {
             --background: #1a1e23;
-            --surface: #2c3e50;
-            --surface-light: #34495e;
+            --surface: #2a2e33;
+            --surface-light: #3a3e43;
             --primary: #14d8b4;
             --secondary: #8a56e2;
             --accent: #f39c12;
-            --danger: #e74c3c;
+            --danger: #e67e22;
             --warning: #f1c40f;
             --success: #27ae60;
             --text-primary: #ffffff;
             --text-secondary: #bdc3c7;
-            --border: #34495e;
+            --border: #3a3e43;
         }
 
         * {
@@ -36,7 +36,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1800px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -53,24 +53,14 @@
         }
 
         .header h1 {
-            color: var(--primary);
-            font-size: 2rem;
+            font-size: 28px;
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .header-subtitle {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            font-weight: 400;
-            margin-top: 5px;
+            color: var(--text-primary);
         }
 
         .header-actions {
             display: flex;
-            gap: 10px;
+            gap: 15px;
         }
 
         .btn {
@@ -84,7 +74,6 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.9rem;
         }
 
         .btn-primary {
@@ -100,59 +89,23 @@
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
-        .filters {
-            background: var(--surface);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            border: 1px solid var(--border);
-        }
-
-        .filters-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .filters-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .filter-group label {
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
             color: var(--text-secondary);
-            font-size: 0.9rem;
-            font-weight: 500;
         }
 
-        .filter-group input,
-        .filter-group select {
-            padding: 10px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            background: var(--surface-light);
-            color: var(--text-primary);
-            font-size: 0.9rem;
-        }
-
-        .filter-group input:focus,
-        .filter-group select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(20, 216, 180, 0.2);
+        .error {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
         }
 
         .metrics-grid {
@@ -176,53 +129,79 @@
         }
 
         .metric-icon {
-            width: 40px;
-            height: 40px;
-            margin: 0 auto 15px;
+            width: 50px;
+            height: 50px;
             background: var(--primary);
-            border-radius: 8px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--background);
+            margin: 0 auto 15px;
+            font-size: 24px;
             font-weight: bold;
-            font-size: 1.2rem;
+            color: var(--background);
         }
 
         .metric-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 5px;
         }
 
         .metric-label {
             color: var(--text-secondary);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 14px;
         }
 
-        .metric-change {
-            font-size: 0.8rem;
-            margin-top: 8px;
-            padding: 4px 8px;
+        .filters-section {
+            background: var(--surface);
+            padding: 25px;
             border-radius: 12px;
-            display: inline-block;
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
         }
 
-        .positive { 
-            background: rgba(39, 174, 96, 0.2); 
-            color: var(--success); 
-        }
-        .negative { 
-            background: rgba(231, 76, 60, 0.2); 
-            color: var(--danger); 
-        }
-
-        .charts-section {
+        .filters-grid {
             display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface-light);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(20, 216, 180, 0.1);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
             margin-bottom: 30px;
         }
 
@@ -234,56 +213,15 @@
         }
 
         .chart-title {
-            color: var(--text-primary);
-            font-size: 1.3rem;
+            font-size: 18px;
             font-weight: 600;
             margin-bottom: 20px;
-            text-align: center;
+            color: var(--text-primary);
         }
 
         .chart-wrapper {
             position: relative;
             height: 300px;
-        }
-
-        .additional-charts {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        .insights-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .insight-card {
-            background: var(--surface);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            border-left: 4px solid var(--primary);
-        }
-
-        .insight-title {
-            color: var(--text-primary);
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .insight-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .insight-description {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
         }
 
         .table-container {
@@ -294,7 +232,7 @@
         }
 
         .table-header {
-            padding: 20px;
+            padding: 20px 25px;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
@@ -302,9 +240,9 @@
         }
 
         .table-title {
-            color: var(--text-primary);
-            font-size: 1.3rem;
+            font-size: 20px;
             font-weight: 600;
+            color: var(--text-primary);
         }
 
         .table-wrapper {
@@ -314,21 +252,45 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 1600px;
         }
 
         th, td {
-            padding: 15px;
+            padding: 12px 8px;
             text-align: left;
             border-bottom: 1px solid var(--border);
+            font-size: 13px;
+            white-space: nowrap;
         }
 
         th {
             background: var(--surface-light);
-            color: var(--text-secondary);
             font-weight: 600;
+            color: var(--text-primary);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .group-header {
+            background: var(--primary);
+            color: var(--background);
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
             text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 1px;
+        }
+
+        .subgroup-header {
+            background: var(--secondary);
+            color: var(--text-primary);
+            text-align: center;
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        td {
+            color: var(--text-secondary);
         }
 
         tr:hover {
@@ -336,56 +298,87 @@
         }
 
         .risk-badge {
-            padding: 6px 12px;
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
         }
 
-        .risk-low { background: rgba(39, 174, 96, 0.2); color: var(--success); }
-        .risk-medium { background: rgba(241, 196, 15, 0.2); color: var(--warning); }
-        .risk-high { background: rgba(231, 76, 60, 0.2); color: var(--danger); }
+        .risk-low {
+            background: rgba(20, 216, 180, 0.2);
+            color: #14d8b4;
+        }
+
+        .risk-medium {
+            background: rgba(138, 86, 226, 0.2);
+            color: #8a56e2;
+        }
+
+        .risk-high {
+            background: rgba(230, 126, 34, 0.2);
+            color: #e67e22;
+        }
+
+        .incident-count {
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .incident-count.high {
+            color: var(--danger);
+        }
+
+        .incident-count.medium {
+            color: var(--warning);
+        }
+
+        .incident-count.low {
+            color: var(--success);
+        }
 
         .pagination {
-            padding: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 20px 25px;
             border-top: 1px solid var(--border);
         }
 
         .pagination-info {
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 14px;
         }
 
         .pagination-controls {
             display: flex;
-            gap: 10px;
+            gap: 15px;
             align-items: center;
         }
 
         .pagination-controls select {
-            padding: 8px;
+            padding: 8px 12px;
             border: 1px solid var(--border);
             border-radius: 6px;
             background: var(--surface-light);
             color: var(--text-primary);
+            font-size: 14px;
         }
 
         .pagination-buttons {
             display: flex;
-            gap: 5px;
+            gap: 8px;
         }
 
         .pagination-btn {
             padding: 8px 12px;
             border: 1px solid var(--border);
+            border-radius: 6px;
             background: var(--surface-light);
             color: var(--text-primary);
-            border-radius: 6px;
             cursor: pointer;
+            font-size: 14px;
             transition: all 0.3s ease;
         }
 
@@ -404,269 +397,259 @@
             color: var(--background);
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-secondary);
-        }
-
-        .error {
-            background: rgba(231, 76, 60, 0.1);
-            border: 1px solid var(--danger);
-            color: var(--danger);
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-size: 0.9rem;
-        }
-
-        .debug-panel {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 15px;
-            margin: 15px 0;
-            font-family: monospace;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
         @media (max-width: 768px) {
-            .charts-section {
-                grid-template-columns: 1fr;
+            .container {
+                padding: 15px;
             }
-            
-            .additional-charts {
-                grid-template-columns: 1fr;
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
             }
-            
+
             .metrics-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             }
-            
+
             .filters-grid {
                 grid-template-columns: 1fr;
             }
-            
-            .insights-section {
+
+            .charts-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .pagination {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .table-wrapper {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 8px 6px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
-            <div>
-                <h1>Scorecard Preditivo de Risco</h1>
-                <div class="header-subtitle">Análise Avançada de Segurança e Prevenção de Acidentes</div>
-            </div>
+            <h1>Scorecard Preditivo de Acidentes</h1>
             <div class="header-actions">
-                <button class="btn btn-secondary" onclick="exportToExcel()">
-                    Exportar Excel
-                </button>
-                <button class="btn btn-primary" onclick="refreshData()">
-                    Atualizar
-                </button>
+                <button class="btn btn-secondary" onclick="refreshData()">Atualizar</button>
+                <button class="btn btn-primary" onclick="exportToExcel()">Exportar Excel</button>
             </div>
         </div>
 
-        <!-- Filters -->
-        <div class="filters">
-            <div class="filters-header">
-                <span>Filtros</span>
-            </div>
-            <div class="filters-grid">
-                <div class="filter-group">
-                    <label>Período</label>
-                    <select id="periodFilter">
-                        <option value="30">Últimos 30 dias</option>
-                        <option value="60">Últimos 60 dias</option>
-                        <option value="90">Últimos 90 dias</option>
-                        <option value="180">Últimos 6 meses</option>
-                        <option value="365">Último ano</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label>Nível de Risco</label>
-                    <select id="riskFilter">
-                        <option value="">Todos</option>
-                        <option value="low">Baixo</option>
-                        <option value="medium">Médio</option>
-                        <option value="high">Alto</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label>Buscar Motorista</label>
-                    <input type="text" id="driverSearch" placeholder="Nome do motorista...">
-                </div>
-                <div class="filter-group">
-                    <label>Score Mínimo</label>
-                    <input type="number" id="minScore" placeholder="0" min="0" max="100">
-                </div>
-            </div>
-        </div>
-
-        <!-- Loading State -->
         <div id="loadingState" class="loading">
-            <p>Carregando dados do scorecard preditivo...</p>
+            Carregando dados do scorecard preditivo de acidentes...
         </div>
 
-        <!-- Debug Panel -->
-        <div id="debugPanel" class="debug-panel" style="display: none;">
-            <h4>Debug Information:</h4>
-            <div id="debugContent"></div>
-        </div>
-
-        <!-- Error State (apenas para erros críticos) -->
         <div id="errorState" class="error" style="display: none;">
-            <p><strong>Erro:</strong> Não foi possível carregar dados das APIs. Verifique a conectividade.</p>
+            <p><strong>Erro:</strong> Não foi possível carregar os dados. Verifique a conectividade e tente novamente.</p>
         </div>
 
-        <!-- Metrics Grid -->
-        <div class="metrics-grid" id="metricsGrid" style="display: none;">
-            <div class="metric-card">
-                <div class="metric-icon" style="background: var(--danger);">R</div>
-                <div class="metric-value" style="color: var(--danger);" id="fleetRiskScore">0.0</div>
-                <div class="metric-label">Score de Risco da Frota</div>
-                <div class="metric-change" id="fleetRiskChange">--</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-icon" style="background: var(--warning);">M</div>
-                <div class="metric-value" style="color: var(--warning);" id="totalDrivers">0</div>
-                <div class="metric-label">Total de Motoristas</div>
-                <div class="metric-change" id="driversChange">--</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-icon" style="background: var(--primary);">V</div>
-                <div class="metric-value" style="color: var(--primary);" id="totalTrips">0</div>
-                <div class="metric-label">Total de Viagens</div>
-                <div class="metric-change" id="tripsChange">--</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-icon" style="background: var(--success);">D</div>
-                <div class="metric-value" style="color: var(--success);" id="totalDistance">0.0</div>
-                <div class="metric-label">Distância Total (km)</div>
-                <div class="metric-change" id="distanceChange">--</div>
-            </div>
-        </div>
-
-        <!-- Insights Section -->
-        <div class="insights-section" id="insightsSection" style="display: none;">
-            <div class="insight-card">
-                <div class="insight-title">Motoristas Alto Risco</div>
-                <div class="insight-value" style="color: var(--danger);" id="highRiskDrivers">0</div>
-                <div class="insight-description">Motoristas que precisam de atenção imediata</div>
-            </div>
-            <div class="insight-card">
-                <div class="insight-title">Tendência Mensal</div>
-                <div class="insight-value" style="color: var(--warning);" id="monthlyTrend">+2.3%</div>
-                <div class="insight-description">Variação do risco médio no último mês</div>
-            </div>
-            <div class="insight-card">
-                <div class="insight-title">Eficiência da Frota</div>
-                <div class="insight-value" style="color: var(--success);" id="fleetEfficiency">87%</div>
-                <div class="insight-description">Percentual de motoristas com risco baixo/médio</div>
-            </div>
-            <div class="insight-card">
-                <div class="insight-title">Eventos Críticos</div>
-                <div class="insight-value" style="color: var(--accent);" id="criticalEvents">0</div>
-                <div class="insight-description">Eventos de alto risco detectados hoje</div>
-            </div>
-        </div>
-
-        <!-- Charts Section -->
-        <div class="charts-section" id="chartsSection" style="display: none;">
-            <!-- Risk Distribution Pie Chart -->
-            <div class="chart-container">
-                <div class="chart-title">Distribuição de Risco da Frota</div>
-                <div class="chart-wrapper">
-                    <canvas id="riskDistributionChart"></canvas>
+        <div id="mainContent" style="display: none;">
+            <!-- Métricas Principais -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">R</div>
+                    <div class="metric-value" id="avgRiskScore">0</div>
+                    <div class="metric-label">Risco Médio da Frota</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">M</div>
+                    <div class="metric-value" id="totalDrivers">0</div>
+                    <div class="metric-label">Motoristas Monitorados</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">V</div>
+                    <div class="metric-value" id="totalTrips">0</div>
+                    <div class="metric-label">Viagens Analisadas</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">D</div>
+                    <div class="metric-value" id="totalDistance">0</div>
+                    <div class="metric-label">Distância Total (km)</div>
                 </div>
             </div>
 
-            <!-- Top Risk Drivers Bar Chart -->
-            <div class="chart-container">
-                <div class="chart-title">Top 10 Motoristas por Risco</div>
-                <div class="chart-wrapper">
-                    <canvas id="riskBarChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Additional Charts -->
-        <div class="additional-charts" id="additionalCharts" style="display: none;">
-            <!-- Risk vs Distance Scatter -->
-            <div class="chart-container">
-                <div class="chart-title">Correlação: Risco vs Distância Percorrida</div>
-                <div class="chart-wrapper">
-                    <canvas id="riskDistanceScatter"></canvas>
-                </div>
-            </div>
-
-            <!-- Risk Evolution Line Chart -->
-            <div class="chart-container">
-                <div class="chart-title">Evolução do Risco nos Últimos 6 Meses</div>
-                <div class="chart-wrapper">
-                    <canvas id="riskEvolutionChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Risk by Trip Frequency -->
-            <div class="chart-container">
-                <div class="chart-title">Risco por Frequência de Viagens</div>
-                <div class="chart-wrapper">
-                    <canvas id="riskFrequencyChart"></canvas>
+            <!-- Filtros -->
+            <div class="filters-section">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="periodFilter">Período</label>
+                        <select id="periodFilter" onchange="applyFilters()">
+                            <option value="all">Todos os períodos</option>
+                            <option value="7">Últimos 7 dias</option>
+                            <option value="30" selected>Últimos 30 dias</option>
+                            <option value="90">Últimos 90 dias</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="riskFilter">Nível de Risco</label>
+                        <select id="riskFilter" onchange="applyFilters()">
+                            <option value="all">Todos os níveis</option>
+                            <option value="high">Alto Risco</option>
+                            <option value="medium">Médio Risco</option>
+                            <option value="low">Baixo Risco</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="nameFilter">Nome do Motorista</label>
+                        <input type="text" id="nameFilter" placeholder="Buscar motorista..." onkeyup="applyFilters()">
+                    </div>
+                    <div class="filter-group">
+                        <label for="scoreFilter">Score Mínimo</label>
+                        <input type="number" id="scoreFilter" placeholder="0-100" min="0" max="100" onchange="applyFilters()">
+                    </div>
                 </div>
             </div>
 
-            <!-- Performance Benchmark -->
-            <div class="chart-container">
-                <div class="chart-title">Benchmark de Performance vs Mercado</div>
-                <div class="chart-wrapper">
-                    <canvas id="benchmarkChart"></canvas>
+            <!-- Gráficos -->
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Distribuição de Risco da Frota</div>
+                    <div class="chart-wrapper">
+                        <canvas id="riskDistributionChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Top 10 Motoristas por Risco de Acidentes</div>
+                    <div class="chart-wrapper">
+                        <canvas id="topDriversChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Correlação Risco vs Distância</div>
+                    <div class="chart-wrapper">
+                        <canvas id="riskDistanceChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Evolução do Risco de Acidentes</div>
+                    <div class="chart-wrapper">
+                        <canvas id="riskEvolutionChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Risco por Frequência de Viagens</div>
+                    <div class="chart-wrapper">
+                        <canvas id="riskFrequencyChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Incidentes por Categoria</div>
+                    <div class="chart-wrapper">
+                        <canvas id="incidentCategoriesChart"></canvas>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Data Table -->
-        <div class="table-container" id="tableContainer" style="display: none;">
-            <div class="table-header">
-                <div class="table-title">Detalhamento por Motorista</div>
-            </div>
-            <div class="table-wrapper">
-                <table id="driversTable">
-                    <thead>
-                        <tr>
-                            <th>Motorista</th>
-                            <th>Score Preditivo</th>
-                            <th>Nível de Risco</th>
-                            <th>Total de Viagens</th>
-                            <th>Distância (km)</th>
-                            <th>Última Viagem</th>
-                            <th>Tendência</th>
-                            <th>Eventos/Viagem</th>
-                        </tr>
-                    </thead>
-                    <tbody id="driversTableBody">
-                        <!-- Dados serão inseridos via JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-            <div class="pagination">
-                <div class="pagination-info" id="paginationInfo">
-                    Mostrando 0-0 de 0 registros
+            <!-- Tabela Detalhada -->
+            <div class="table-container" id="tableContainer" style="display: none;">
+                <div class="table-header">
+                    <div class="table-title">Detalhamento por Motorista - Análise Completa de Incidentes</div>
                 </div>
-                <div class="pagination-controls">
-                    <select id="recordsPerPage" onchange="changeRecordsPerPage()">
-                        <option value="50">50 por página</option>
-                        <option value="100" selected>100 por página</option>
-                        <option value="200">200 por página</option>
-                        <option value="500">500 por página</option>
-                    </select>
-                    <div class="pagination-buttons" id="paginationButtons">
-                        <!-- Botões serão inseridos via JavaScript -->
+                <div class="table-wrapper">
+                    <table id="driversTable">
+                        <thead>
+                            <tr>
+                                <!-- Informações Básicas -->
+                                <th rowspan="3">Motorista</th>
+                                <th rowspan="3">Score Geral</th>
+                                <th rowspan="3">Score ML</th>
+                                <th rowspan="3">Score Preditivo de Acidentes</th>
+                                <th rowspan="3">Nível de Risco</th>
+                                <th rowspan="3">Total Viagens</th>
+                                <th rowspan="3">Distância (km)</th>
+                                <th rowspan="3">Última Viagem</th>
+                                
+                                <!-- Grupos de Incidentes -->
+                                <th colspan="4" class="group-header">Movimento do Veículo</th>
+                                <th colspan="9" class="group-header">Direção Agressiva</th>
+                                <th colspan="3" class="group-header">Distrações / Fadiga</th>
+                                <th colspan="3" class="group-header">Condições Técnicas</th>
+                                <th rowspan="3">Total Eventos</th>
+                            </tr>
+                            <tr>
+                                <!-- Movimento do Veículo -->
+                                <th>Em Movimento</th>
+                                <th>Parado</th>
+                                <th>Marcha Lenta</th>
+                                <th>Acc Events</th>
+                                
+                                <!-- Direção Agressiva - Subgrupos -->
+                                <th colspan="2" class="subgroup-header">Aceleração</th>
+                                <th colspan="4" class="subgroup-header">Frenagem</th>
+                                <th colspan="3" class="subgroup-header">Curvas</th>
+                                
+                                <!-- Distrações / Fadiga -->
+                                <th>Smartphone</th>
+                                <th>Mov. Telefone</th>
+                                <th>Fadiga</th>
+                                
+                                <!-- Condições Técnicas -->
+                                <th>Alta Temp.</th>
+                                <th>Bateria Baixa</th>
+                                <th>Inércia</th>
+                            </tr>
+                            <tr>
+                                <!-- Movimento do Veículo -->
+                                <th>Mov</th>
+                                <th>Stop</th>
+                                <th>Idle</th>
+                                <th>Acc</th>
+                                
+                                <!-- Direção Agressiva - Aceleração -->
+                                <th>Freq</th>
+                                <th>Alta</th>
+                                
+                                <!-- Direção Agressiva - Frenagem -->
+                                <th>Freq</th>
+                                <th>Alta</th>
+                                <th>Paradas</th>
+                                <th>Pós-Curva</th>
+                                
+                                <!-- Direção Agressiva - Curvas -->
+                                <th>Curvas</th>
+                                <th>Pré-Curva</th>
+                                <th>Desvios</th>
+                                
+                                <!-- Distrações / Fadiga -->
+                                <th>Uso</th>
+                                <th>Mov</th>
+                                <th>Fadiga</th>
+                                
+                                <!-- Condições Técnicas -->
+                                <th>Temp</th>
+                                <th>Bat</th>
+                                <th>Inert</th>
+                            </tr>
+                        </thead>
+                        <tbody id="driversTableBody">
+                            <!-- Dados serão inseridos via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <div class="pagination-info" id="paginationInfo">
+                        Mostrando 0-0 de 0 registros
+                    </div>
+                    <div class="pagination-controls">
+                        <select id="recordsPerPage" onchange="changeRecordsPerPage()">
+                            <option value="25">25 por página</option>
+                            <option value="50" selected>50 por página</option>
+                            <option value="100">100 por página</option>
+                            <option value="200">200 por página</option>
+                        </select>
+                        <div class="pagination-buttons" id="paginationButtons">
+                            <!-- Botões serão inseridos via JavaScript -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -674,552 +657,394 @@
     </div>
 
     <script>
-        // Configuração de debug (ativar temporariamente para investigação)
-        const DEBUG_MODE = true;
-        
-        // Função para logs de debug
-        function debugLog(...args) {
-            if (DEBUG_MODE) {
-                console.log('[SCORECARD DEBUG]', ...args);
-                updateDebugPanel(args.join(' '));
-            }
-        }
-
-        // Atualizar painel de debug
-        function updateDebugPanel(message) {
-            if (DEBUG_MODE) {
-                const debugPanel = document.getElementById('debugPanel');
-                const debugContent = document.getElementById('debugContent');
-                debugPanel.style.display = 'block';
-                
-                const timestamp = new Date().toLocaleTimeString();
-                debugContent.innerHTML += `<div>[${timestamp}] ${message}</div>`;
-                debugContent.scrollTop = debugContent.scrollHeight;
-            }
-        }
-
-        // Variáveis globais
-        let tripsData = [];
-        let usersData = [];
-        let usersMap = new Map();
-        let processedData = [];
-        let filteredData = [];
-        let currentPage = 1;
-        let recordsPerPage = 100;
-        let charts = {};
-        let currentEnterpriseId = '';
-
-        // URLs das APIs
+        // Configurações globais
+        const PRODUCTION_MODE = true;
         const API_BASE = 'https://firebase-bi-api.onrender.com';
+        
+        // Variáveis globais
+        let allDriversData = [];
+        let filteredData = [];
+        let usersMap = new Map();
+        let currentPage = 1;
+        let recordsPerPage = 50;
+        let charts = {};
 
-        // Obter enterpriseId da URL
+        // Função para logs condicionais (apenas em desenvolvimento)
+        function debugLog(...args) {
+            if (!PRODUCTION_MODE) {
+                console.log(...args);
+            }
+        }
+
+        // Capturar enterpriseId dinamicamente da URL
         function getEnterpriseIdFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const enterpriseId = urlParams.get('enterpriseId') || 'qzDVZ1jB6IC60baxtsDU';
-            debugLog('Enterprise ID obtido da URL:', enterpriseId);
-            return enterpriseId;
-        }
-
-        // Inicializar aplicação
-        document.addEventListener('DOMContentLoaded', function() {
-            currentEnterpriseId = getEnterpriseIdFromUrl();
-            
-            debugLog('=== INICIANDO SCORECARD PREDITIVO ===');
-            debugLog('Enterprise ID:', currentEnterpriseId);
-            debugLog('API Base:', API_BASE);
-            
-            loadData();
-            setupEventListeners();
-        });
-
-        // Configurar event listeners
-        function setupEventListeners() {
-            document.getElementById('periodFilter').addEventListener('change', applyFilters);
-            document.getElementById('riskFilter').addEventListener('change', applyFilters);
-            document.getElementById('driverSearch').addEventListener('input', applyFilters);
-            document.getElementById('minScore').addEventListener('input', applyFilters);
-        }
-
-        // Carregar dados das APIs com filtro por enterpriseId
-        async function loadData() {
             try {
-                debugLog('=== INICIANDO CARREGAMENTO DE DADOS ===');
-                debugLog('Enterprise ID:', currentEnterpriseId);
+                // Método 1: URL atual (window.location)
+                const currentUrl = new URL(window.location.href);
+                let enterpriseId = currentUrl.searchParams.get('enterpriseId');
                 
-                // Carregar dados das APIs com timeout
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => {
-                    controller.abort();
-                    debugLog('TIMEOUT: Requisição cancelada após 15 segundos');
-                }, 15000);
-                
-                // === TESTE API TRIPS ===
-                debugLog('--- CARREGANDO API TRIPS ---');
-                const tripsUrl = `${API_BASE}/trips?enterpriseId=${currentEnterpriseId}`;
-                debugLog('URL Trips:', tripsUrl);
-                
-                const tripsResponse = await fetch(tripsUrl, { 
-                    signal: controller.signal 
-                });
-
-                debugLog('Response Status Trips:', tripsResponse.status);
-                debugLog('Response OK Trips:', tripsResponse.ok);
-
-                if (!tripsResponse.ok) {
-                    throw new Error(`Erro na API trips: ${tripsResponse.status} - ${tripsResponse.statusText}`);
+                if (enterpriseId) {
+                    debugLog('Enterprise ID capturado da URL:', enterpriseId);
+                    return enterpriseId;
                 }
-
-                const tripsResult = await tripsResponse.json();
-                debugLog('=== RESPOSTA API TRIPS ===');
-                debugLog('Count:', tripsResult.count);
-                debugLog('Data length:', tripsResult.data ? tripsResult.data.length : 'undefined');
-                debugLog('Enterprise ID na resposta:', tripsResult.enterpriseId);
-                debugLog('Status:', tripsResult.firebase_status);
                 
-                tripsData = tripsResult.data || [];
-                debugLog('Trips data carregado:', tripsData.length, 'registros');
-
-                // Analisar estrutura dos dados
-                if (tripsData.length > 0) {
-                    debugLog('=== ANÁLISE PRIMEIRO REGISTRO ===');
-                    const firstTrip = tripsData[0];
-                    debugLog('UserString:', firstTrip.UserString);
-                    debugLog('DriverBehaviorScore:', firstTrip.DriverBehaviorScore);
-                    debugLog('TripDistance:', firstTrip.TripDistance);
-                    debugLog('TotalEvents:', firstTrip.totalEvents);
-                    debugLog('AmountOfSpeedOverLimitEvents:', firstTrip.AmountOfSpeedOverLimitEvents);
-                    debugLog('TimestampDate:', firstTrip.TimestampDate);
-                }
-
-                // === TESTE API USERS ===
-                debugLog('--- CARREGANDO API USERS ---');
-                try {
-                    const usersUrl = `${API_BASE}/users?enterpriseId=${currentEnterpriseId}`;
-                    debugLog('URL Users:', usersUrl);
-                    
-                    const usersResponse = await fetch(usersUrl, { 
-                        signal: controller.signal 
-                    });
-
-                    debugLog('Response Status Users:', usersResponse.status);
-                    debugLog('Response OK Users:', usersResponse.ok);
-
-                    if (usersResponse.ok) {
-                        const usersResult = await usersResponse.json();
-                        debugLog('=== RESPOSTA API USERS ===');
-                        debugLog('Count:', usersResult.count);
-                        debugLog('Data length:', usersResult.data ? usersResult.data.length : 'undefined');
-                        
-                        usersData = usersResult.data || [];
-                        
-                        // Se não retornou dados com enterpriseId, tentar sem filtro
-                        if (usersData.length === 0) {
-                            debugLog('Nenhum usuário encontrado com enterpriseId, tentando buscar todos...');
-                            const allUsersUrl = `${API_BASE}/users`;
-                            debugLog('URL Users (sem filtro):', allUsersUrl);
-                            
-                            const allUsersResponse = await fetch(allUsersUrl, { 
-                                signal: controller.signal 
-                            });
-                            
-                            if (allUsersResponse.ok) {
-                                const allUsersResult = await allUsersResponse.json();
-                                usersData = allUsersResult.data || [];
-                                debugLog('Carregados todos os usuários:', usersData.length);
-                            }
-                        }
-                        
-                        if (usersData.length > 0) {
-                            debugLog('API users carregada com sucesso:', usersData.length, 'usuários');
-                            createUsersMap();
-                        } else {
-                            debugLog('API users não retornou dados');
-                        }
-                    } else {
-                        throw new Error(`Erro na API users: ${usersResponse.status}`);
+                // Método 2: Hash parameters
+                const hash = window.location.hash;
+                if (hash.includes('enterpriseId=')) {
+                    const hashParams = new URLSearchParams(hash.substring(1));
+                    enterpriseId = hashParams.get('enterpriseId');
+                    if (enterpriseId) {
+                        debugLog('Enterprise ID capturado do hash:', enterpriseId);
+                        return enterpriseId;
                     }
-                } catch (usersError) {
-                    debugLog('Erro na API users (continuando sem ela):', usersError.message);
                 }
-
-                clearTimeout(timeoutId);
-
-                // === PROCESSAMENTO DOS DADOS ===
-                if (tripsData.length > 0) {
-                    debugLog('=== PROCESSANDO DADOS REAIS ===');
-                    debugLog('Total de viagens para processar:', tripsData.length);
-                    
-                    // Processar dados reais
-                    processRealData();
-                    
-                    debugLog('=== DADOS PROCESSADOS ===');
-                    debugLog('Total de motoristas processados:', processedData.length);
-                    
-                    if (processedData.length > 0) {
-                        debugLog('Primeiro motorista processado:', processedData[0].driverName);
-                        debugLog('Score do primeiro motorista:', processedData[0].riskScore);
-                    }
-                } else {
-                    throw new Error(`Nenhuma viagem encontrada para Enterprise ID: ${currentEnterpriseId}`);
+                
+                // Método 3: Pathname
+                const pathParts = window.location.pathname.split('/');
+                const enterpriseIndex = pathParts.indexOf('enterprise');
+                if (enterpriseIndex !== -1 && pathParts[enterpriseIndex + 1]) {
+                    enterpriseId = pathParts[enterpriseIndex + 1];
+                    debugLog('Enterprise ID capturado do pathname:', enterpriseId);
+                    return enterpriseId;
                 }
+                
+                // Método 4: Variável global
+                if (window.currentEnterpriseId) {
+                    debugLog('Enterprise ID capturado de variável global:', window.currentEnterpriseId);
+                    return window.currentEnterpriseId;
+                }
+                
+                // Método 5: Storage
+                enterpriseId = sessionStorage.getItem('enterpriseId') || localStorage.getItem('enterpriseId');
+                if (enterpriseId) {
+                    debugLog('Enterprise ID capturado do storage:', enterpriseId);
+                    return enterpriseId;
+                }
+                
+                // Fallback padrão
+                debugLog('Usando enterprise ID padrão');
+                return 'qzDVZ1jB6IC60baxtsDU';
                 
             } catch (error) {
-                debugLog('=== ERRO NO CARREGAMENTO ===');
-                debugLog('Erro:', error.message);
-                debugLog('Stack:', error.stack);
-                
-                document.getElementById('errorState').style.display = 'block';
-                document.getElementById('errorState').innerHTML = `
-                    <p><strong>Erro:</strong> ${error.message}</p>
-                    <p>Enterprise ID: ${currentEnterpriseId}</p>
-                    <p>Verifique o console para mais detalhes.</p>
-                `;
-                
-                processedData = [];
-                
-            } finally {
-                debugLog('=== RENDERIZANDO INTERFACE ===');
-                // Renderizar interface sempre
-                renderInterface();
+                debugLog('Erro ao capturar enterprise ID:', error);
+                return 'qzDVZ1jB6IC60baxtsDU';
             }
         }
 
-        // Criar mapa de usuários para DE-PARA
-        function createUsersMap() {
-            debugLog('=== CRIANDO MAPA DE USUÁRIOS ===');
-            
-            usersMap.clear();
-            let mappingsCreated = 0;
-            
-            usersData.forEach((user, index) => {
-                // Tentar diferentes campos de ID
-                const userId = user._doc_id || user.id || user.userId;
-                const userName = user.display_name || user.displayName || user.name;
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            debugLog('Iniciando scorecard preditivo de acidentes...');
+            loadData();
+        });
+
+        // Carregar dados das APIs
+        async function loadData() {
+            try {
+                const currentEnterpriseId = getEnterpriseIdFromUrl();
+                debugLog('Carregando dados para enterprise:', currentEnterpriseId);
                 
-                if (index < 3) { // Log dos primeiros 3 usuários
-                    debugLog(`Usuário ${index}:`, {
-                        _doc_id: user._doc_id,
-                        id: user.id,
-                        userId: user.userId,
-                        display_name: user.display_name,
-                        displayName: user.displayName,
-                        name: user.name
+                // Carregar dados das APIs com timeout
+                const [tripsData, usersData] = await Promise.all([
+                    fetchWithTimeout(`${API_BASE}/trips?enterpriseId=${currentEnterpriseId}`, 15000),
+                    fetchWithTimeout(`${API_BASE}/users?enterpriseId=${currentEnterpriseId}`, 15000).catch(() => null)
+                ]);
+
+                debugLog('Dados trips carregados:', tripsData?.data?.length || 0, 'registros');
+                debugLog('Dados users carregados:', usersData?.data?.length || 0, 'registros');
+
+                // Processar dados de usuários para mapeamento
+                if (usersData && usersData.data && usersData.data.length > 0) {
+                    usersData.data.forEach(user => {
+                        if (user.id && user.name && user.name !== 'N/A') {
+                            usersMap.set(user.id, user.name);
+                        }
                     });
+                    debugLog('Mapeamento de usuários criado:', usersMap.size, 'entradas');
                 }
-                
-                if (userId && userName && userName !== 'N/A') {
-                    usersMap.set(userId, userName);
-                    mappingsCreated++;
+
+                // Processar dados de viagens
+                if (tripsData && tripsData.data && tripsData.data.length > 0) {
+                    processTripsData(tripsData.data);
+                    
+                    // Mostrar conteúdo principal
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('mainContent').style.display = 'block';
+                    document.getElementById('tableContainer').style.display = 'block';
+                    
+                    // Atualizar interface
+                    updateMetrics();
+                    createCharts();
+                    applyFilters();
+                    
+                } else {
+                    throw new Error('Nenhum dado de viagens disponível');
                 }
-            });
-            
-            debugLog(`${mappingsCreated} mapeamentos de usuários criados de ${usersData.length} usuários`);
+
+            } catch (error) {
+                debugLog('Erro ao carregar dados:', error);
+                showError('Erro ao carregar dados das APIs. Verifique a conectividade.');
+            }
         }
 
-        // Função para obter nome do motorista
-        function getDriverName(userString) {
-            if (!userString) return 'Motorista não identificado';
+        // Fetch com timeout
+        async function fetchWithTimeout(url, timeout = 10000) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
             
-            // Se temos mapeamento de usuários, usar
+            try {
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                clearTimeout(timeoutId);
+                throw error;
+            }
+        }
+
+        // Processar dados de viagens
+        function processTripsData(trips) {
+            debugLog('Processando', trips.length, 'viagens...');
+            
+            const driversMap = new Map();
+
+            trips.forEach(trip => {
+                const userString = trip.UserString;
+                if (!userString) return;
+
+                if (!driversMap.has(userString)) {
+                    driversMap.set(userString, {
+                        userString: userString,
+                        driverName: getDriverName(userString),
+                        trips: [],
+                        totalDistance: 0,
+                        totalScore: 0,
+                        totalScoreML: 0,
+                        
+                        // 1. Movimento do Veículo
+                        vehicleInMotion: 0,
+                        vehicleStopped: 0,
+                        idling: 0,
+                        accEvents: 0,
+                        
+                        // 2. Direção Agressiva - Aceleração
+                        frequentAcceleration: 0,
+                        highAcceleration: 0,
+                        
+                        // 2. Direção Agressiva - Frenagem
+                        frequentBraking: 0,
+                        highDeceleration: 0,
+                        frequentStops: 0,
+                        decAfterCurve: 0,
+                        
+                        // 2. Direção Agressiva - Curvas
+                        cornering: 0,
+                        accBeforeCurve: 0,
+                        swerving: 0,
+                        
+                        // 3. Distrações / Fadiga
+                        smartphoneUsage: 0,
+                        phoneMovement: 0,
+                        driverFatigue: 0,
+                        
+                        // 4. Condições Técnicas
+                        highTemperature: 0,
+                        lowBattery: 0,
+                        inertiaEvents: 0,
+                        
+                        // Total
+                        totalEvents: 0
+                    });
+                }
+
+                const driver = driversMap.get(userString);
+                driver.trips.push(trip);
+                driver.totalDistance += trip.TripDistance || 0;
+                
+                // Somar scores
+                driver.totalScore += trip.score || 0;
+                driver.totalScoreML += trip.scoreML || 0;
+                
+                // 1. Movimento do Veículo
+                driver.vehicleInMotion += trip.AmountOfVehicleInMotionEvents || 0;
+                driver.vehicleStopped += trip.AmountOfVehicleStoppedEvents || 0;
+                driver.idling += trip.AmountOfIdlingEvents || 0;
+                driver.accEvents += trip.accEvents || 0;
+                
+                // 2. Direção Agressiva - Aceleração
+                driver.frequentAcceleration += trip.AmountOfFrequentAccelerationEvents || 0;
+                driver.highAcceleration += trip.AmountOfHighAccEvents || 0;
+                
+                // 2. Direção Agressiva - Frenagem
+                driver.frequentBraking += trip.AmountOfFrequentBrakingEvents || 0;
+                driver.highDeceleration += trip.AmountOfHighDecEvents || 0;
+                driver.frequentStops += trip.AmountOfFrequentStopEvents || 0;
+                driver.decAfterCurve += trip.AmountOfDecAfterCurveEvents || 0;
+                
+                // 2. Direção Agressiva - Curvas
+                driver.cornering += trip.AmountOfCorneringEvents || 0;
+                driver.accBeforeCurve += trip.AmountOfAccBeforeCurveEvents || 0;
+                driver.swerving += trip.AmountOfSwervingEvents || 0;
+                
+                // 3. Distrações / Fadiga
+                driver.smartphoneUsage += trip.AmountOfSmartphoneUsageEvents || 0;
+                driver.phoneMovement += trip.amountOfPhoneMovementEvents || 0;
+                driver.driverFatigue += trip.AmountOfDriverFatigueEvents || 0;
+                
+                // 4. Condições Técnicas
+                driver.highTemperature += trip.AmountOfHighTemperatureEvents || 0;
+                driver.lowBattery += trip.AmountOfLowBatteryEvents || 0;
+                driver.inertiaEvents += trip.inertiaEvents || 0;
+                
+                // Total de eventos
+                driver.totalEvents += trip.totalEvents || 0;
+            });
+
+            // Converter para array e calcular métricas
+            allDriversData = Array.from(driversMap.values()).map(driver => {
+                const tripCount = driver.trips.length;
+                const avgScore = tripCount > 0 ? driver.totalScore / tripCount : 0;
+                const avgScoreML = tripCount > 0 ? driver.totalScoreML / tripCount : 0;
+                
+                // Calcular score preditivo de acidentes baseado em eventos de risco
+                const riskScore = calculateAccidentRiskScore(driver);
+                
+                // Determinar nível de risco
+                let riskLevel = 'low';
+                if (riskScore >= 70) riskLevel = 'high';
+                else if (riskScore >= 40) riskLevel = 'medium';
+
+                // Última viagem
+                const lastTrip = driver.trips.reduce((latest, trip) => {
+                    const tripDate = new Date(trip.TimestampDate || trip.TimeStamp);
+                    const latestDate = new Date(latest.TimestampDate || latest.TimeStamp);
+                    return tripDate > latestDate ? trip : latest;
+                }, driver.trips[0]);
+
+                return {
+                    driverName: driver.driverName,
+                    userString: driver.userString,
+                    totalTrips: tripCount,
+                    totalDistance: driver.totalDistance,
+                    avgScore: avgScore,
+                    avgScoreML: avgScoreML,
+                    riskScore: riskScore,
+                    riskLevel: riskLevel,
+                    lastTrip: lastTrip ? (lastTrip.TimestampDate || lastTrip.TimeStamp) : null,
+                    
+                    // Todos os campos de incidentes
+                    vehicleInMotion: driver.vehicleInMotion,
+                    vehicleStopped: driver.vehicleStopped,
+                    idling: driver.idling,
+                    accEvents: driver.accEvents,
+                    frequentAcceleration: driver.frequentAcceleration,
+                    highAcceleration: driver.highAcceleration,
+                    frequentBraking: driver.frequentBraking,
+                    highDeceleration: driver.highDeceleration,
+                    frequentStops: driver.frequentStops,
+                    decAfterCurve: driver.decAfterCurve,
+                    cornering: driver.cornering,
+                    accBeforeCurve: driver.accBeforeCurve,
+                    swerving: driver.swerving,
+                    smartphoneUsage: driver.smartphoneUsage,
+                    phoneMovement: driver.phoneMovement,
+                    driverFatigue: driver.driverFatigue,
+                    highTemperature: driver.highTemperature,
+                    lowBattery: driver.lowBattery,
+                    inertiaEvents: driver.inertiaEvents,
+                    totalEvents: driver.totalEvents
+                };
+            });
+
+            debugLog('Processados', allDriversData.length, 'motoristas');
+        }
+
+        // Calcular score preditivo de acidentes
+        function calculateAccidentRiskScore(driver) {
+            const tripCount = driver.trips.length;
+            if (tripCount === 0) return 0;
+
+            // Fatores de risco para acidentes (pesos ajustados)
+            const smartphoneRisk = (driver.smartphoneUsage / tripCount) * 25; // 25% do peso
+            const fatigueRisk = (driver.driverFatigue / tripCount) * 20; // 20% do peso
+            const swervingRisk = (driver.swerving / tripCount) * 20; // 20% do peso
+            const brakingRisk = (driver.frequentBraking / tripCount) * 15; // 15% do peso
+            const accelerationRisk = (driver.frequentAcceleration / tripCount) * 10; // 10% do peso
+            const phoneMovementRisk = (driver.phoneMovement / tripCount) * 10; // 10% do peso
+
+            const totalRisk = smartphoneRisk + fatigueRisk + swervingRisk + brakingRisk + accelerationRisk + phoneMovementRisk;
+            
+            // Normalizar para 0-100 (limitando a 100)
+            return Math.min(100, totalRisk);
+        }
+
+        // Obter nome do motorista
+        function getDriverName(userString) {
             if (usersMap.size > 0) {
                 const driverName = usersMap.get(userString);
                 if (driverName && driverName !== 'N/A') {
                     return driverName;
                 }
             }
-            
-            // Fallback: usar ID truncado mais legível
-            if (userString.length > 12) {
-                return `Motorista ${userString.substring(0, 8)}...`;
-            }
-            
-            return `Motorista ${userString}`;
-        }
-
-        // Processar dados reais das APIs
-        function processRealData() {
-            debugLog('=== PROCESSANDO DADOS REAIS ===');
-            
-            if (!tripsData || tripsData.length === 0) {
-                debugLog('ERRO: Nenhum dado de viagens disponível');
-                processedData = [];
-                return;
-            }
-
-            // Agrupar viagens por motorista
-            const driverStats = {};
-            let processedTrips = 0;
-            
-            tripsData.forEach((trip, index) => {
-                const driverId = trip.UserString || trip.user || trip.userId || trip.driver;
-                if (!driverId) {
-                    if (index < 5) debugLog(`Viagem ${index}: UserString não encontrado`);
-                    return;
-                }
-                
-                processedTrips++;
-                
-                if (!driverStats[driverId]) {
-                    driverStats[driverId] = {
-                        driverId: driverId,
-                        driverName: getDriverName(driverId),
-                        totalTrips: 0,
-                        totalDistance: 0,
-                        totalDuration: 0,
-                        riskEvents: 0,
-                        lastTrip: null,
-                        scores: [],
-                        totalScore: 0,
-                        speedEvents: 0,
-                        brakeEvents: 0,
-                        accEvents: 0
-                    };
-                }
-                
-                const stats = driverStats[driverId];
-                stats.totalTrips++;
-                
-                // Processar distância (em metros, converter para km)
-                if (trip.TripDistance) {
-                    stats.totalDistance += parseFloat(trip.TripDistance) || 0;
-                }
-                
-                // Processar duração (em horas)
-                if (trip.TripTime) {
-                    stats.totalDuration += parseFloat(trip.TripTime) || 0;
-                }
-                
-                // Processar eventos de risco
-                const speedEvents = parseInt(trip.AmountOfSpeedOverLimitEvents) || 0;
-                const brakeEvents = parseInt(trip.AmountOfFrequentBrakingEvents) || 0;
-                const accEvents = parseInt(trip.AmountOfFrequentAccelerationEvents) || 0;
-                const totalEvents = parseInt(trip.totalEvents) || (speedEvents + brakeEvents + accEvents);
-                
-                stats.riskEvents += totalEvents;
-                stats.speedEvents += speedEvents;
-                stats.brakeEvents += brakeEvents;
-                stats.accEvents += accEvents;
-                
-                // Processar score (usar DriverBehaviorScore ou score)
-                const tripScore = parseFloat(trip.DriverBehaviorScore) || parseFloat(trip.score) || 0;
-                if (tripScore > 0) {
-                    stats.scores.push(tripScore);
-                    stats.totalScore += tripScore;
-                }
-                
-                // Última viagem
-                const tripDate = trip.TimestampDate || trip.TripEndTimestampDate || trip.date;
-                if (tripDate && (!stats.lastTrip || new Date(tripDate) > new Date(stats.lastTrip))) {
-                    stats.lastTrip = tripDate;
-                }
-            });
-
-            debugLog(`Viagens processadas: ${processedTrips} de ${tripsData.length}`);
-            debugLog(`Motoristas únicos encontrados: ${Object.keys(driverStats).length}`);
-
-            // Calcular scores preditivos baseados em dados reais
-            processedData = Object.values(driverStats).map((driver, index) => {
-                const avgScore = driver.scores.length > 0 ? (driver.totalScore / driver.scores.length) : 50;
-                const riskScore = calculateRealRiskScore(driver, avgScore);
-                const riskLevel = getRiskLevel(riskScore);
-                const eventsPerTrip = driver.totalTrips > 0 ? (driver.riskEvents / driver.totalTrips) : 0;
-                
-                if (index < 3) { // Log dos primeiros 3 motoristas
-                    debugLog(`Motorista ${index}:`, {
-                        name: driver.driverName,
-                        trips: driver.totalTrips,
-                        avgScore: avgScore.toFixed(2),
-                        riskScore: riskScore.toFixed(2),
-                        riskLevel: riskLevel
-                    });
-                }
-                
-                return {
-                    ...driver,
-                    riskScore: parseFloat(riskScore.toFixed(2)),
-                    riskLevel: riskLevel,
-                    avgDistance: driver.totalTrips > 0 ? (driver.totalDistance / driver.totalTrips) : 0,
-                    eventsPerTrip: parseFloat(eventsPerTrip.toFixed(2)),
-                    avgScore: parseFloat(avgScore.toFixed(2)),
-                    riskTrend: riskScore > avgScore ? 'up' : 'down'
-                };
-            });
-
-            // Ordenar por score de risco (maior risco primeiro)
-            processedData.sort((a, b) => b.riskScore - a.riskScore);
-            
-            debugLog(`=== PROCESSAMENTO CONCLUÍDO ===`);
-            debugLog(`${processedData.length} motoristas processados com dados reais`);
-            debugLog(`Enterprise ID: ${currentEnterpriseId}`);
-        }
-
-        // Calcular score de risco baseado em dados reais
-        function calculateRealRiskScore(driver, avgScore) {
-            let riskScore = 0;
-            
-            // Fator 1: Score médio invertido (peso 40%)
-            // Score alto = risco baixo, então invertemos
-            const scoreRisk = Math.max(0, 100 - avgScore);
-            riskScore += (scoreRisk * 0.4);
-            
-            // Fator 2: Eventos de risco por viagem (peso 30%)
-            const eventsPerTrip = driver.totalTrips > 0 ? driver.riskEvents / driver.totalTrips : 0;
-            const eventsRisk = Math.min(eventsPerTrip * 10, 100); // Normalizar
-            riskScore += (eventsRisk * 0.3);
-            
-            // Fator 3: Eventos de velocidade (peso 20%)
-            const speedEventsPerTrip = driver.totalTrips > 0 ? driver.speedEvents / driver.totalTrips : 0;
-            const speedRisk = Math.min(speedEventsPerTrip * 15, 100);
-            riskScore += (speedRisk * 0.2);
-            
-            // Fator 4: Frequência de viagens (peso 10%)
-            // Muitas viagens podem indicar maior exposição ao risco
-            const tripFrequency = Math.min(driver.totalTrips / 50, 1);
-            riskScore += (tripFrequency * 10);
-            
-            return Math.min(riskScore, 100);
-        }
-
-        // Determinar nível de risco
-        function getRiskLevel(score) {
-            if (score >= 70) return 'high';
-            if (score >= 40) return 'medium';
-            return 'low';
-        }
-
-        // Aplicar filtros
-        function applyFilters() {
-            const periodFilter = document.getElementById('periodFilter').value;
-            const riskFilter = document.getElementById('riskFilter').value;
-            const driverSearch = document.getElementById('driverSearch').value.toLowerCase();
-            const minScore = parseFloat(document.getElementById('minScore').value) || 0;
-
-            filteredData = processedData.filter(driver => {
-                // Filtro de período (baseado na última viagem)
-                if (periodFilter && driver.lastTrip) {
-                    const tripDate = new Date(driver.lastTrip);
-                    const cutoffDate = new Date();
-                    cutoffDate.setDate(cutoffDate.getDate() - parseInt(periodFilter));
-                    if (tripDate < cutoffDate) return false;
-                }
-
-                // Filtro de nível de risco
-                if (riskFilter && driver.riskLevel !== riskFilter) return false;
-
-                // Filtro de busca por nome
-                if (driverSearch && !driver.driverName.toLowerCase().includes(driverSearch)) return false;
-
-                // Filtro de score mínimo
-                if (driver.riskScore < minScore) return false;
-
-                return true;
-            });
-
-            currentPage = 1;
-            renderTable();
-            updateMetrics();
-            updateInsights();
-            updateCharts();
-        }
-
-        // Renderizar interface completa
-        function renderInterface() {
-            debugLog('=== RENDERIZANDO INTERFACE ===');
-            debugLog('Dados processados:', processedData.length);
-            
-            document.getElementById('loadingState').style.display = 'none';
-            
-            if (processedData.length > 0) {
-                debugLog('Exibindo interface com dados');
-                document.getElementById('metricsGrid').style.display = 'grid';
-                document.getElementById('insightsSection').style.display = 'grid';
-                document.getElementById('chartsSection').style.display = 'grid';
-                document.getElementById('additionalCharts').style.display = 'grid';
-                document.getElementById('tableContainer').style.display = 'block';
-
-                // Aplicar filtros iniciais
-                applyFilters();
-                
-                updateMetrics();
-                updateInsights();
-                createCharts();
-                renderTable();
-            } else {
-                debugLog('Exibindo mensagem de erro - sem dados');
-                // Mostrar mensagem de erro se não há dados
-                document.getElementById('errorState').style.display = 'block';
-            }
+            return `Motorista ${userString.substring(0, 8)}...`;
         }
 
         // Atualizar métricas
         function updateMetrics() {
-            const totalDrivers = filteredData.length;
-            const totalTrips = filteredData.reduce((sum, driver) => sum + driver.totalTrips, 0);
-            const totalDistance = filteredData.reduce((sum, driver) => sum + driver.totalDistance, 0);
-            const avgRiskScore = totalDrivers > 0 ? filteredData.reduce((sum, driver) => sum + driver.riskScore, 0) / totalDrivers : 0;
+            const totalDrivers = allDriversData.length;
+            const totalTrips = allDriversData.reduce((sum, driver) => sum + driver.totalTrips, 0);
+            const totalDistance = allDriversData.reduce((sum, driver) => sum + driver.totalDistance, 0);
+            const avgRiskScore = totalDrivers > 0 ? 
+                allDriversData.reduce((sum, driver) => sum + driver.riskScore, 0) / totalDrivers : 0;
 
-            document.getElementById('fleetRiskScore').textContent = avgRiskScore.toFixed(1);
             document.getElementById('totalDrivers').textContent = totalDrivers;
             document.getElementById('totalTrips').textContent = totalTrips.toLocaleString();
-            document.getElementById('totalDistance').textContent = (totalDistance / 1000).toFixed(1);
-
-            // Simular mudanças (em uma implementação real, comparar com período anterior)
-            document.getElementById('fleetRiskChange').textContent = '+2.3%';
-            document.getElementById('fleetRiskChange').className = 'metric-change negative';
-            
-            document.getElementById('driversChange').textContent = '+5';
-            document.getElementById('driversChange').className = 'metric-change positive';
-            
-            document.getElementById('tripsChange').textContent = '+12%';
-            document.getElementById('tripsChange').className = 'metric-change positive';
-            
-            document.getElementById('distanceChange').textContent = '+8.5%';
-            document.getElementById('distanceChange').className = 'metric-change positive';
-        }
-
-        // Atualizar insights
-        function updateInsights() {
-            const highRiskDrivers = filteredData.filter(d => d.riskLevel === 'high').length;
-            const lowMediumRiskDrivers = filteredData.filter(d => d.riskLevel !== 'high').length;
-            const fleetEfficiency = filteredData.length > 0 ? ((lowMediumRiskDrivers / filteredData.length) * 100) : 0;
-            const criticalEvents = Math.floor(Math.random() * 5); // Simulado
-
-            document.getElementById('highRiskDrivers').textContent = highRiskDrivers;
-            document.getElementById('fleetEfficiency').textContent = fleetEfficiency.toFixed(0) + '%';
-            document.getElementById('criticalEvents').textContent = criticalEvents;
+            document.getElementById('totalDistance').textContent = (totalDistance / 1000).toFixed(0);
+            document.getElementById('avgRiskScore').textContent = avgRiskScore.toFixed(1);
         }
 
         // Criar gráficos
         function createCharts() {
             createRiskDistributionChart();
-            createRiskBarChart();
-            createRiskDistanceScatter();
+            createTopDriversChart();
+            createRiskDistanceChart();
             createRiskEvolutionChart();
             createRiskFrequencyChart();
-            createBenchmarkChart();
+            createIncidentCategoriesChart();
         }
 
-        // Distribuição de risco da frota (Pie Chart)
+        // Gráfico de distribuição de risco
         function createRiskDistributionChart() {
             const ctx = document.getElementById('riskDistributionChart').getContext('2d');
             
+            const riskCounts = {
+                low: allDriversData.filter(d => d.riskLevel === 'low').length,
+                medium: allDriversData.filter(d => d.riskLevel === 'medium').length,
+                high: allDriversData.filter(d => d.riskLevel === 'high').length
+            };
+
             if (charts.riskDistribution) {
                 charts.riskDistribution.destroy();
             }
-            
-            const lowRisk = filteredData.filter(d => d.riskLevel === 'low').length;
-            const mediumRisk = filteredData.filter(d => d.riskLevel === 'medium').length;
-            const highRisk = filteredData.filter(d => d.riskLevel === 'high').length;
-            
+
             charts.riskDistribution = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: ['Baixo Risco', 'Médio Risco', 'Alto Risco'],
                     datasets: [{
-                        data: [lowRisk, mediumRisk, highRisk],
-                        backgroundColor: ['#27ae60', '#f1c40f', '#e74c3c'],
-                        borderWidth: 3,
-                        borderColor: '#1a1e23'
+                        data: [riskCounts.low, riskCounts.medium, riskCounts.high],
+                        backgroundColor: [
+                            'rgba(20, 216, 180, 0.8)',
+                            'rgba(138, 86, 226, 0.8)',
+                            'rgba(230, 126, 34, 0.8)'
+                        ],
+                        borderWidth: 0,
+                        hoverBorderWidth: 0,
+                        cutout: '65%'
                     }]
                 },
                 options: {
@@ -1228,19 +1053,73 @@
                     plugins: {
                         legend: {
                             position: 'bottom',
-                            labels: { 
+                            labels: {
                                 color: '#bdc3c7',
-                                padding: 20,
-                                font: { size: 12 }
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        }
+                    },
+                    animation: {
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+
+        // Gráfico top 10 motoristas
+        function createTopDriversChart() {
+            const ctx = document.getElementById('topDriversChart').getContext('2d');
+            
+            const top10 = allDriversData
+                .sort((a, b) => b.riskScore - a.riskScore)
+                .slice(0, 10);
+
+            if (charts.topDrivers) {
+                charts.topDrivers.destroy();
+            }
+
+            charts.topDrivers = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: top10.map(d => d.driverName.length > 15 ? d.driverName.substring(0, 15) + '...' : d.driverName),
+                    datasets: [{
+                        label: 'Score de Risco de Acidentes',
+                        data: top10.map(d => d.riskScore),
+                        backgroundColor: top10.map(driver => 
+                            driver.riskLevel === 'high' ? 'rgba(230, 126, 34, 0.8)' :
+                            driver.riskLevel === 'medium' ? 'rgba(138, 86, 226, 0.8)' : 'rgba(20, 216, 180, 0.8)'
+                        ),
+                        borderWidth: 0,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#bdc3c7'
                             }
                         },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
-                                    return `${context.label}: ${context.parsed} (${percentage}%)`;
-                                }
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#bdc3c7',
+                                maxRotation: 45
                             }
                         }
                     }
@@ -1248,108 +1127,34 @@
             });
         }
 
-        // Top 10 motoristas por risco (Bar Chart)
-        function createRiskBarChart() {
-            const ctx = document.getElementById('riskBarChart').getContext('2d');
-            
-            if (charts.riskBar) {
-                charts.riskBar.destroy();
+        // Gráfico correlação risco vs distância
+        function createRiskDistanceChart() {
+            const ctx = document.getElementById('riskDistanceChart').getContext('2d');
+
+            if (charts.riskDistance) {
+                charts.riskDistance.destroy();
             }
-            
-            const top10 = filteredData.slice(0, 10);
-            
-            charts.riskBar = new Chart(ctx, {
-                type: 'bar',
+
+            charts.riskDistance = new Chart(ctx, {
+                type: 'scatter',
                 data: {
-                    labels: top10.map(driver => driver.driverName.length > 20 ? 
-                        driver.driverName.substring(0, 20) + '...' : driver.driverName),
                     datasets: [{
-                        label: 'Score de Risco',
-                        data: top10.map(driver => driver.riskScore),
-                        backgroundColor: top10.map(driver => 
-                            driver.riskLevel === 'high' ? '#e74c3c' :
-                            driver.riskLevel === 'medium' ? '#f1c40f' : '#27ae60'
-                        ),
-                        borderColor: '#34495e',
+                        label: 'Motoristas',
+                        data: allDriversData.map(d => ({
+                            x: d.totalDistance / 1000,
+                            y: d.riskScore
+                        })),
+                        backgroundColor: 'rgba(20, 216, 180, 0.6)',
+                        borderColor: 'rgba(20, 216, 180, 1)',
                         borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    indexAxis: 'y',
                     plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                title: function(context) {
-                                    const index = context[0].dataIndex;
-                                    return top10[index] ? top10[index].driverName : 'N/A';
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            max: 100,
-                            grid: { color: '#34495e' },
-                            ticks: { color: '#bdc3c7' }
-                        },
-                        y: {
-                            grid: { color: '#34495e' },
-                            ticks: { color: '#bdc3c7' }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Correlação Risco vs Distância (Scatter Plot)
-        function createRiskDistanceScatter() {
-            const ctx = document.getElementById('riskDistanceScatter').getContext('2d');
-            
-            if (charts.riskDistanceScatter) {
-                charts.riskDistanceScatter.destroy();
-            }
-            
-            const scatterData = filteredData.map(driver => ({
-                x: driver.totalDistance / 1000, // km
-                y: driver.riskScore,
-                backgroundColor: driver.riskLevel === 'high' ? '#e74c3c' :
-                               driver.riskLevel === 'medium' ? '#f1c40f' : '#27ae60'
-            }));
-            
-            charts.riskDistanceScatter = new Chart(ctx, {
-                type: 'scatter',
-                data: {
-                    datasets: [{
-                        label: 'Motoristas',
-                        data: scatterData,
-                        backgroundColor: scatterData.map(point => point.backgroundColor),
-                        borderColor: '#34495e',
-                        borderWidth: 1,
-                        pointRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                title: function(context) {
-                                    const index = context[0].dataIndex;
-                                    return filteredData[index] ? filteredData[index].driverName : 'N/A';
-                                },
-                                label: function(context) {
-                                    return [
-                                        `Distância: ${context.parsed.x.toFixed(1)} km`,
-                                        `Score de Risco: ${context.parsed.y.toFixed(1)}`
-                                    ];
-                                }
-                            }
+                        legend: {
+                            display: false
                         }
                     },
                     scales: {
@@ -1359,242 +1164,24 @@
                                 text: 'Distância Total (km)',
                                 color: '#bdc3c7'
                             },
-                            grid: { color: '#34495e' },
-                            ticks: { color: '#bdc3c7' }
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#bdc3c7'
+                            }
                         },
                         y: {
                             title: {
                                 display: true,
-                                text: 'Score de Risco',
+                                text: 'Score de Risco de Acidentes',
                                 color: '#bdc3c7'
                             },
-                            beginAtZero: true,
-                            max: 100,
-                            grid: { color: '#34495e' },
-                            ticks: { color: '#bdc3c7' }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Evolução do risco nos últimos 6 meses (Line Chart)
-        function createRiskEvolutionChart() {
-            const ctx = document.getElementById('riskEvolutionChart').getContext('2d');
-            
-            if (charts.riskEvolution) {
-                charts.riskEvolution.destroy();
-            }
-            
-            // Dados simulados para os últimos 6 meses
-            const months = [];
-            const riskScores = [];
-            const targetLine = [];
-            
-            for (let i = 5; i >= 0; i--) {
-                const date = new Date();
-                date.setMonth(date.getMonth() - i);
-                months.push(date.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }));
-                
-                // Simular tendência de melhoria
-                const baseScore = 55 - (i * 2); // Melhoria gradual
-                const variation = (Math.random() - 0.5) * 10;
-                riskScores.push(Math.max(30, Math.min(80, baseScore + variation)));
-                targetLine.push(45); // Meta de risco
-            }
-            
-            charts.riskEvolution = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: months,
-                    datasets: [
-                        {
-                            label: 'Score Médio de Risco',
-                            data: riskScores,
-                            borderColor: '#14d8b4',
-                            backgroundColor: 'rgba(20, 216, 180, 0.1)',
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 5,
-                            pointHoverRadius: 8
-                        },
-                        {
-                            label: 'Meta de Risco',
-                            data: targetLine,
-                            borderColor: '#e74c3c',
-                            backgroundColor: 'transparent',
-                            borderDash: [5, 5],
-                            pointRadius: 0,
-                            tension: 0
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: { color: '#bdc3c7' }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: '#34495e' },
-                            ticks: { color: '#bdc3c7' }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            grid: { color: '#34495e' },
-                            ticks: { color: '#bdc3c7' }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Risco por frequência de viagens (Bar Chart)
-        function createRiskFrequencyChart() {
-            const ctx = document.getElementById('riskFrequencyChart').getContext('2d');
-            
-            if (charts.riskFrequency) {
-                charts.riskFrequency.destroy();
-            }
-            
-            // Agrupar por faixas de frequência de viagens
-            const frequencyGroups = {
-                '1-10 viagens': [],
-                '11-25 viagens': [],
-                '26-50 viagens': [],
-                '51-100 viagens': [],
-                '100+ viagens': []
-            };
-            
-            filteredData.forEach(driver => {
-                if (driver.totalTrips <= 10) {
-                    frequencyGroups['1-10 viagens'].push(driver);
-                } else if (driver.totalTrips <= 25) {
-                    frequencyGroups['11-25 viagens'].push(driver);
-                } else if (driver.totalTrips <= 50) {
-                    frequencyGroups['26-50 viagens'].push(driver);
-                } else if (driver.totalTrips <= 100) {
-                    frequencyGroups['51-100 viagens'].push(driver);
-                } else {
-                    frequencyGroups['100+ viagens'].push(driver);
-                }
-            });
-            
-            const labels = Object.keys(frequencyGroups);
-            const avgRiskScores = labels.map(label => {
-                const drivers = frequencyGroups[label];
-                if (drivers.length === 0) return 0;
-                return drivers.reduce((sum, driver) => sum + driver.riskScore, 0) / drivers.length;
-            });
-            
-            charts.riskFrequency = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Score Médio de Risco',
-                        data: avgRiskScores,
-                        backgroundColor: '#8a56e2',
-                        borderColor: '#34495e',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: '#34495e' },
-                            ticks: { color: '#bdc3c7' }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            grid: { color: '#34495e' },
-                            ticks: { color: '#bdc3c7' }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Benchmark de performance vs mercado (Radar Chart)
-        function createBenchmarkChart() {
-            const ctx = document.getElementById('benchmarkChart').getContext('2d');
-            
-            if (charts.benchmark) {
-                charts.benchmark.destroy();
-            }
-            
-            // Calcular métricas da frota atual
-            const avgRiskScore = filteredData.length > 0 ? 
-                filteredData.reduce((sum, driver) => sum + driver.riskScore, 0) / filteredData.length : 0;
-            const avgEventsPerTrip = filteredData.length > 0 ?
-                filteredData.reduce((sum, driver) => sum + driver.eventsPerTrip, 0) / filteredData.length : 0;
-            const highRiskPercentage = filteredData.length > 0 ?
-                (filteredData.filter(d => d.riskLevel === 'high').length / filteredData.length) * 100 : 0;
-            
-            // Dados simulados do mercado para comparação
-            const marketBenchmark = [65, 75, 80, 70, 60]; // Scores invertidos para melhor visualização
-            const fleetPerformance = [
-                100 - avgRiskScore, // Segurança (invertido)
-                Math.max(0, 100 - (avgEventsPerTrip * 20)), // Eventos (invertido)
-                Math.max(0, 100 - highRiskPercentage), // Motoristas baixo risco
-                Math.random() * 30 + 60, // Eficiência (simulado)
-                Math.random() * 25 + 65  // Conformidade (simulado)
-            ];
-            
-            charts.benchmark = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: ['Segurança', 'Baixos Eventos', 'Motoristas Seguros', 'Eficiência', 'Conformidade'],
-                    datasets: [
-                        {
-                            label: 'Sua Frota',
-                            data: fleetPerformance,
-                            borderColor: '#14d8b4',
-                            backgroundColor: 'rgba(20, 216, 180, 0.2)',
-                            pointBackgroundColor: '#14d8b4',
-                            pointBorderColor: '#ffffff',
-                            pointHoverBackgroundColor: '#ffffff',
-                            pointHoverBorderColor: '#14d8b4'
-                        },
-                        {
-                            label: 'Benchmark Mercado',
-                            data: marketBenchmark,
-                            borderColor: '#f39c12',
-                            backgroundColor: 'rgba(243, 156, 18, 0.1)',
-                            pointBackgroundColor: '#f39c12',
-                            pointBorderColor: '#ffffff',
-                            pointHoverBackgroundColor: '#ffffff',
-                            pointHoverBorderColor: '#f39c12'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: { color: '#bdc3c7' }
-                        }
-                    },
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            max: 100,
-                            grid: { color: '#34495e' },
-                            pointLabels: { color: '#bdc3c7' },
-                            ticks: { 
-                                color: '#bdc3c7',
-                                display: false
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#bdc3c7'
                             }
                         }
                     }
@@ -1602,9 +1189,230 @@
             });
         }
 
-        // Atualizar gráficos
-        function updateCharts() {
-            createCharts();
+        // Gráfico evolução do risco
+        function createRiskEvolutionChart() {
+            const ctx = document.getElementById('riskEvolutionChart').getContext('2d');
+
+            // Dados simulados para evolução (últimos 6 meses)
+            const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+            const avgRisk = allDriversData.length > 0 ? 
+                allDriversData.reduce((sum, d) => sum + d.riskScore, 0) / allDriversData.length : 0;
+            
+            const evolutionData = months.map(() => avgRisk + (Math.random() - 0.5) * 20);
+
+            if (charts.riskEvolution) {
+                charts.riskEvolution.destroy();
+            }
+
+            charts.riskEvolution = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Risco Médio de Acidentes',
+                        data: evolutionData,
+                        borderColor: 'rgba(20, 216, 180, 1)',
+                        backgroundColor: 'rgba(20, 216, 180, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#bdc3c7'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#bdc3c7'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Gráfico risco por frequência
+        function createRiskFrequencyChart() {
+            const ctx = document.getElementById('riskFrequencyChart').getContext('2d');
+
+            // Agrupar por faixas de viagens
+            const frequencyGroups = {
+                '1-10': allDriversData.filter(d => d.totalTrips >= 1 && d.totalTrips <= 10),
+                '11-25': allDriversData.filter(d => d.totalTrips >= 11 && d.totalTrips <= 25),
+                '26-50': allDriversData.filter(d => d.totalTrips >= 26 && d.totalTrips <= 50),
+                '50+': allDriversData.filter(d => d.totalTrips > 50)
+            };
+
+            const avgRiskByFrequency = Object.keys(frequencyGroups).map(key => {
+                const group = frequencyGroups[key];
+                return group.length > 0 ? 
+                    group.reduce((sum, d) => sum + d.riskScore, 0) / group.length : 0;
+            });
+
+            if (charts.riskFrequency) {
+                charts.riskFrequency.destroy();
+            }
+
+            charts.riskFrequency = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['1-10 viagens', '11-25 viagens', '26-50 viagens', '50+ viagens'],
+                    datasets: [{
+                        label: 'Risco Médio de Acidentes',
+                        data: avgRiskByFrequency,
+                        backgroundColor: 'rgba(138, 86, 226, 0.8)',
+                        borderWidth: 0,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#bdc3c7'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#bdc3c7'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Gráfico categorias de incidentes
+        function createIncidentCategoriesChart() {
+            const ctx = document.getElementById('incidentCategoriesChart').getContext('2d');
+
+            // Somar incidentes por categoria
+            const categoryTotals = {
+                'Movimento Veículo': allDriversData.reduce((sum, d) => sum + d.vehicleInMotion + d.vehicleStopped + d.idling + d.accEvents, 0),
+                'Direção Agressiva': allDriversData.reduce((sum, d) => sum + d.frequentAcceleration + d.highAcceleration + d.frequentBraking + d.highDeceleration + d.frequentStops + d.decAfterCurve + d.cornering + d.accBeforeCurve + d.swerving, 0),
+                'Distrações/Fadiga': allDriversData.reduce((sum, d) => sum + d.smartphoneUsage + d.phoneMovement + d.driverFatigue, 0),
+                'Condições Técnicas': allDriversData.reduce((sum, d) => sum + d.highTemperature + d.lowBattery + d.inertiaEvents, 0)
+            };
+
+            if (charts.incidentCategories) {
+                charts.incidentCategories.destroy();
+            }
+
+            charts.incidentCategories = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(categoryTotals),
+                    datasets: [{
+                        label: 'Total de Incidentes',
+                        data: Object.values(categoryTotals),
+                        backgroundColor: [
+                            'rgba(52, 152, 219, 0.8)',
+                            'rgba(230, 126, 34, 0.8)',
+                            'rgba(231, 76, 60, 0.8)',
+                            'rgba(155, 89, 182, 0.8)'
+                        ],
+                        borderWidth: 0,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#bdc3c7'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#bdc3c7',
+                                maxRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Aplicar filtros
+        function applyFilters() {
+            const periodFilter = document.getElementById('periodFilter').value;
+            const riskFilter = document.getElementById('riskFilter').value;
+            const nameFilter = document.getElementById('nameFilter').value.toLowerCase();
+            const scoreFilter = parseFloat(document.getElementById('scoreFilter').value) || 0;
+
+            filteredData = allDriversData.filter(driver => {
+                // Filtro de período (simplificado)
+                let periodMatch = true;
+                if (periodFilter !== 'all' && driver.lastTrip) {
+                    const tripDate = new Date(driver.lastTrip);
+                    const daysAgo = parseInt(periodFilter);
+                    const cutoffDate = new Date();
+                    cutoffDate.setDate(cutoffDate.getDate() - daysAgo);
+                    periodMatch = tripDate >= cutoffDate;
+                }
+
+                // Filtro de risco
+                const riskMatch = riskFilter === 'all' || driver.riskLevel === riskFilter;
+
+                // Filtro de nome
+                const nameMatch = nameFilter === '' || driver.driverName.toLowerCase().includes(nameFilter);
+
+                // Filtro de score
+                const scoreMatch = driver.riskScore >= scoreFilter;
+
+                return periodMatch && riskMatch && nameMatch && scoreMatch;
+            });
+
+            currentPage = 1;
+            renderTable();
         }
 
         // Renderizar tabela
@@ -1619,19 +1427,60 @@
             pageData.forEach(driver => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${driver.driverName}</td>
+                    <td><strong>${driver.driverName}</strong></td>
+                    <td>${driver.avgScore.toFixed(1)}</td>
+                    <td>${driver.avgScoreML.toFixed(1)}</td>
                     <td><strong>${driver.riskScore.toFixed(2)}</strong></td>
                     <td><span class="risk-badge risk-${driver.riskLevel}">${getRiskLevelText(driver.riskLevel)}</span></td>
                     <td>${driver.totalTrips}</td>
                     <td>${(driver.totalDistance / 1000).toFixed(1)}</td>
                     <td>${driver.lastTrip ? new Date(driver.lastTrip).toLocaleDateString('pt-BR') : 'N/A'}</td>
-                    <td>${driver.riskTrend === 'up' ? '↗' : '↘'}</td>
-                    <td>${driver.eventsPerTrip.toFixed(2)}</td>
+                    
+                    <!-- Movimento do Veículo -->
+                    <td><span class="incident-count ${getIncidentClass(driver.vehicleInMotion)}">${driver.vehicleInMotion}</span></td>
+                    <td><span class="incident-count ${getIncidentClass(driver.vehicleStopped)}">${driver.vehicleStopped}</span></td>
+                    <td><span class="incident-count ${getIncidentClass(driver.idling)}">${driver.idling}</span></td>
+                    <td><span class="incident-count ${getIncidentClass(driver.accEvents)}">${driver.accEvents}</span></td>
+                    
+                    <!-- Direção Agressiva - Aceleração -->
+                    <td><span class="incident-count ${getIncidentClass(driver.frequentAcceleration)}">${driver.frequentAcceleration}</span></td>
+                    <td><span class="incident-count ${getIncidentClass(driver.highAcceleration)}">${driver.highAcceleration}</span></td>
+                    
+                    <!-- Direção Agressiva - Frenagem -->
+                    <td><span class="incident-count ${getIncidentClass(driver.frequentBraking)}">${driver.frequentBraking}</span></td>
+                    <td><span class="incident-count ${getIncidentClass(driver.highDeceleration)}">${driver.highDeceleration}</span></td>
+                    <td><span class="incident-count ${getIncidentClass(driver.frequentStops)}">${driver.frequentStops}</span></td>
+                    <td><span class="incident-count ${getIncidentClass(driver.decAfterCurve)}">${driver.decAfterCurve}</span></td>
+                    
+                    <!-- Direção Agressiva - Curvas -->
+                    <td><span class="incident-count ${getIncidentClass(driver.cornering)}">${driver.cornering}</span></td>
+                    <td><span class="incident-count ${getIncidentClass(driver.accBeforeCurve)}">${driver.accBeforeCurve}</span></td>
+                    <td><span class="incident-count ${getIncidentClass(driver.swerving)}">${driver.swerving}</span></td>
+                    
+                    <!-- Distrações / Fadiga -->
+                    <td><span class="incident-count ${getIncidentClass(driver.smartphoneUsage)}">${driver.smartphoneUsage}</span></td>
+                    <td><span class="incident-count ${getIncidentClass(driver.phoneMovement)}">${driver.phoneMovement}</span></td>
+                    <td><span class="incident-count ${getIncidentClass(driver.driverFatigue)}">${driver.driverFatigue}</span></td>
+                    
+                    <!-- Condições Técnicas -->
+                    <td><span class="incident-count ${getIncidentClass(driver.highTemperature)}">${driver.highTemperature}</span></td>
+                    <td><span class="incident-count ${getIncidentClass(driver.lowBattery)}">${driver.lowBattery}</span></td>
+                    <td><span class="incident-count ${getIncidentClass(driver.inertiaEvents)}">${driver.inertiaEvents}</span></td>
+                    
+                    <!-- Total -->
+                    <td><span class="incident-count ${getIncidentClass(driver.totalEvents)}">${driver.totalEvents}</span></td>
                 `;
                 tbody.appendChild(row);
             });
 
             updatePagination();
+        }
+
+        // Obter classe CSS para incidentes
+        function getIncidentClass(count) {
+            if (count >= 10) return 'high';
+            if (count >= 5) return 'medium';
+            return 'low';
         }
 
         // Obter texto do nível de risco
@@ -1648,68 +1497,60 @@
         function updatePagination() {
             const totalRecords = filteredData.length;
             const totalPages = Math.ceil(totalRecords / recordsPerPage);
-            const startRecord = totalRecords > 0 ? (currentPage - 1) * recordsPerPage + 1 : 0;
+            const startRecord = (currentPage - 1) * recordsPerPage + 1;
             const endRecord = Math.min(currentPage * recordsPerPage, totalRecords);
 
-            // Atualizar informações
             document.getElementById('paginationInfo').textContent = 
-                `Mostrando ${startRecord}-${endRecord} de ${totalRecords} registros (Página ${currentPage} de ${totalPages})`;
+                `Mostrando ${startRecord}-${endRecord} de ${totalRecords} registros`;
 
-            // Criar botões de paginação
             const buttonsContainer = document.getElementById('paginationButtons');
             buttonsContainer.innerHTML = '';
 
-            if (totalPages <= 1) return;
-
-            // Botão Primeira
-            const firstBtn = document.createElement('button');
-            firstBtn.className = 'pagination-btn';
-            firstBtn.textContent = 'Primeira';
-            firstBtn.disabled = currentPage === 1;
-            firstBtn.onclick = () => goToPage(1);
-            buttonsContainer.appendChild(firstBtn);
-
-            // Botão Anterior
+            // Botão anterior
             const prevBtn = document.createElement('button');
             prevBtn.className = 'pagination-btn';
-            prevBtn.textContent = 'Anterior';
+            prevBtn.textContent = '‹ Anterior';
             prevBtn.disabled = currentPage === 1;
-            prevBtn.onclick = () => goToPage(currentPage - 1);
+            prevBtn.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                }
+            };
             buttonsContainer.appendChild(prevBtn);
 
-            // Botões de números (mostrar até 5 páginas)
-            const startPage = Math.max(1, currentPage - 2);
-            const endPage = Math.min(totalPages, startPage + 4);
+            // Botões de página
+            const maxButtons = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+
+            if (endPage - startPage + 1 < maxButtons) {
+                startPage = Math.max(1, endPage - maxButtons + 1);
+            }
 
             for (let i = startPage; i <= endPage; i++) {
                 const pageBtn = document.createElement('button');
                 pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
                 pageBtn.textContent = i;
-                pageBtn.onclick = () => goToPage(i);
+                pageBtn.onclick = () => {
+                    currentPage = i;
+                    renderTable();
+                };
                 buttonsContainer.appendChild(pageBtn);
             }
 
-            // Botão Próxima
+            // Botão próximo
             const nextBtn = document.createElement('button');
             nextBtn.className = 'pagination-btn';
-            nextBtn.textContent = 'Próxima';
+            nextBtn.textContent = 'Próximo ›';
             nextBtn.disabled = currentPage === totalPages;
-            nextBtn.onclick = () => goToPage(currentPage + 1);
+            nextBtn.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable();
+                }
+            };
             buttonsContainer.appendChild(nextBtn);
-
-            // Botão Última
-            const lastBtn = document.createElement('button');
-            lastBtn.className = 'pagination-btn';
-            lastBtn.textContent = 'Última';
-            lastBtn.disabled = currentPage === totalPages;
-            lastBtn.onclick = () => goToPage(totalPages);
-            buttonsContainer.appendChild(lastBtn);
-        }
-
-        // Ir para página específica
-        function goToPage(page) {
-            currentPage = page;
-            renderTable();
         }
 
         // Alterar registros por página
@@ -1721,47 +1562,110 @@
 
         // Atualizar dados
         function refreshData() {
-            debugLog('=== REFRESH SOLICITADO ===');
-            
             document.getElementById('loadingState').style.display = 'block';
-            document.getElementById('metricsGrid').style.display = 'none';
-            document.getElementById('insightsSection').style.display = 'none';
-            document.getElementById('chartsSection').style.display = 'none';
-            document.getElementById('additionalCharts').style.display = 'none';
-            document.getElementById('tableContainer').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'none';
             document.getElementById('errorState').style.display = 'none';
-            
-            // Reset variables
-            processedData = [];
-            filteredData = [];
-            
-            // Recarregar com o enterpriseId atual
-            currentEnterpriseId = getEnterpriseIdFromUrl();
-            
             loadData();
         }
 
         // Exportar para Excel
         function exportToExcel() {
-            const csvContent = [
-                ['Motorista', 'Score Preditivo', 'Nível de Risco', 'Total de Viagens', 'Distância (km)', 'Última Viagem', 'Tendência', 'Eventos/Viagem'],
-                ...filteredData.map(driver => [
-                    driver.driverName,
-                    driver.riskScore.toFixed(2),
-                    getRiskLevelText(driver.riskLevel),
-                    driver.totalTrips,
-                    (driver.totalDistance / 1000).toFixed(1),
-                    driver.lastTrip ? new Date(driver.lastTrip).toLocaleDateString('pt-BR') : 'N/A',
-                    driver.riskTrend === 'up' ? 'Subindo' : 'Descendo',
-                    driver.eventsPerTrip.toFixed(2)
-                ])
-            ].map(row => row.join(',')).join('\n');
-
+            const csvContent = generateCSV();
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `scorecard_preditivo_${currentEnterpriseId}_${new Date().toISOString().split('T')[0]}.csv`;
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `scorecard_preditivo_acidentes_completo_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
+        }
+
+        // Gerar CSV
+        function generateCSV() {
+            const headers = [
+                'Motorista',
+                'Score Geral',
+                'Score ML',
+                'Score Preditivo de Acidentes',
+                'Nível de Risco',
+                'Total Viagens',
+                'Distância (km)',
+                'Última Viagem',
+                // Movimento do Veículo
+                'Veículo em Movimento',
+                'Veículo Parado',
+                'Marcha Lenta',
+                'Eventos Aceleração',
+                // Direção Agressiva - Aceleração
+                'Acelerações Frequentes',
+                'Acelerações Altas',
+                // Direção Agressiva - Frenagem
+                'Frenagens Frequentes',
+                'Desacelerações Altas',
+                'Paradas Frequentes',
+                'Desaceleração Pós-Curva',
+                // Direção Agressiva - Curvas
+                'Eventos de Curva',
+                'Aceleração Pré-Curva',
+                'Desvios',
+                // Distrações / Fadiga
+                'Uso Smartphone',
+                'Movimento Telefone',
+                'Fadiga',
+                // Condições Técnicas
+                'Alta Temperatura',
+                'Bateria Baixa',
+                'Eventos Inércia',
+                // Total
+                'Total Eventos'
+            ];
+
+            const rows = filteredData.map(driver => [
+                driver.driverName,
+                driver.avgScore.toFixed(1),
+                driver.avgScoreML.toFixed(1),
+                driver.riskScore.toFixed(2),
+                getRiskLevelText(driver.riskLevel),
+                driver.totalTrips,
+                (driver.totalDistance / 1000).toFixed(1),
+                driver.lastTrip ? new Date(driver.lastTrip).toLocaleDateString('pt-BR') : 'N/A',
+                driver.vehicleInMotion,
+                driver.vehicleStopped,
+                driver.idling,
+                driver.accEvents,
+                driver.frequentAcceleration,
+                driver.highAcceleration,
+                driver.frequentBraking,
+                driver.highDeceleration,
+                driver.frequentStops,
+                driver.decAfterCurve,
+                driver.cornering,
+                driver.accBeforeCurve,
+                driver.swerving,
+                driver.smartphoneUsage,
+                driver.phoneMovement,
+                driver.driverFatigue,
+                driver.highTemperature,
+                driver.lowBattery,
+                driver.inertiaEvents,
+                driver.totalEvents
+            ]);
+
+            return [headers, ...rows].map(row => 
+                row.map(cell => `"${cell}"`).join(',')
+            ).join('\n');
+        }
+
+        // Mostrar erro
+        function showError(message) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorState').innerHTML = `
+                <p><strong>Erro:</strong> ${message}</p>
+            `;
         }
     </script>
 </body>
