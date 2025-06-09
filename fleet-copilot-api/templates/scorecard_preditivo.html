@@ -420,6 +420,17 @@
             font-size: 0.9rem;
         }
 
+        .debug-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
         @media (max-width: 768px) {
             .charts-section {
                 grid-template-columns: 1fr;
@@ -500,6 +511,12 @@
         <!-- Loading State -->
         <div id="loadingState" class="loading">
             <p>Carregando dados do scorecard preditivo...</p>
+        </div>
+
+        <!-- Debug Panel -->
+        <div id="debugPanel" class="debug-panel" style="display: none;">
+            <h4>Debug Information:</h4>
+            <div id="debugContent"></div>
         </div>
 
         <!-- Error State (apenas para erros críticos) -->
@@ -657,13 +674,27 @@
     </div>
 
     <script>
-        // Configuração de produção
-        const PRODUCTION_MODE = true;
+        // Configuração de debug (ativar temporariamente para investigação)
+        const DEBUG_MODE = true;
         
-        // Função para logs condicionais (apenas em desenvolvimento)
+        // Função para logs de debug
         function debugLog(...args) {
-            if (!PRODUCTION_MODE) {
-                console.log(...args);
+            if (DEBUG_MODE) {
+                console.log('[SCORECARD DEBUG]', ...args);
+                updateDebugPanel(args.join(' '));
+            }
+        }
+
+        // Atualizar painel de debug
+        function updateDebugPanel(message) {
+            if (DEBUG_MODE) {
+                const debugPanel = document.getElementById('debugPanel');
+                const debugContent = document.getElementById('debugContent');
+                debugPanel.style.display = 'block';
+                
+                const timestamp = new Date().toLocaleTimeString();
+                debugContent.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+                debugContent.scrollTop = debugContent.scrollHeight;
             }
         }
 
@@ -693,7 +724,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             currentEnterpriseId = getEnterpriseIdFromUrl();
             
-            debugLog('Inicializando Scorecard Preditivo de Risco para Enterprise ID:', currentEnterpriseId);
+            debugLog('=== INICIANDO SCORECARD PREDITIVO ===');
+            debugLog('Enterprise ID:', currentEnterpriseId);
+            debugLog('API Base:', API_BASE);
+            
             loadData();
             setupEventListeners();
         });
@@ -709,41 +743,82 @@
         // Carregar dados das APIs com filtro por enterpriseId
         async function loadData() {
             try {
-                debugLog('Carregando dados das APIs para Enterprise ID:', currentEnterpriseId);
+                debugLog('=== INICIANDO CARREGAMENTO DE DADOS ===');
+                debugLog('Enterprise ID:', currentEnterpriseId);
                 
                 // Carregar dados das APIs com timeout
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 15000);
+                const timeoutId = setTimeout(() => {
+                    controller.abort();
+                    debugLog('TIMEOUT: Requisição cancelada após 15 segundos');
+                }, 15000);
                 
-                debugLog('Carregando API trips...');
-                const tripsResponse = await fetch(`${API_BASE}/trips?enterpriseId=${currentEnterpriseId}`, { 
+                // === TESTE API TRIPS ===
+                debugLog('--- CARREGANDO API TRIPS ---');
+                const tripsUrl = `${API_BASE}/trips?enterpriseId=${currentEnterpriseId}`;
+                debugLog('URL Trips:', tripsUrl);
+                
+                const tripsResponse = await fetch(tripsUrl, { 
                     signal: controller.signal 
                 });
 
+                debugLog('Response Status Trips:', tripsResponse.status);
+                debugLog('Response OK Trips:', tripsResponse.ok);
+
                 if (!tripsResponse.ok) {
-                    throw new Error(`Erro na API trips: ${tripsResponse.status}`);
+                    throw new Error(`Erro na API trips: ${tripsResponse.status} - ${tripsResponse.statusText}`);
                 }
 
                 const tripsResult = await tripsResponse.json();
-                debugLog('API trips carregada:', tripsResult.count || 0, 'registros');
+                debugLog('=== RESPOSTA API TRIPS ===');
+                debugLog('Count:', tripsResult.count);
+                debugLog('Data length:', tripsResult.data ? tripsResult.data.length : 'undefined');
+                debugLog('Enterprise ID na resposta:', tripsResult.enterpriseId);
+                debugLog('Status:', tripsResult.firebase_status);
                 
                 tripsData = tripsResult.data || [];
+                debugLog('Trips data carregado:', tripsData.length, 'registros');
 
-                // Carregar users - tentar com enterpriseId primeiro, depois sem filtro
-                debugLog('Carregando API users...');
+                // Analisar estrutura dos dados
+                if (tripsData.length > 0) {
+                    debugLog('=== ANÁLISE PRIMEIRO REGISTRO ===');
+                    const firstTrip = tripsData[0];
+                    debugLog('UserString:', firstTrip.UserString);
+                    debugLog('DriverBehaviorScore:', firstTrip.DriverBehaviorScore);
+                    debugLog('TripDistance:', firstTrip.TripDistance);
+                    debugLog('TotalEvents:', firstTrip.totalEvents);
+                    debugLog('AmountOfSpeedOverLimitEvents:', firstTrip.AmountOfSpeedOverLimitEvents);
+                    debugLog('TimestampDate:', firstTrip.TimestampDate);
+                }
+
+                // === TESTE API USERS ===
+                debugLog('--- CARREGANDO API USERS ---');
                 try {
-                    const usersResponse = await fetch(`${API_BASE}/users?enterpriseId=${currentEnterpriseId}`, { 
+                    const usersUrl = `${API_BASE}/users?enterpriseId=${currentEnterpriseId}`;
+                    debugLog('URL Users:', usersUrl);
+                    
+                    const usersResponse = await fetch(usersUrl, { 
                         signal: controller.signal 
                     });
 
+                    debugLog('Response Status Users:', usersResponse.status);
+                    debugLog('Response OK Users:', usersResponse.ok);
+
                     if (usersResponse.ok) {
                         const usersResult = await usersResponse.json();
+                        debugLog('=== RESPOSTA API USERS ===');
+                        debugLog('Count:', usersResult.count);
+                        debugLog('Data length:', usersResult.data ? usersResult.data.length : 'undefined');
+                        
                         usersData = usersResult.data || [];
                         
                         // Se não retornou dados com enterpriseId, tentar sem filtro
                         if (usersData.length === 0) {
                             debugLog('Nenhum usuário encontrado com enterpriseId, tentando buscar todos...');
-                            const allUsersResponse = await fetch(`${API_BASE}/users`, { 
+                            const allUsersUrl = `${API_BASE}/users`;
+                            debugLog('URL Users (sem filtro):', allUsersUrl);
+                            
+                            const allUsersResponse = await fetch(allUsersUrl, { 
                                 signal: controller.signal 
                             });
                             
@@ -764,34 +839,46 @@
                         throw new Error(`Erro na API users: ${usersResponse.status}`);
                     }
                 } catch (usersError) {
-                    debugLog('Erro na API users (continuando sem ela):', usersError);
+                    debugLog('Erro na API users (continuando sem ela):', usersError.message);
                 }
 
                 clearTimeout(timeoutId);
 
-                // Se temos dados de trips, consideramos sucesso
+                // === PROCESSAMENTO DOS DADOS ===
                 if (tripsData.length > 0) {
-                    debugLog('Dados reais carregados com sucesso para Enterprise ID:', currentEnterpriseId);
+                    debugLog('=== PROCESSANDO DADOS REAIS ===');
+                    debugLog('Total de viagens para processar:', tripsData.length);
                     
                     // Processar dados reais
                     processRealData();
+                    
+                    debugLog('=== DADOS PROCESSADOS ===');
+                    debugLog('Total de motoristas processados:', processedData.length);
+                    
+                    if (processedData.length > 0) {
+                        debugLog('Primeiro motorista processado:', processedData[0].driverName);
+                        debugLog('Score do primeiro motorista:', processedData[0].riskScore);
+                    }
                 } else {
                     throw new Error(`Nenhuma viagem encontrada para Enterprise ID: ${currentEnterpriseId}`);
                 }
                 
             } catch (error) {
-                debugLog('Erro ao carregar APIs:', error);
+                debugLog('=== ERRO NO CARREGAMENTO ===');
+                debugLog('Erro:', error.message);
+                debugLog('Stack:', error.stack);
                 
                 document.getElementById('errorState').style.display = 'block';
                 document.getElementById('errorState').innerHTML = `
                     <p><strong>Erro:</strong> ${error.message}</p>
                     <p>Enterprise ID: ${currentEnterpriseId}</p>
+                    <p>Verifique o console para mais detalhes.</p>
                 `;
                 
-                // Não usar fallback - mostrar erro real
                 processedData = [];
                 
             } finally {
+                debugLog('=== RENDERIZANDO INTERFACE ===');
                 // Renderizar interface sempre
                 renderInterface();
             }
@@ -799,15 +886,26 @@
 
         // Criar mapa de usuários para DE-PARA
         function createUsersMap() {
-            debugLog('Criando mapa de usuários para DE-PARA...');
+            debugLog('=== CRIANDO MAPA DE USUÁRIOS ===');
             
             usersMap.clear();
             let mappingsCreated = 0;
             
-            usersData.forEach(user => {
+            usersData.forEach((user, index) => {
                 // Tentar diferentes campos de ID
                 const userId = user._doc_id || user.id || user.userId;
                 const userName = user.display_name || user.displayName || user.name;
+                
+                if (index < 3) { // Log dos primeiros 3 usuários
+                    debugLog(`Usuário ${index}:`, {
+                        _doc_id: user._doc_id,
+                        id: user.id,
+                        userId: user.userId,
+                        display_name: user.display_name,
+                        displayName: user.displayName,
+                        name: user.name
+                    });
+                }
                 
                 if (userId && userName && userName !== 'N/A') {
                     usersMap.set(userId, userName);
@@ -815,7 +913,7 @@
                 }
             });
             
-            debugLog(`${mappingsCreated} mapeamentos de usuários criados`);
+            debugLog(`${mappingsCreated} mapeamentos de usuários criados de ${usersData.length} usuários`);
         }
 
         // Função para obter nome do motorista
@@ -840,20 +938,26 @@
 
         // Processar dados reais das APIs
         function processRealData() {
-            debugLog('Processando dados reais das APIs...');
+            debugLog('=== PROCESSANDO DADOS REAIS ===');
             
             if (!tripsData || tripsData.length === 0) {
-                debugLog('Nenhum dado de viagens disponível');
+                debugLog('ERRO: Nenhum dado de viagens disponível');
                 processedData = [];
                 return;
             }
 
             // Agrupar viagens por motorista
             const driverStats = {};
+            let processedTrips = 0;
             
-            tripsData.forEach(trip => {
+            tripsData.forEach((trip, index) => {
                 const driverId = trip.UserString || trip.user || trip.userId || trip.driver;
-                if (!driverId) return;
+                if (!driverId) {
+                    if (index < 5) debugLog(`Viagem ${index}: UserString não encontrado`);
+                    return;
+                }
+                
+                processedTrips++;
                 
                 if (!driverStats[driverId]) {
                     driverStats[driverId] = {
@@ -910,12 +1014,25 @@
                 }
             });
 
+            debugLog(`Viagens processadas: ${processedTrips} de ${tripsData.length}`);
+            debugLog(`Motoristas únicos encontrados: ${Object.keys(driverStats).length}`);
+
             // Calcular scores preditivos baseados em dados reais
-            processedData = Object.values(driverStats).map(driver => {
+            processedData = Object.values(driverStats).map((driver, index) => {
                 const avgScore = driver.scores.length > 0 ? (driver.totalScore / driver.scores.length) : 50;
                 const riskScore = calculateRealRiskScore(driver, avgScore);
                 const riskLevel = getRiskLevel(riskScore);
                 const eventsPerTrip = driver.totalTrips > 0 ? (driver.riskEvents / driver.totalTrips) : 0;
+                
+                if (index < 3) { // Log dos primeiros 3 motoristas
+                    debugLog(`Motorista ${index}:`, {
+                        name: driver.driverName,
+                        trips: driver.totalTrips,
+                        avgScore: avgScore.toFixed(2),
+                        riskScore: riskScore.toFixed(2),
+                        riskLevel: riskLevel
+                    });
+                }
                 
                 return {
                     ...driver,
@@ -931,7 +1048,9 @@
             // Ordenar por score de risco (maior risco primeiro)
             processedData.sort((a, b) => b.riskScore - a.riskScore);
             
-            debugLog(`${processedData.length} motoristas processados com dados reais para Enterprise ID: ${currentEnterpriseId}`);
+            debugLog(`=== PROCESSAMENTO CONCLUÍDO ===`);
+            debugLog(`${processedData.length} motoristas processados com dados reais`);
+            debugLog(`Enterprise ID: ${currentEnterpriseId}`);
         }
 
         // Calcular score de risco baseado em dados reais
@@ -1005,9 +1124,13 @@
 
         // Renderizar interface completa
         function renderInterface() {
+            debugLog('=== RENDERIZANDO INTERFACE ===');
+            debugLog('Dados processados:', processedData.length);
+            
             document.getElementById('loadingState').style.display = 'none';
             
             if (processedData.length > 0) {
+                debugLog('Exibindo interface com dados');
                 document.getElementById('metricsGrid').style.display = 'grid';
                 document.getElementById('insightsSection').style.display = 'grid';
                 document.getElementById('chartsSection').style.display = 'grid';
@@ -1022,6 +1145,7 @@
                 createCharts();
                 renderTable();
             } else {
+                debugLog('Exibindo mensagem de erro - sem dados');
                 // Mostrar mensagem de erro se não há dados
                 document.getElementById('errorState').style.display = 'block';
             }
@@ -1597,6 +1721,8 @@
 
         // Atualizar dados
         function refreshData() {
+            debugLog('=== REFRESH SOLICITADO ===');
+            
             document.getElementById('loadingState').style.display = 'block';
             document.getElementById('metricsGrid').style.display = 'none';
             document.getElementById('insightsSection').style.display = 'none';
