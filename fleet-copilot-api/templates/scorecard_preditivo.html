@@ -20,6 +20,12 @@
             --text-primary: #ffffff;
             --text-secondary: #bdc3c7;
             --border: #3a3e43;
+            
+            /* Cores discretas em tons de cinza para grupos */
+            --group-vehicle: #6c757d;
+            --group-aggressive: #5a6268;
+            --group-distraction: #495057;
+            --group-technical: #343a40;
         }
 
         * {
@@ -252,7 +258,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1600px;
+            min-width: 1700px;
         }
 
         th, td {
@@ -273,12 +279,29 @@
         }
 
         .group-header {
-            background: var(--primary);
-            color: var(--background);
             text-align: center;
             font-weight: bold;
             font-size: 12px;
             text-transform: uppercase;
+            color: #ffffff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .group-vehicle {
+            background: linear-gradient(135deg, var(--group-vehicle), #5a6268);
+        }
+
+        .group-aggressive {
+            background: linear-gradient(135deg, var(--group-aggressive), #495057);
+        }
+
+        .group-distraction {
+            background: linear-gradient(135deg, var(--group-distraction), #343a40);
+        }
+
+        .group-technical {
+            background: linear-gradient(135deg, var(--group-technical), #212529);
         }
 
         .subgroup-header {
@@ -335,6 +358,23 @@
         }
 
         .incident-count.low {
+            color: var(--success);
+        }
+
+        .accident-chance {
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .accident-chance.high {
+            color: var(--danger);
+        }
+
+        .accident-chance.medium {
+            color: var(--warning);
+        }
+
+        .accident-chance.low {
             color: var(--success);
         }
 
@@ -458,8 +498,8 @@
             <div class="metrics-grid">
                 <div class="metric-card">
                     <div class="metric-icon">R</div>
-                    <div class="metric-value" id="avgRiskScore">0</div>
-                    <div class="metric-label">Risco Médio da Frota</div>
+                    <div class="metric-value" id="avgRiskScore">0%</div>
+                    <div class="metric-label">Chance Média de Acidentes</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-icon">M</div>
@@ -504,7 +544,7 @@
                         <input type="text" id="nameFilter" placeholder="Buscar motorista..." onkeyup="applyFilters()">
                     </div>
                     <div class="filter-group">
-                        <label for="scoreFilter">Score Mínimo</label>
+                        <label for="scoreFilter">Chance Mínima (%)</label>
                         <input type="number" id="scoreFilter" placeholder="0-100" min="0" max="100" onchange="applyFilters()">
                     </div>
                 </div>
@@ -545,7 +585,7 @@
                 <div class="chart-container">
                     <div class="chart-title">Incidentes por Categoria</div>
                     <div class="chart-wrapper">
-                        <canvas id="incidentCategoriesChart"></canvas>
+                        <canvas id="incidentTypesChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -563,17 +603,17 @@
                                 <th rowspan="3">Motorista</th>
                                 <th rowspan="3">Score Geral</th>
                                 <th rowspan="3">Score ML</th>
-                                <th rowspan="3">Score Preditivo de Acidentes</th>
+                                <th rowspan="3">Chance de Acidentes</th>
                                 <th rowspan="3">Nível de Risco</th>
                                 <th rowspan="3">Total Viagens</th>
                                 <th rowspan="3">Distância (km)</th>
                                 <th rowspan="3">Última Viagem</th>
                                 
                                 <!-- Grupos de Incidentes -->
-                                <th colspan="4" class="group-header">Movimento do Veículo</th>
-                                <th colspan="9" class="group-header">Direção Agressiva</th>
-                                <th colspan="3" class="group-header">Distrações / Fadiga</th>
-                                <th colspan="3" class="group-header">Condições Técnicas</th>
+                                <th colspan="4" class="group-header group-vehicle">Movimento do Veículo</th>
+                                <th colspan="10" class="group-header group-aggressive">Direção Agressiva</th>
+                                <th colspan="3" class="group-header group-distraction">Distrações / Fadiga</th>
+                                <th colspan="3" class="group-header group-technical">Condições Técnicas</th>
                                 <th rowspan="3">Total Eventos</th>
                             </tr>
                             <tr>
@@ -587,6 +627,7 @@
                                 <th colspan="2" class="subgroup-header">Aceleração</th>
                                 <th colspan="4" class="subgroup-header">Frenagem</th>
                                 <th colspan="3" class="subgroup-header">Curvas</th>
+                                <th class="subgroup-header">Velocidade</th>
                                 
                                 <!-- Distrações / Fadiga -->
                                 <th>Smartphone</th>
@@ -619,6 +660,9 @@
                                 <th>Curvas</th>
                                 <th>Pré-Curva</th>
                                 <th>Desvios</th>
+                                
+                                <!-- Direção Agressiva - Velocidade -->
+                                <th>Excesso</th>
                                 
                                 <!-- Distrações / Fadiga -->
                                 <th>Uso</th>
@@ -668,6 +712,7 @@
         let currentPage = 1;
         let recordsPerPage = 50;
         let charts = {};
+        let currentPeriodFilter = 'all';
 
         // Função para logs condicionais (apenas em desenvolvimento)
         function debugLog(...args) {
@@ -737,15 +782,15 @@
             loadData();
         });
 
-        // Carregar dados das APIs
+        // Carregar dados das APIs - SEM LIMITE DE VIAGENS
         async function loadData() {
             try {
                 const currentEnterpriseId = getEnterpriseIdFromUrl();
                 debugLog('Carregando dados para enterprise:', currentEnterpriseId);
                 
-                // Carregar dados das APIs com timeout
+                // Carregar TODAS as viagens sem limite - timeout aumentado para grandes volumes
                 const [tripsData, usersData] = await Promise.all([
-                    fetchWithTimeout(`${API_BASE}/trips?enterpriseId=${currentEnterpriseId}`, 15000),
+                    fetchWithTimeout(`${API_BASE}/trips?enterpriseId=${currentEnterpriseId}`, 30000), // 30s timeout
                     fetchWithTimeout(`${API_BASE}/users?enterpriseId=${currentEnterpriseId}`, 15000).catch(() => null)
                 ]);
 
@@ -762,7 +807,7 @@
                     debugLog('Mapeamento de usuários criado:', usersMap.size, 'entradas');
                 }
 
-                // Processar dados de viagens
+                // Processar TODAS as viagens disponíveis
                 if (tripsData && tripsData.data && tripsData.data.length > 0) {
                     processTripsData(tripsData.data);
                     
@@ -806,13 +851,33 @@
             }
         }
 
-        // Processar dados de viagens
-        function processTripsData(trips) {
-            debugLog('Processando', trips.length, 'viagens...');
+        // Filtrar viagens por período
+        function filterTripsByPeriod(trips, periodFilter) {
+            if (periodFilter === 'all') {
+                return trips; // TODAS as viagens, sem limite
+            }
+
+            const daysAgo = parseInt(periodFilter);
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - daysAgo);
+
+            return trips.filter(trip => {
+                const tripDate = new Date(trip.TimestampDate || trip.TimeStamp);
+                return tripDate >= cutoffDate;
+            });
+        }
+
+        // Processar dados de viagens - SEM LIMITE + DISTÂNCIA CORRIGIDA
+        function processTripsData(allTrips) {
+            debugLog('Processando', allTrips.length, 'viagens totais (SEM LIMITE)...');
+            
+            // Filtrar viagens por período atual - mas sem limite de quantidade
+            const filteredTrips = filterTripsByPeriod(allTrips, currentPeriodFilter);
+            debugLog('Viagens após filtro de período:', filteredTrips.length);
             
             const driversMap = new Map();
 
-            trips.forEach(trip => {
+            filteredTrips.forEach(trip => {
                 const userString = trip.UserString;
                 if (!userString) return;
 
@@ -846,6 +911,9 @@
                         accBeforeCurve: 0,
                         swerving: 0,
                         
+                        // 2. Direção Agressiva - Velocidade (NOVO)
+                        speedOverLimit: 0,
+                        
                         // 3. Distrações / Fadiga
                         smartphoneUsage: 0,
                         phoneMovement: 0,
@@ -863,7 +931,10 @@
 
                 const driver = driversMap.get(userString);
                 driver.trips.push(trip);
-                driver.totalDistance += trip.TripDistance || 0;
+                
+                // CORRIGIR DISTÂNCIA - usar TripDistance que está em km
+                const tripDistance = trip.TripDistance || trip.distanceAverage || 0;
+                driver.totalDistance += tripDistance;
                 
                 // Somar scores
                 driver.totalScore += trip.score || 0;
@@ -890,6 +961,9 @@
                 driver.accBeforeCurve += trip.AmountOfAccBeforeCurveEvents || 0;
                 driver.swerving += trip.AmountOfSwervingEvents || 0;
                 
+                // 2. Direção Agressiva - Velocidade (NOVO)
+                driver.speedOverLimit += trip.AmountOfSpeedOverLimitEvents || 0;
+                
                 // 3. Distrações / Fadiga
                 driver.smartphoneUsage += trip.AmountOfSmartphoneUsageEvents || 0;
                 driver.phoneMovement += trip.amountOfPhoneMovementEvents || 0;
@@ -910,13 +984,13 @@
                 const avgScore = tripCount > 0 ? driver.totalScore / tripCount : 0;
                 const avgScoreML = tripCount > 0 ? driver.totalScoreML / tripCount : 0;
                 
-                // Calcular score preditivo de acidentes baseado em eventos de risco
-                const riskScore = calculateAccidentRiskScore(driver);
+                // NOVA FÓRMULA: Calcular chance de acidentes baseada no score (INVERTIDA)
+                const accidentChance = calculateAccidentChance(avgScore, driver);
                 
-                // Determinar nível de risco
+                // Determinar nível de risco baseado na chance de acidentes
                 let riskLevel = 'low';
-                if (riskScore >= 70) riskLevel = 'high';
-                else if (riskScore >= 40) riskLevel = 'medium';
+                if (accidentChance >= 70) riskLevel = 'high';
+                else if (accidentChance >= 40) riskLevel = 'medium';
 
                 // Última viagem
                 const lastTrip = driver.trips.reduce((latest, trip) => {
@@ -929,10 +1003,10 @@
                     driverName: driver.driverName,
                     userString: driver.userString,
                     totalTrips: tripCount,
-                    totalDistance: driver.totalDistance,
+                    totalDistance: driver.totalDistance, // Já em km
                     avgScore: avgScore,
                     avgScoreML: avgScoreML,
-                    riskScore: riskScore,
+                    accidentChance: accidentChance,
                     riskLevel: riskLevel,
                     lastTrip: lastTrip ? (lastTrip.TimestampDate || lastTrip.TimeStamp) : null,
                     
@@ -950,6 +1024,7 @@
                     cornering: driver.cornering,
                     accBeforeCurve: driver.accBeforeCurve,
                     swerving: driver.swerving,
+                    speedOverLimit: driver.speedOverLimit, // NOVO
                     smartphoneUsage: driver.smartphoneUsage,
                     phoneMovement: driver.phoneMovement,
                     driverFatigue: driver.driverFatigue,
@@ -960,26 +1035,32 @@
                 };
             });
 
-            debugLog('Processados', allDriversData.length, 'motoristas');
+            debugLog('Processados', allDriversData.length, 'motoristas de', filteredTrips.length, 'viagens');
         }
 
-        // Calcular score preditivo de acidentes
-        function calculateAccidentRiskScore(driver) {
+        // NOVA FÓRMULA: Calcular chance de acidentes baseada no score geral (CORRIGIDA)
+        function calculateAccidentChance(avgScore, driver) {
             const tripCount = driver.trips.length;
             if (tripCount === 0) return 0;
 
-            // Fatores de risco para acidentes (pesos ajustados)
-            const smartphoneRisk = (driver.smartphoneUsage / tripCount) * 25; // 25% do peso
-            const fatigueRisk = (driver.driverFatigue / tripCount) * 20; // 20% do peso
-            const swervingRisk = (driver.swerving / tripCount) * 20; // 20% do peso
-            const brakingRisk = (driver.frequentBraking / tripCount) * 15; // 15% do peso
-            const accelerationRisk = (driver.frequentAcceleration / tripCount) * 10; // 10% do peso
-            const phoneMovementRisk = (driver.phoneMovement / tripCount) * 10; // 10% do peso
-
-            const totalRisk = smartphoneRisk + fatigueRisk + swervingRisk + brakingRisk + accelerationRisk + phoneMovementRisk;
+            // LÓGICA CORRIGIDA: Score alto = baixa chance de acidentes
+            // Score varia de 0-100, onde 100 é o melhor
+            let baseChance = 100 - avgScore; // Inverter: score 100 = 0% chance, score 0 = 100% chance
             
-            // Normalizar para 0-100 (limitando a 100)
-            return Math.min(100, totalRisk);
+            // Ajustar baseado em incidentes críticos (aumenta chance de acidentes)
+            const criticalIncidents = (
+                (driver.smartphoneUsage / tripCount) * 15 +     // Smartphone é crítico
+                (driver.driverFatigue / tripCount) * 12 +       // Fadiga é crítica
+                (driver.swerving / tripCount) * 10 +            // Desvios são críticos
+                (driver.speedOverLimit / tripCount) * 8 +       // Excesso velocidade
+                (driver.frequentBraking / tripCount) * 5 +      // Frenagem frequente
+                (driver.phoneMovement / tripCount) * 5          // Movimento telefone
+            );
+            
+            // Somar incidentes críticos à chance base
+            const finalChance = Math.min(100, Math.max(0, baseChance + criticalIncidents));
+            
+            return finalChance;
         }
 
         // Obter nome do motorista
@@ -993,18 +1074,18 @@
             return `Motorista ${userString.substring(0, 8)}...`;
         }
 
-        // Atualizar métricas
+        // Atualizar métricas - DISTÂNCIA CORRIGIDA
         function updateMetrics() {
             const totalDrivers = allDriversData.length;
             const totalTrips = allDriversData.reduce((sum, driver) => sum + driver.totalTrips, 0);
             const totalDistance = allDriversData.reduce((sum, driver) => sum + driver.totalDistance, 0);
-            const avgRiskScore = totalDrivers > 0 ? 
-                allDriversData.reduce((sum, driver) => sum + driver.riskScore, 0) / totalDrivers : 0;
+            const avgAccidentChance = totalDrivers > 0 ? 
+                allDriversData.reduce((sum, driver) => sum + driver.accidentChance, 0) / totalDrivers : 0;
 
             document.getElementById('totalDrivers').textContent = totalDrivers;
             document.getElementById('totalTrips').textContent = totalTrips.toLocaleString();
-            document.getElementById('totalDistance').textContent = (totalDistance / 1000).toFixed(0);
-            document.getElementById('avgRiskScore').textContent = avgRiskScore.toFixed(1);
+            document.getElementById('totalDistance').textContent = totalDistance.toFixed(1); // Já em km
+            document.getElementById('avgRiskScore').textContent = avgAccidentChance.toFixed(1) + '%';
         }
 
         // Criar gráficos
@@ -1014,7 +1095,7 @@
             createRiskDistanceChart();
             createRiskEvolutionChart();
             createRiskFrequencyChart();
-            createIncidentCategoriesChart();
+            createIncidentTypesChart();
         }
 
         // Gráfico de distribuição de risco
@@ -1067,12 +1148,13 @@
             });
         }
 
-        // Gráfico top 10 motoristas
+        // Gráfico top 10 motoristas (sem limite de viagens)
         function createTopDriversChart() {
             const ctx = document.getElementById('topDriversChart').getContext('2d');
             
+            // Top 10 motoristas por risco (não limitado por número de viagens)
             const top10 = allDriversData
-                .sort((a, b) => b.riskScore - a.riskScore)
+                .sort((a, b) => b.accidentChance - a.accidentChance)
                 .slice(0, 10);
 
             if (charts.topDrivers) {
@@ -1084,8 +1166,8 @@
                 data: {
                     labels: top10.map(d => d.driverName.length > 15 ? d.driverName.substring(0, 15) + '...' : d.driverName),
                     datasets: [{
-                        label: 'Score de Risco de Acidentes',
-                        data: top10.map(d => d.riskScore),
+                        label: 'Chance de Acidentes (%)',
+                        data: top10.map(d => d.accidentChance),
                         backgroundColor: top10.map(driver => 
                             driver.riskLevel === 'high' ? 'rgba(230, 126, 34, 0.8)' :
                             driver.riskLevel === 'medium' ? 'rgba(138, 86, 226, 0.8)' : 'rgba(20, 216, 180, 0.8)'
@@ -1110,7 +1192,10 @@
                                 color: 'rgba(255, 255, 255, 0.1)'
                             },
                             ticks: {
-                                color: '#bdc3c7'
+                                color: '#bdc3c7',
+                                callback: function(value) {
+                                    return value + '%';
+                                }
                             }
                         },
                         x: {
@@ -1127,7 +1212,7 @@
             });
         }
 
-        // Gráfico correlação risco vs distância
+        // Gráfico correlação risco vs distância - DISTÂNCIA CORRIGIDA
         function createRiskDistanceChart() {
             const ctx = document.getElementById('riskDistanceChart').getContext('2d');
 
@@ -1141,8 +1226,8 @@
                     datasets: [{
                         label: 'Motoristas',
                         data: allDriversData.map(d => ({
-                            x: d.totalDistance / 1000,
-                            y: d.riskScore
+                            x: d.totalDistance, // Já em km
+                            y: d.accidentChance
                         })),
                         backgroundColor: 'rgba(20, 216, 180, 0.6)',
                         borderColor: 'rgba(20, 216, 180, 1)',
@@ -1174,14 +1259,17 @@
                         y: {
                             title: {
                                 display: true,
-                                text: 'Score de Risco de Acidentes',
+                                text: 'Chance de Acidentes (%)',
                                 color: '#bdc3c7'
                             },
                             grid: {
                                 color: 'rgba(255, 255, 255, 0.1)'
                             },
                             ticks: {
-                                color: '#bdc3c7'
+                                color: '#bdc3c7',
+                                callback: function(value) {
+                                    return value + '%';
+                                }
                             }
                         }
                     }
@@ -1196,7 +1284,7 @@
             // Dados simulados para evolução (últimos 6 meses)
             const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
             const avgRisk = allDriversData.length > 0 ? 
-                allDriversData.reduce((sum, d) => sum + d.riskScore, 0) / allDriversData.length : 0;
+                allDriversData.reduce((sum, d) => sum + d.accidentChance, 0) / allDriversData.length : 0;
             
             const evolutionData = months.map(() => avgRisk + (Math.random() - 0.5) * 20);
 
@@ -1209,7 +1297,7 @@
                 data: {
                     labels: months,
                     datasets: [{
-                        label: 'Risco Médio de Acidentes',
+                        label: 'Chance Média de Acidentes (%)',
                         data: evolutionData,
                         borderColor: 'rgba(20, 216, 180, 1)',
                         backgroundColor: 'rgba(20, 216, 180, 0.1)',
@@ -1234,7 +1322,10 @@
                                 color: 'rgba(255, 255, 255, 0.1)'
                             },
                             ticks: {
-                                color: '#bdc3c7'
+                                color: '#bdc3c7',
+                                callback: function(value) {
+                                    return value + '%';
+                                }
                             }
                         },
                         x: {
@@ -1265,7 +1356,7 @@
             const avgRiskByFrequency = Object.keys(frequencyGroups).map(key => {
                 const group = frequencyGroups[key];
                 return group.length > 0 ? 
-                    group.reduce((sum, d) => sum + d.riskScore, 0) / group.length : 0;
+                    group.reduce((sum, d) => sum + d.accidentChance, 0) / group.length : 0;
             });
 
             if (charts.riskFrequency) {
@@ -1277,7 +1368,7 @@
                 data: {
                     labels: ['1-10 viagens', '11-25 viagens', '26-50 viagens', '50+ viagens'],
                     datasets: [{
-                        label: 'Risco Médio de Acidentes',
+                        label: 'Chance Média de Acidentes (%)',
                         data: avgRiskByFrequency,
                         backgroundColor: 'rgba(138, 86, 226, 0.8)',
                         borderWidth: 0,
@@ -1300,7 +1391,10 @@
                                 color: 'rgba(255, 255, 255, 0.1)'
                             },
                             ticks: {
-                                color: '#bdc3c7'
+                                color: '#bdc3c7',
+                                callback: function(value) {
+                                    return value + '%';
+                                }
                             }
                         },
                         x: {
@@ -1316,34 +1410,40 @@
             });
         }
 
-        // Gráfico categorias de incidentes
-        function createIncidentCategoriesChart() {
-            const ctx = document.getElementById('incidentCategoriesChart').getContext('2d');
+        // Gráfico tipos de incidentes agrupados por categoria - VERSÃO CORRIGIDA
+        function createIncidentTypesChart() {
+            const ctx = document.getElementById('incidentTypesChart').getContext('2d');
 
-            // Somar incidentes por categoria
-            const categoryTotals = {
-                'Movimento Veículo': allDriversData.reduce((sum, d) => sum + d.vehicleInMotion + d.vehicleStopped + d.idling + d.accEvents, 0),
-                'Direção Agressiva': allDriversData.reduce((sum, d) => sum + d.frequentAcceleration + d.highAcceleration + d.frequentBraking + d.highDeceleration + d.frequentStops + d.decAfterCurve + d.cornering + d.accBeforeCurve + d.swerving, 0),
-                'Distrações/Fadiga': allDriversData.reduce((sum, d) => sum + d.smartphoneUsage + d.phoneMovement + d.driverFatigue, 0),
-                'Condições Técnicas': allDriversData.reduce((sum, d) => sum + d.highTemperature + d.lowBattery + d.inertiaEvents, 0)
+            // Agrupar incidentes por categoria para melhor visualização
+            const incidentCategories = {
+                'Aceleração': allDriversData.reduce((sum, d) => sum + d.frequentAcceleration + d.highAcceleration, 0),
+                'Frenagem': allDriversData.reduce((sum, d) => sum + d.frequentBraking + d.highDeceleration + d.frequentStops + d.decAfterCurve, 0),
+                'Curvas': allDriversData.reduce((sum, d) => sum + d.cornering + d.accBeforeCurve + d.swerving, 0),
+                'Smartphone': allDriversData.reduce((sum, d) => sum + d.smartphoneUsage + d.phoneMovement, 0),
+                'Excesso Velocidade': allDriversData.reduce((sum, d) => sum + d.speedOverLimit, 0),
+                'Fadiga': allDriversData.reduce((sum, d) => sum + d.driverFatigue, 0),
+                'Inércia': allDriversData.reduce((sum, d) => sum + d.inertiaEvents, 0)
             };
 
-            if (charts.incidentCategories) {
-                charts.incidentCategories.destroy();
+            if (charts.incidentTypes) {
+                charts.incidentTypes.destroy();
             }
 
-            charts.incidentCategories = new Chart(ctx, {
+            charts.incidentTypes = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(categoryTotals),
+                    labels: Object.keys(incidentCategories),
                     datasets: [{
                         label: 'Total de Incidentes',
-                        data: Object.values(categoryTotals),
+                        data: Object.values(incidentCategories),
                         backgroundColor: [
-                            'rgba(52, 152, 219, 0.8)',
-                            'rgba(230, 126, 34, 0.8)',
-                            'rgba(231, 76, 60, 0.8)',
-                            'rgba(155, 89, 182, 0.8)'
+                            'rgba(52, 152, 219, 0.8)',   // Aceleração (azul)
+                            'rgba(230, 126, 34, 0.8)',   // Frenagem (laranja)
+                            'rgba(155, 89, 182, 0.8)',   // Curvas (roxo)
+                            'rgba(26, 188, 156, 0.8)',   // Smartphone (verde)
+                            'rgba(243, 156, 18, 0.8)',   // Excesso Velocidade (amarelo)
+                            'rgba(46, 204, 113, 0.8)',   // Fadiga (verde claro)
+                            'rgba(149, 165, 166, 0.8)'   // Inércia (cinza)
                         ],
                         borderWidth: 0,
                         borderRadius: 6
@@ -1355,6 +1455,34 @@
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const label = context.label;
+                                    if (label === 'Aceleração') {
+                                        const freq = allDriversData.reduce((sum, d) => sum + d.frequentAcceleration, 0);
+                                        const alta = allDriversData.reduce((sum, d) => sum + d.highAcceleration, 0);
+                                        return [`Frequente: ${freq}`, `Alta: ${alta}`];
+                                    } else if (label === 'Frenagem') {
+                                        const freq = allDriversData.reduce((sum, d) => sum + d.frequentBraking, 0);
+                                        const alta = allDriversData.reduce((sum, d) => sum + d.highDeceleration, 0);
+                                        const stops = allDriversData.reduce((sum, d) => sum + d.frequentStops, 0);
+                                        const curve = allDriversData.reduce((sum, d) => sum + d.decAfterCurve, 0);
+                                        return [`Freq: ${freq}`, `Alta: ${alta}`, `Paradas: ${stops}`, `Pós-Curva: ${curve}`];
+                                    } else if (label === 'Curvas') {
+                                        const corner = allDriversData.reduce((sum, d) => sum + d.cornering, 0);
+                                        const before = allDriversData.reduce((sum, d) => sum + d.accBeforeCurve, 0);
+                                        const swerve = allDriversData.reduce((sum, d) => sum + d.swerving, 0);
+                                        return [`Curvas: ${corner}`, `Pré-Curva: ${before}`, `Desvios: ${swerve}`];
+                                    } else if (label === 'Smartphone') {
+                                        const usage = allDriversData.reduce((sum, d) => sum + d.smartphoneUsage, 0);
+                                        const movement = allDriversData.reduce((sum, d) => sum + d.phoneMovement, 0);
+                                        return [`Uso: ${usage}`, `Movimento: ${movement}`];
+                                    }
+                                    return '';
+                                }
+                            }
                         }
                     },
                     scales: {
@@ -1388,34 +1516,32 @@
             const nameFilter = document.getElementById('nameFilter').value.toLowerCase();
             const scoreFilter = parseFloat(document.getElementById('scoreFilter').value) || 0;
 
-            filteredData = allDriversData.filter(driver => {
-                // Filtro de período (simplificado)
-                let periodMatch = true;
-                if (periodFilter !== 'all' && driver.lastTrip) {
-                    const tripDate = new Date(driver.lastTrip);
-                    const daysAgo = parseInt(periodFilter);
-                    const cutoffDate = new Date();
-                    cutoffDate.setDate(cutoffDate.getDate() - daysAgo);
-                    periodMatch = tripDate >= cutoffDate;
-                }
+            // Se o filtro de período mudou, reprocessar os dados
+            if (periodFilter !== currentPeriodFilter) {
+                currentPeriodFilter = periodFilter;
+                // Recarregar dados com novo filtro de período
+                loadData();
+                return;
+            }
 
+            filteredData = allDriversData.filter(driver => {
                 // Filtro de risco
                 const riskMatch = riskFilter === 'all' || driver.riskLevel === riskFilter;
 
                 // Filtro de nome
                 const nameMatch = nameFilter === '' || driver.driverName.toLowerCase().includes(nameFilter);
 
-                // Filtro de score
-                const scoreMatch = driver.riskScore >= scoreFilter;
+                // Filtro de chance de acidentes
+                const scoreMatch = driver.accidentChance >= scoreFilter;
 
-                return periodMatch && riskMatch && nameMatch && scoreMatch;
+                return riskMatch && nameMatch && scoreMatch;
             });
 
             currentPage = 1;
             renderTable();
         }
 
-        // Renderizar tabela
+        // Renderizar tabela - DISTÂNCIA CORRIGIDA
         function renderTable() {
             const tbody = document.getElementById('driversTableBody');
             const startIndex = (currentPage - 1) * recordsPerPage;
@@ -1430,10 +1556,10 @@
                     <td><strong>${driver.driverName}</strong></td>
                     <td>${driver.avgScore.toFixed(1)}</td>
                     <td>${driver.avgScoreML.toFixed(1)}</td>
-                    <td><strong>${driver.riskScore.toFixed(2)}</strong></td>
+                    <td><span class="accident-chance ${getAccidentChanceClass(driver.accidentChance)}">${driver.accidentChance.toFixed(1)}%</span></td>
                     <td><span class="risk-badge risk-${driver.riskLevel}">${getRiskLevelText(driver.riskLevel)}</span></td>
                     <td>${driver.totalTrips}</td>
-                    <td>${(driver.totalDistance / 1000).toFixed(1)}</td>
+                    <td>${driver.totalDistance.toFixed(1)}</td>
                     <td>${driver.lastTrip ? new Date(driver.lastTrip).toLocaleDateString('pt-BR') : 'N/A'}</td>
                     
                     <!-- Movimento do Veículo -->
@@ -1457,6 +1583,9 @@
                     <td><span class="incident-count ${getIncidentClass(driver.accBeforeCurve)}">${driver.accBeforeCurve}</span></td>
                     <td><span class="incident-count ${getIncidentClass(driver.swerving)}">${driver.swerving}</span></td>
                     
+                    <!-- Direção Agressiva - Velocidade (NOVO) -->
+                    <td><span class="incident-count ${getIncidentClass(driver.speedOverLimit)}">${driver.speedOverLimit}</span></td>
+                    
                     <!-- Distrações / Fadiga -->
                     <td><span class="incident-count ${getIncidentClass(driver.smartphoneUsage)}">${driver.smartphoneUsage}</span></td>
                     <td><span class="incident-count ${getIncidentClass(driver.phoneMovement)}">${driver.phoneMovement}</span></td>
@@ -1474,6 +1603,13 @@
             });
 
             updatePagination();
+        }
+
+        // Obter classe CSS para chance de acidentes
+        function getAccidentChanceClass(chance) {
+            if (chance >= 70) return 'high';
+            if (chance >= 40) return 'medium';
+            return 'low';
         }
 
         // Obter classe CSS para incidentes
@@ -1568,7 +1704,7 @@
             loadData();
         }
 
-        // Exportar para Excel
+        // Exportar para Excel - DISTÂNCIA CORRIGIDA
         function exportToExcel() {
             const csvContent = generateCSV();
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1582,13 +1718,13 @@
             document.body.removeChild(link);
         }
 
-        // Gerar CSV
+        // Gerar CSV - DISTÂNCIA CORRIGIDA
         function generateCSV() {
             const headers = [
                 'Motorista',
                 'Score Geral',
                 'Score ML',
-                'Score Preditivo de Acidentes',
+                'Chance de Acidentes (%)',
                 'Nível de Risco',
                 'Total Viagens',
                 'Distância (km)',
@@ -1610,6 +1746,8 @@
                 'Eventos de Curva',
                 'Aceleração Pré-Curva',
                 'Desvios',
+                // Direção Agressiva - Velocidade
+                'Excesso de Velocidade',
                 // Distrações / Fadiga
                 'Uso Smartphone',
                 'Movimento Telefone',
@@ -1626,10 +1764,10 @@
                 driver.driverName,
                 driver.avgScore.toFixed(1),
                 driver.avgScoreML.toFixed(1),
-                driver.riskScore.toFixed(2),
+                driver.accidentChance.toFixed(1),
                 getRiskLevelText(driver.riskLevel),
                 driver.totalTrips,
-                (driver.totalDistance / 1000).toFixed(1),
+                driver.totalDistance.toFixed(1), // Já em km
                 driver.lastTrip ? new Date(driver.lastTrip).toLocaleDateString('pt-BR') : 'N/A',
                 driver.vehicleInMotion,
                 driver.vehicleStopped,
@@ -1644,6 +1782,7 @@
                 driver.cornering,
                 driver.accBeforeCurve,
                 driver.swerving,
+                driver.speedOverLimit, // NOVO
                 driver.smartphoneUsage,
                 driver.phoneMovement,
                 driver.driverFatigue,
