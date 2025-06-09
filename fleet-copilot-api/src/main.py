@@ -1,6 +1,6 @@
 import os
 import sys
-import requests
+# import requests  # Removido para evitar erro de deploy
 import json
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, jsonify
