@@ -408,6 +408,47 @@
     </div>
 
     <script>
+        // Sistema de DE-PARA automático para nomes dos motoristas
+        let usersMapping = {};
+        let mappingLoaded = false;
+        
+        async function loadUsersMapping() {
+            if (mappingLoaded) return usersMapping;
+            
+            try {
+                console.log('[DE-PARA] Carregando mapeamento de usuários...');
+                const response = await fetch(`/api/users-mapping?enterpriseId=${getEnterpriseId()}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    usersMapping = data.mapping || {};
+                    mappingLoaded = true;
+                    console.log(`[DE-PARA] Mapeamento carregado: ${Object.keys(usersMapping).length} usuários`);
+                }
+            } catch (error) {
+                console.error('[DE-PARA] Erro ao buscar mapeamento:', error);
+            }
+            
+            return usersMapping;
+        }
+        
+        function getDriverName(userString) {
+            if (!userString) return 'N/A';
+            
+            // Usar nome real se disponível
+            if (usersMapping[userString]) {
+                return usersMapping[userString];
+            }
+            
+            // Fallback para nome original ou ID truncado
+            return userString.length > 20 ? `Motorista ${userString.substring(0, 8)}...` : userString;
+        }
+        
+        function getEnterpriseId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('enterpriseId') || 'qzDVZ1jB6IC60baxtsDU';
+        }
+    
         // Dados mockados diretamente no HTML
         const MOCK_DATA = {
             data: [
@@ -676,7 +717,7 @@
                 const chave = `${item.motorista}|${item.transportadora}`;
                 if (!motoristas[chave]) {
                     motoristas[chave] = {
-                        nome: item.motorista,
+                        nome: getDriverName(item.motorista),
                         transportadora: item.transportadora,
                         tempoTotalCD: 0,
                         tempoTotalViagem: 0,
@@ -742,7 +783,7 @@
                 const chave = `${item.motorista}|${item.transportadora}`;
                 if (!motoristas[chave]) {
                     motoristas[chave] = {
-                        nome: item.motorista,
+                        nome: getDriverName(item.motorista),
                         transportadora: item.transportadora,
                         total: 0,
                         comPOD: 0,

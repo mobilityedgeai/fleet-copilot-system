@@ -979,6 +979,49 @@
     </div>
 
     <script>
+        // Sistema de DE-PARA automático para nomes dos motoristas
+        let usersMapping = {};
+        let mappingLoaded = false;
+        
+        async function loadUsersMapping() {
+            if (mappingLoaded) return usersMapping;
+            
+            try {
+                console.log('[DE-PARA] Carregando mapeamento de usuários...');
+                const response = await fetch(`/api/users-mapping?enterpriseId=${getEnterpriseId()}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    usersMapping = data.mapping || {};
+                    mappingLoaded = true;
+                    console.log(`[DE-PARA] Mapeamento carregado: ${Object.keys(usersMapping).length} usuários`);
+                } else {
+                    console.warn('[DE-PARA] Erro ao carregar mapeamento:', data.message);
+                }
+            } catch (error) {
+                console.error('[DE-PARA] Erro ao buscar mapeamento:', error);
+            }
+            
+            return usersMapping;
+        }
+        
+        function getDriverName(userString) {
+            if (!userString) return 'N/A';
+            
+            // Usar nome real se disponível
+            if (usersMapping[userString]) {
+                return usersMapping[userString];
+            }
+            
+            // Fallback para ID truncado
+            return `Motorista ${userString.substring(0, 8)}...`;
+        }
+        
+        function getEnterpriseId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('enterpriseId') || 'qzDVZ1jB6IC60baxtsDU';
+        }
+    
         // Variáveis globais
         let tripsData = [];
         let filteredData = [];
@@ -995,6 +1038,8 @@
 
         // Função para carregar dados da API
         async function loadTripsData() {
+            // Carregar mapeamento de usuários primeiro
+            await loadUsersMapping();
             try {
                 const enterpriseId = getUrlParameter('enterpriseId') || 'qzDVZ1jB6IC60baxtsDU';
                 console.log('🚛 Carregando dados de trips para:', enterpriseId);
@@ -1075,7 +1120,10 @@
             }
 
             // Extrair valores únicos para filtros
-            const drivers = [...new Set(tripsData.map(trip => trip.UserString || trip.userString).filter(Boolean))];
+            const drivers = [...new Set(tripsData.map(trip => {
+                const userString = trip.UserString || trip.userString;
+                return userString ? getDriverName(userString) : null;
+            }).filter(Boolean))];
             const vehicles = [...new Set(tripsData.map(trip => trip.vehiclePlate || trip.VehiclePlate).filter(Boolean))];
 
             console.log('👥 Motoristas encontrados:', drivers);
@@ -1254,7 +1302,7 @@
             // Score por motorista
             const driverScores = {};
             filteredData.forEach(trip => {
-                const driver = trip.UserString || trip.userString || 'N/A';
+                const driver = getDriverName(trip.UserString || trip.userString);
                 if (!driverScores[driver]) {
                     driverScores[driver] = { total: 0, count: 0 };
                 }
@@ -1549,7 +1597,7 @@
             // Consumo por motorista
             const fuelByDriver = {};
             filteredData.forEach(trip => {
-                const driver = trip.UserString || trip.userString || 'N/A';
+                const driver = getDriverName(trip.UserString || trip.userString);
                 if (!fuelByDriver[driver]) {
                     fuelByDriver[driver] = { total: 0, count: 0 };
                 }
@@ -1618,7 +1666,7 @@
             const driverStats = {};
             
             filteredData.forEach(trip => {
-                const driver = trip.UserString || trip.userString || 'N/A';
+                const driver = getDriverName(trip.UserString || trip.userString);
                 if (!driverStats[driver]) {
                     driverStats[driver] = {
                         name: driver,
@@ -1673,7 +1721,7 @@
                 
                 row.innerHTML = `
                     <td>${date}</td>
-                    <td>${trip.UserString || trip.userString || 'N/A'}</td>
+                    <td>${getDriverName(trip.UserString || trip.userString)}</td>
                     <td>${trip.vehiclePlate || trip.VehiclePlate || 'N/A'}</td>
                     <td title="${route}">${route.length > 50 ? route.substring(0, 50) + '...' : route}</td>
                     <td>${(trip.TripDistance || trip.distance || 0).toFixed(1)}</td>
